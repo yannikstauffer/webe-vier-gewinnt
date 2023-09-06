@@ -1,14 +1,16 @@
-import logo from "./logo.svg";
-import "./App.css";
 import Lobby from "./component/Lobby";
 import Chat from "./component/Chat";
+import { StompContext,initStompClient } from "./context/socket";
+
+
 
 function App() {
+
   return (
-    <div>
+    <StompContext.Provider value={initStompClient()}>
       <Lobby />
       <Chat />
-    </div>
+    </StompContext.Provider>
   );
 }
 
