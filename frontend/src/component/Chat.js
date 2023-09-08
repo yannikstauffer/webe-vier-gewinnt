@@ -1,32 +1,17 @@
-import React, { useContext, useEffect, useState } from "react";
-import { StompContext } from "../context/socket";
+import React, { useState } from "react";
+import { useStompClient, useSubscription } from "react-stomp-hooks";
 
 const Chat = () => {
-  const stompClient = useContext(StompContext);
-  console.log(stompClient);
+  const stompClient = useStompClient();
 
   const [privateChats, setPrivateChats] = useState(new Map());
   const [publicChats, setPublicChats] = useState([]);
   const [tab, setTab] = useState("LOBBY");
   const [chatState, setUserData] = useState({
     text: "",
-    senderId: undefined,
-    receiverId: undefined,
+    senderId: 1,
+    receiverId: 2,
   });
-
-  // entry point
-  useEffect(() => {
-    registerWSTopics();
-  });
-
-  const registerWSTopics = () => {
-    // todo: ensure stompclient is connected when this is called
-    stompClient.subscribe("/chat/lobby", onLobbyMessageReceived);
-    stompClient.subscribe(
-      "/user/" + chatState.username + "/chat",
-      onPrivateMessageReceived
-    );
-  }
 
   const onLobbyMessageReceived = (payload) => {
     console.log("lobby message received", payload);
@@ -41,13 +26,13 @@ const Chat = () => {
     var payloadData = JSON.parse(payload.body);
     let list = [];
     list.push(payloadData);
-    privateChats.set(payloadData.senderName, list);
+    privateChats.set(payloadData.senderId, list);
     setPrivateChats(new Map(privateChats));
   };
 
-  const onError = (err) => {
-    console.log(err);
-  };
+  useSubscription("/chat/lobby", onLobbyMessageReceived);
+  useSubscription("/user/" + chatState.senderId + "/chat", onPrivateMessageReceived);
+
 
   const sendMessage = () => {
     if (stompClient) {
@@ -56,7 +41,10 @@ const Chat = () => {
         receiverId: tab === "LOBBY" ? null : chatState.receiverId,
       };
       console.log("sending message", newMessage);
-      stompClient.send("/4gewinnt/message", {}, JSON.stringify(newMessage));
+      stompClient.publish({
+        destination: "/4gewinnt/message",
+        body: JSON.stringify(newMessage)
+      });
       setUserData({ ...chatState, text: "" });
     }
   };
