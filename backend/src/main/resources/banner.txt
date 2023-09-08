@@ -4,5 +4,5 @@
 /    ^   / /_____/ / /_/  >  ___/\     /|  |   |  \   |  \  |
 \____   |          \___  / \___  >\/\_/ |__|___|  /___|  /__|
      |__|         /_____/      \/               \/     \/
-
+:: ${application.title} ${application.formatted-version} :: ${server.port} ::
 ::  Spring Boot ${spring-boot.formatted-version} :: Java ${java.version} ::

@@ -6,10 +6,7 @@
       <excludeFolder url="file://$MODULE_DIR$/../sonarlint/securityhotspotstore" />
     </content>
   </component>
-  <component name="CheckStyle-IDEA-Module" serialisationVersion="2">
-    <option name="activeLocationsIds" />
-  </component>
   <component name="SonarLintModuleSettings">
-    <option name="uniqueId" value="eacac546-6bce-4ea4-ab8a-b3cfdae1d26d" />
+    <option name="uniqueId" value="faf81ca6-7e2b-44f6-82a3-4868c6109646" />
   </component>
 </module>
