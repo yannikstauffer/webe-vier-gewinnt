@@ -5,7 +5,7 @@ const Chat = () => {
   const stompClient = useStompClient();
 
   const [privateChats, setPrivateChats] = useState(new Map());
-  const [publicChats, setPublicChats] = useState([]);
+  const [lobbyMessages, setLobbyMessages] = useState([]);
   const [tab, setTab] = useState("LOBBY");
   const [chatState, setUserData] = useState({
     text: "",
@@ -15,16 +15,18 @@ const Chat = () => {
 
   const onLobbyMessageReceived = (payload) => {
     console.log("lobby message received", payload);
+    let payloadData = JSON.parse(payload.body);
 
-    var payloadData = JSON.parse(payload.body);
-    publicChats.push(payloadData);
-    setPublicChats([...publicChats]);
+    lobbyMessages.push(payloadData);
+    setLobbyMessages([...lobbyMessages]);
   };
 
   const onPrivateMessageReceived = (payload) => {
     console.log("private message received", payload);
-    var payloadData = JSON.parse(payload.body);
-    let list = [];
+    let payloadData = JSON.parse(payload.body);
+    
+    let list = privateChats.get(payloadData.senderId);
+    if(!list) list = [];
     list.push(payloadData);
     privateChats.set(payloadData.senderId, list);
     setPrivateChats(new Map(privateChats));
@@ -33,10 +35,9 @@ const Chat = () => {
   useSubscription("/chat/lobby", onLobbyMessageReceived);
   useSubscription("/user/" + chatState.senderId + "/chat", onPrivateMessageReceived);
 
-
   const sendMessage = () => {
     if (stompClient) {
-      var newMessage = {
+      let newMessage = {
         text: chatState.text,
         receiverId: tab === "LOBBY" ? null : chatState.receiverId,
       };
@@ -58,7 +59,14 @@ const Chat = () => {
     <div className="container">
       <h1>Chat</h1>
       <div>
-        <div className="chat-history"></div>
+        <div className="chat-history">
+          <ul>
+            {lobbyMessages.map((message, index) => (
+              <li key={index}>{message.text}</li>
+
+                ))}
+          </ul>
+        </div>
         <div className="chat-input">
           <input
             type="text"
