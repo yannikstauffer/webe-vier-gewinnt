@@ -16,9 +16,13 @@ Das Projekt startet auf Port `localhost:3000`. Der Browser wird beim Speichern v
 
 
 ## Deployment
-Für Deployment auf das Spring Boot Projekt:
+Für Deployment mit UNIX, iOS auf das Spring Boot Projekt:
 ```bash
 npm run clean-deploy
+```
+Für Deployment mit Windows auf das Spring Boot Projekt:
+```bash
+npm run clean-deploy-windows
 ```
 
 Danach Spring Boot neu starten.
