@@ -1,16 +1,63 @@
 import React, { useState } from "react";
 import { useStompClient, useSubscription } from "react-stomp-hooks";
+import {createUseStyles, useTheme} from "react-jss";
+
+
+const userId = Math.floor(Math.random() * 1000);
+
+const useStyles = createUseStyles({
+  layout: {
+    display: "grid",
+    gridTemplateRows: "auto 1fr auto",
+    gridGap: "5px",
+    margin: "0 auto",
+    height: "100%",
+    overflowY: "scroll"
+  },
+
+  history: {
+    display: "flex",
+    flexFlow: "column nowrap",
+    justifyContent: "flex-start",
+  
+    margin: 0,
+    listStyle: "none",
+    border: "1px solid #ccc",
+    borderRadius: "5px",
+    padding: "10px",
+    overflowY: "scroll",
+    paddingInline: "10px",
+  },
+  
+  message: {
+    display: "flex",
+    listStyleType: "none",
+    border: "1px solid #ccc",
+    borderRadius: "5px",
+    padding: "10px",
+    width: "80%",
+    '&:not(:last-child)': {
+      marginBottom: "10px",
+    },
+    '&.self': {
+      alignSelf: "flex-end",
+    },
+  },
+  
+});
 
 const Chat = () => {
+  const theme = useTheme();
+  const classes = useStyles(theme);
   const stompClient = useStompClient();
 
   const [privateChats, setPrivateChats] = useState(new Map());
   const [lobbyMessages, setLobbyMessages] = useState([]);
   const [tab, setTab] = useState("LOBBY");
-  const [chatState, setUserData] = useState({
+  const [chatState, setChatState] = useState({
     text: "",
-    senderId: 1,
-    receiverId: 2,
+    senderId: userId,
+    receiverId: tab,
   });
 
   const onLobbyMessageReceived = (payload) => {
@@ -36,48 +83,61 @@ const Chat = () => {
   useSubscription("/user/" + chatState.senderId + "/chat", onPrivateMessageReceived);
 
   const sendMessage = () => {
-    if (stompClient) {
+    if (stompClient && chatState.text) {
+      let receiver = chatState.receiverId === "LOBBY" ? null : chatState.receiverId;
+      let destination = chatState.receiverId === "LOBBY" 
+          ? "/4gewinnt/message"
+          : "/user/" + receiver + "/chat";
+
       let newMessage = {
         text: chatState.text,
-        receiverId: tab === "LOBBY" ? null : chatState.receiverId,
+        sender: chatState.senderId,
+        receiver: receiver,
       };
       console.log("sending message", newMessage);
       stompClient.publish({
-        destination: "/4gewinnt/message",
+        destination: destination,
         body: JSON.stringify(newMessage)
       });
-      setUserData({ ...chatState, text: "" });
+    
+
+
+      setChatState({ ...chatState, text: "" });
     }
   };
 
   const handleMessageInput = (event) => {
     const { value } = event.target;
-    setUserData({ ...chatState, text: value });
+    setChatState({ ...chatState, text: value });
+  };
+
+
+  const getMessageStyles = (message) => {
+    let baseStyles = classes.message
+    if(message.sender.id === chatState.senderId) return classes.message + " self";
+    return baseStyles;
   };
 
   return (
-    <div className="container">
+    <div className={classes.layout}>
       <h1>Chat</h1>
-      <div>
-        <div className="chat-history">
-          <ul>
-            {lobbyMessages.map((message, index) => (
-              <li key={index}>{message.text}</li>
+      <ul className={classes.history}>
+        {lobbyMessages.map((message, index) => (
+          <li key={index} className={getMessageStyles(message)}>{message.text}</li>
 
-                ))}
-          </ul>
-        </div>
-        <div className="chat-input">
-          <input
-            type="text"
-            placeholder="Hier könnte ihre Nachricht stehen"
-            value={chatState.text}
-            onChange={handleMessageInput}
-          />
-          <button type="button" onClick={sendMessage}>
-            Senden
-          </button>
-        </div>
+            ))}
+      </ul>
+
+      <div className='flex-row'>
+        <textarea
+          type="text"
+          placeholder="Hier könnte ihre Nachricht stehen..."
+          value={chatState.text}
+          onChange={handleMessageInput}
+        />
+        <button type="button" onClick={sendMessage}>
+          Senden
+        </button>
       </div>
     </div>
   );
