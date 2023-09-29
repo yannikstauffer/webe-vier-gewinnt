@@ -18,16 +18,12 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
-
     "rmdeploy": "rm -rf ../backend/src/main/resources/static/*",
     "rmdeploy-windows": "rmdir /S /Q ..\\backend\\src\\main\\resources\\static\\ || exit 0",
-
     "deploy": "mkdir -p ../backend/src/main/resources/static/ && cp -a build/. ../backend/src/main/resources/static/",
     "deploy-windows": "if not exist ..\\backend\\src\\main\\resources\\static\\ mkdir ..\\backend\\src\\main\\resources\\static\\ && xcopy /E /I /Y build\\* ..\\backend\\src\\main\\resources\\static\\",
-
     "clean-deploy": "npm run build && npm run rmdeploy && npm run deploy",
     "clean-deploy-windows": "npm run build && npm run rmdeploy-windows && npm run deploy-windows",
-
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
@@ -48,5 +44,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "@babel/plugin-transform-private-property-in-object": "^7.22.11"
   }
 }
