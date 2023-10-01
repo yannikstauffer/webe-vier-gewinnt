@@ -27,7 +27,7 @@ public class OutboundMessageDto {
                 .sentAt(message.getSentAt())
                 .sender(PlayerDto.of(message.getSender()));
 
-        message.getReceiver().ifPresent(user -> builder.receiver(PlayerDto.of(user)));
+        message.getReceiver().ifPresent(player -> builder.receiver(PlayerDto.of(player)));
 
         return builder.build();
     }
