@@ -19,7 +19,7 @@ const useStyles = createUseStyles({
     display: "flex",
     flexFlow: "column nowrap",
     justifyContent: "flex-start",
-  
+
     margin: 0,
     listStyle: "none",
     border: "1px solid #ccc",
@@ -28,7 +28,7 @@ const useStyles = createUseStyles({
     overflowY: "scroll",
     paddingInline: "10px",
   },
-  
+
   message: {
     display: "flex",
     listStyleType: "none",
@@ -43,7 +43,7 @@ const useStyles = createUseStyles({
       alignSelf: "flex-end",
     },
   },
-  
+
 });
 
 const Chat = () => {
@@ -79,15 +79,15 @@ const Chat = () => {
     setPrivateChats(new Map(privateChats));
   };
 
-  useSubscription("/chat/lobby", onLobbyMessageReceived);
-  useSubscription("/player/" + chatState.senderId + "/chat", onPrivateMessageReceived);
+  useSubscription("/lobby/chat", onLobbyMessageReceived);
+  useSubscription("/user/queue/chat", onPrivateMessageReceived);
 
   const sendMessage = () => {
     if (stompClient && chatState.text) {
       let receiver = chatState.receiverId === "LOBBY" ? null : chatState.receiverId;
-      let destination = chatState.receiverId === "LOBBY" 
+      let destination = chatState.receiverId === "LOBBY"
           ? "/4gewinnt/message"
-          : "/user/" + receiver + "/chat";
+          : "/4gewinnt/private-message";
 
       let newMessage = {
         text: chatState.text,
@@ -99,7 +99,7 @@ const Chat = () => {
         destination: destination,
         body: JSON.stringify(newMessage)
       });
-    
+
 
 
       setChatState({ ...chatState, text: "" });

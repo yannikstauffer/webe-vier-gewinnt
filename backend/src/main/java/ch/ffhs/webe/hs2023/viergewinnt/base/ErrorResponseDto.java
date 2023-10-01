@@ -10,12 +10,12 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor(access = AccessLevel.PACKAGE)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-public class ExceptionDto {
+public class ErrorResponseDto {
     private String code;
     private String message;
 
-    public ExceptionDto of(final VierGewinntException exception) {
-        return ExceptionDto.builder()
+    public ErrorResponseDto of(final VierGewinntException exception) {
+        return ErrorResponseDto.builder()
                 .code(exception.getErrorCode().getCode())
                 .message(exception.getMessage())
                 .build();
