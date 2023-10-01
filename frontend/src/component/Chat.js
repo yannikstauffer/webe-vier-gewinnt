@@ -33,7 +33,7 @@ const Chat = () => {
   };
 
   useSubscription("/chat/lobby", onLobbyMessageReceived);
-  useSubscription("/user/" + chatState.senderId + "/chat", onPrivateMessageReceived);
+  useSubscription("/player/" + chatState.senderId + "/chat", onPrivateMessageReceived);
 
   const sendMessage = () => {
     if (stompClient) {
