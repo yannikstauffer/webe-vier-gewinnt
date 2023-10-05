@@ -1,18 +1,19 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Lobby from "./component/Lobby";
 import Chat from "./component/Chat";
 import ErrorHandler from "./component/ErrorHandler";
 import { StompSessionProvider } from "react-stomp-hooks";
 import { createUseStyles, ThemeProvider } from "react-jss";
 
-const WS_URL = "http://localhost:9000/ws";
+const APP_URL = "http://localhost:9000/4gewinnt";
+const WS_URL = APP_URL + "/ws";
 
 const theme = {
   accentBackgroundColor: "rgb(240 240 240)",
   accentColor: "rgb(30 30 30)",
   accentHighlightBackgroundColor: "rgb(200 200 200)",
   accentHighlightColor: "rgb(10 10 10)",
-}
+};
 
 const buttonBase = (theme) => ({
   fontFamily: "inherit",
@@ -35,15 +36,14 @@ const buttonBase = (theme) => ({
   color: theme.accentColor,
   backgroundColor: theme.accentBackgroundColor,
 
-
-  '&:hover': {
+  "&:hover": {
     backgroundColor: theme.accentColor,
     color: theme.accentBackgroundColor,
-    cursor: "pointer"
-  }
+    cursor: "pointer",
+  },
 });
 
-const textInputBase =  {
+const textInputBase = {
   fontFamily: "inherit",
   fontSize: "inherit",
   backgroundColor: "transparent",
@@ -54,14 +54,15 @@ const textInputBase =  {
   boxShadow: "2px 2px 5px 1px rgb(0 0 0 / 30%)",
   border: "none",
   borderRadius: "3px",
-  lineHeight: "1.1"
+  lineHeight: "1.1",
 };
 
 const useStyles = createUseStyles({
   "@global": {
     body: {
       margin: "0",
-      fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',\n    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',\n    sans-serif",
+      fontFamily:
+        "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',\n    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',\n    sans-serif",
       webkitFontSmoothing: "antialiased",
       mozOsxFontSmoothing: "grayscale",
       height: "100vh",
@@ -69,12 +70,14 @@ const useStyles = createUseStyles({
     html: {
       height: "100%",
     },
-    '#root': {
+    "#root": {
       position: "absolute",
       display: "flex",
       flexFlow: "column nowrap",
-      top: 0, bottom: 0,
-      left: 0, right: 0,
+      top: 0,
+      bottom: 0,
+      left: 0,
+      right: 0,
       overflowY: "hidden",
     },
 
@@ -91,14 +94,14 @@ const useStyles = createUseStyles({
       },
     },
     select: {
-      extend: textInputBase
+      extend: textInputBase,
     },
     textarea: {
       extend: textInputBase,
       paddingTop: "0.6em",
       width: "100%",
     },
-    '.flex-row': {
+    ".flex-row": {
       display: "flex",
       flexFlow: "row nowrap",
       justifyContent: "center",
@@ -107,7 +110,7 @@ const useStyles = createUseStyles({
         marginLeft: "5px",
       },
     },
-    '.layout': {
+    ".layout": {
       display: "grid",
       gridTemplateColumns: "2fr 1fr",
       margin: "0 auto",
@@ -115,20 +118,52 @@ const useStyles = createUseStyles({
       gridGap: "5px",
     },
   },
-  });
-
+});
 
 function App() {
   useStyles(theme);
-  return (
+
+  const [isLoading, setLoading] = useState(true);
+  const [csrfHeaders, setCsrfHeaders] = useState({});
+
+  useEffect(() => {
+    loadCsrfStompHeaders().then((headers) => {
+      console.log("CSRF headers loaded", headers);
+      setCsrfHeaders(headers);
+      setLoading(false);
+    });
+  }, []);
+
+  const loadCsrfStompHeaders = () => {
+    return fetch(APP_URL + "/csrf")
+      .then((response) => {
+        if (response.ok) {
+          return response.json();
+        } else {
+          throw new Error("Failed to fetch CSRF token");
+        }
+      })
+      .then((csrfDetails) => {
+        return {
+          "X-CSRF-TOKEN": csrfDetails.token,
+        };
+      });
+  };
+
+  return isLoading ? 
+  (
+    <div>L&auml;dt...</div>
+  ) : (
     <ThemeProvider theme={theme}>
       <StompSessionProvider
         url={WS_URL}
-        debug={(str) => console.log(str)}>
-          <ErrorHandler />
-        <div className='layout'>
-        <Lobby />
-        <Chat />
+        connectHeaders={csrfHeaders}
+        debug={(str) => console.log(str)}
+      >
+        <ErrorHandler />
+        <div className="layout">
+          <Lobby />
+          <Chat />
         </div>
       </StompSessionProvider>
     </ThemeProvider>

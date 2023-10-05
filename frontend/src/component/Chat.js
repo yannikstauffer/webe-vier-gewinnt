@@ -79,7 +79,7 @@ const Chat = () => {
     setPrivateChats(new Map(privateChats));
   };
 
-  useSubscription("/lobby/chat", onLobbyMessageReceived);
+  useSubscription("/topic/lobby/chat", onLobbyMessageReceived);
   useSubscription("/user/queue/chat", onPrivateMessageReceived);
 
   const sendMessage = () => {

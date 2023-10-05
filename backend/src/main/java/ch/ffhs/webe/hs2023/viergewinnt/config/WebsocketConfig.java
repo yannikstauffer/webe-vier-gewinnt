@@ -11,7 +11,7 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 public class WebsocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void registerStompEndpoints(final StompEndpointRegistry registry) {
-        registry.addEndpoint("/ws")
+        registry.addEndpoint("/4gewinnt/ws")
                 .setAllowedOriginPatterns("*")
                 .withSockJS();
     }
@@ -19,7 +19,7 @@ public class WebsocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void configureMessageBroker(final MessageBrokerRegistry registry) {
         registry.setApplicationDestinationPrefixes("/4gewinnt");
-        registry.enableSimpleBroker("/lobby/chat", "/lobby/game", "/queue/chat", "/queue/error");
+        registry.enableSimpleBroker("/topic/lobby/chat", "/topic/lobby/game", "/queue/chat", "/queue/error");
         registry.setUserDestinationPrefix("/user");
     }
 }
