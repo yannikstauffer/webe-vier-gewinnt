@@ -1,8 +1,5 @@
-package ch.ffhs.webe.hs2023.viergewinnt.chat.model;
+package ch.ffhs.webe.hs2023.viergewinnt.chat.values;
 
-import lombok.Getter;
-
-@Getter
 public enum MessageType {
     PUBLIC(Values.PUBLIC),
     PRIVATE(Values.PRIVATE),
@@ -12,6 +9,11 @@ public enum MessageType {
 
     MessageType(final String value) {
         this.value = value;
+    }
+
+    @Override
+    public String toString() {
+        return this.value;
     }
 
     public static class Values {

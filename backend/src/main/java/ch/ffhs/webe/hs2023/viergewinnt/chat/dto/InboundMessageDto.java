@@ -8,5 +8,4 @@ import lombok.Data;
 public class InboundMessageDto {
     private String text;
     private Integer receiverId;
-    private int senderId; // todo: remove when auth is implemented
 }

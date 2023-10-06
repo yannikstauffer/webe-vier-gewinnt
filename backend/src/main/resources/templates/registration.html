@@ -1,0 +1,42 @@
+<!--suppress HtmlRequiredLangAttribute -->
+<html th:lang="${#locale.language}">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<meta charset="utf-8">
+
+<body>
+<h1 th:text="#{label.register.title}">form</h1>
+<form th:action="@{/processRegistration}" th:object="${user}" method="POST">
+    <div>
+        <label th:text="#{label.user.firstName}" for="firstname">first</label>
+        <input th:field="*{firstName}" id="firstname"/>
+        <p th:each="error: ${#fields.errors('firstName')}"
+           th:text="${error}">Validation error</p>
+    </div>
+    <div>
+        <label th:text="#{label.user.lastName}" for="lastname">last</label>
+        <input th:field="*{lastName}" id="lastname"/>
+        <p th:each="error : ${#fields.errors('lastName')}"
+           th:text="${error}">Validation error</p>
+    </div>
+    <div>
+        <label th:text="#{label.user.email}" for="email">email</label>
+        <input type="email" th:field="*{email}" id="email"/>
+        <p th:each="error : ${#fields.errors('email')}"
+           th:text="${error}">Validation error</p>
+    </div>
+    <div>
+        <label th:text="#{label.user.password}" for="password">password</label>
+        <input type="password" th:field="*{password}" id="password"/>
+        <p th:each="error : ${#fields.errors('password')}"
+           th:text="${error}">Validation error</p>
+    </div>
+    <div>
+        <label th:text="#{label.user.passwordConfirmation}" for="password_confirmation">confirm</label>
+        <input type="password" th:field="*{matchingPassword}" id="password_confirmation"/>
+    </div>
+    <button type="submit" th:text="#{label.register.action}">submit</button>
+</form>
+
+<a th:href="@{/login}" th:text="#{label.login.backToLogin}">login</a>
+</body>
+</html>

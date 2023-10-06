@@ -12,12 +12,14 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class ErrorResponseDto {
     private String code;
-    private String message;
+    private String messageKey;
+    private String identifier;
 
-    public ErrorResponseDto of(final VierGewinntException exception) {
+    public static ErrorResponseDto of(final VierGewinntException exception) {
         return ErrorResponseDto.builder()
-                .code(exception.getErrorCode().getCode())
-                .message(exception.getMessage())
+                .code(exception.getErrorCode().toString())
+                .messageKey(exception.getErrorCode().getInternationalizedMessageKey())
+                .identifier(exception.getIdentifier().toString())
                 .build();
     }
 }

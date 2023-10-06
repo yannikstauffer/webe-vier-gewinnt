@@ -7,9 +7,17 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public enum ErrorCode {
-    PLAYER_NOT_FOUND("PLAYER_NOT_FOUND"),
-    UNKNOWN("UNKNOWN");
+    // die Werte aus dem Enum müssen in der Datei messages.properties definiert werden
+    USER_NOT_FOUND("error.user.notFound"),
+    EMAIL_ALREADY_EXISTS("error.user.emailAlreadyExists"),
+    INVALID_CREDENTIALS("error.user.invalidCredentials"),
+    UNKNOWN("error.unknown");
 
-    private final String code;
+    private final String internationalizedMessageKey;
+
+    @Override
+    public String toString() {
+        return this.name();
+    }
 
 }
