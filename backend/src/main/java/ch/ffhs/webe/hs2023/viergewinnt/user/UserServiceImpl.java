@@ -2,7 +2,6 @@ package ch.ffhs.webe.hs2023.viergewinnt.user;
 
 import ch.ffhs.webe.hs2023.viergewinnt.base.ErrorCode;
 import ch.ffhs.webe.hs2023.viergewinnt.base.VierGewinntException;
-import ch.ffhs.webe.hs2023.viergewinnt.user.dto.LoginDto;
 import ch.ffhs.webe.hs2023.viergewinnt.user.dto.UserDto;
 import ch.ffhs.webe.hs2023.viergewinnt.user.model.User;
 import ch.ffhs.webe.hs2023.viergewinnt.user.repository.UserRepository;
@@ -46,12 +45,6 @@ class UserServiceImpl implements UserService {
         user.setRoles(Collections.singletonList(Role.USER));
 
         return this.userRepository.save(user);
-    }
-
-    @Override
-    public Optional<User> login(final LoginDto loginDto) throws VierGewinntException {
-        return this.userRepository.findByEmail(loginDto.getEmail())
-                .filter(user -> this.passwordEncoder.matches(loginDto.getPassword(), user.getPassword()));
     }
 
     @Override
