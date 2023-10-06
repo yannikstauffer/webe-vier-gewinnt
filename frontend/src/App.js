@@ -1,6 +1,7 @@
 import React from "react";
 import Lobby from "./component/Lobby";
 import Chat from "./component/Chat";
+import ErrorHandler from "./component/ErrorHandler";
 import { StompSessionProvider } from "react-stomp-hooks";
 import { createUseStyles, ThemeProvider } from "react-jss";
 
@@ -121,9 +122,10 @@ function App() {
   useStyles(theme);
   return (
     <ThemeProvider theme={theme}>
-      <StompSessionProvider 
+      <StompSessionProvider
         url={WS_URL}
         debug={(str) => console.log(str)}>
+          <ErrorHandler />
         <div className='layout'>
         <Lobby />
         <Chat />

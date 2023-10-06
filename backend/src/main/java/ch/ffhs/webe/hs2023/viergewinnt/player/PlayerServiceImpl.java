@@ -21,8 +21,10 @@ class PlayerServiceImpl implements PlayerService {
     @Override
     public Player getPlayerById(final int id) {
         return this.findPlayerById(id).orElseGet(() -> this.playerRepository.save(new Player(id)));
-//        return this.userRepository.findById(id)
-//                 .orElseThrow(() -> new UserNotFoundException(id))
+//        return this.playerRepository.findById(id)
+//                .orElseThrow(() -> new VierGewinntException(
+//                        ErrorCode.PLAYER_NOT_FOUND,
+//                        "Player with id " + id + " not found"));
     }
 
     @Override
