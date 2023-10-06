@@ -1,6 +1,6 @@
 package ch.ffhs.webe.hs2023.viergewinnt.game.model;
 
-import ch.ffhs.webe.hs2023.viergewinnt.player.model.Player;
+import ch.ffhs.webe.hs2023.viergewinnt.user.model.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -17,18 +17,21 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
+@Entity(name = "games")
 public class Game {
+    private static final String COL_USER_ONE_ID = "user_one_id";
+    private static final String COL_USER_TWO_ID = "user_two_id";
+
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     @Column(updatable = false)
     private int id;
 
     @ManyToOne
-    @JoinColumn(name = "player_one_id", nullable = false, updatable = false)
-    private Player playerOne;
+    @JoinColumn(name = COL_USER_ONE_ID, nullable = false, updatable = false)
+    private User userOne;
 
     @ManyToOne
-    @JoinColumn(name = "player_two_id", nullable = false, updatable = false)
-    private Player playerTwo;
+    @JoinColumn(name = COL_USER_TWO_ID, nullable = false, updatable = false)
+    private User userTwo;
 }

@@ -1,4 +1,4 @@
-package ch.ffhs.webe.hs2023.viergewinnt.session;
+package ch.ffhs.webe.hs2023.viergewinnt.http;
 
 import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.web.bind.annotation.RequestMapping;

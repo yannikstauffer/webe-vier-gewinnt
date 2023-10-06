@@ -1,8 +1,7 @@
 package ch.ffhs.webe.hs2023.viergewinnt.chat.dto;
 
 import ch.ffhs.webe.hs2023.viergewinnt.chat.model.Message;
-import ch.ffhs.webe.hs2023.viergewinnt.chat.model.MessageType;
-import ch.ffhs.webe.hs2023.viergewinnt.player.dto.PlayerDto;
+import ch.ffhs.webe.hs2023.viergewinnt.chat.values.MessageType;
 import lombok.Builder;
 import lombok.Data;
 
@@ -16,8 +15,8 @@ public class OutboundMessageDto {
     private MessageType messageType;
     private LocalDateTime sentAt;
 
-    private PlayerDto sender;
-    private PlayerDto receiver;
+    private MessageUserDto sender;
+    private MessageUserDto receiver;
 
     public static OutboundMessageDto of(final Message message) {
         final var builder = OutboundMessageDto.builder()
@@ -25,9 +24,9 @@ public class OutboundMessageDto {
                 .text(message.getText())
                 .messageType(message.getMessageType())
                 .sentAt(message.getSentAt())
-                .sender(PlayerDto.of(message.getSender()));
+                .sender(MessageUserDto.of(message.getSender()));
 
-        message.getReceiver().ifPresent(player -> builder.receiver(PlayerDto.of(player)));
+        message.getReceiver().ifPresent(user -> builder.receiver(MessageUserDto.of(user)));
 
         return builder.build();
     }

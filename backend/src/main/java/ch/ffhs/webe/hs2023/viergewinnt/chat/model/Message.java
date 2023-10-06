@@ -1,6 +1,7 @@
 package ch.ffhs.webe.hs2023.viergewinnt.chat.model;
 
-import ch.ffhs.webe.hs2023.viergewinnt.player.model.Player;
+import ch.ffhs.webe.hs2023.viergewinnt.chat.values.MessageType;
+import ch.ffhs.webe.hs2023.viergewinnt.user.model.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -22,8 +23,8 @@ import java.util.Optional;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
 @Builder
+@Entity(name = "messages")
 public class Message {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
@@ -36,14 +37,14 @@ public class Message {
     @Setter(AccessLevel.NONE)
     @ManyToOne
     @JoinColumn(name = "sender_id", insertable = false, updatable = false)
-    private Player sender;
+    private User sender;
 
     @Setter(AccessLevel.NONE)
     @ManyToOne
     @JoinColumn(name = "receiver_id", insertable = false, updatable = false)
-    private Player receiver;
+    private User receiver;
 
-    public Optional<Player> getReceiver() {
+    public Optional<User> getReceiver() {
         return Optional.ofNullable(this.receiver);
     }
 

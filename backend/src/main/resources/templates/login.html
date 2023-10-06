@@ -1,0 +1,31 @@
+<!--suppress HtmlRequiredLangAttribute -->
+<html th:lang="${#locale.language}">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<meta charset="utf-8">
+
+<body>
+<h1 th:text="#{label.login.title}">form</h1>
+<div th:if="${param.invalid}" th:text="#{error.user.invalidCredentials}">
+    invalid credentials
+</div>
+<div th:if="${param.logout}" th:text="#{info.logout.done}">
+    logout
+</div>
+<div th:if="${param.registered}" th:text="#{info.register.success}">
+    logout
+</div>
+<form th:action="@{/login}" method="POST">
+    <div>
+        <label th:text="#{label.user.email}" for="username">email</label>
+        <input type="text" name="username" id="username"/>
+    </div>
+    <div>
+        <label th:text="#{label.user.password}" for="password">password</label>
+        <input type="password" name="password" id="password"/>
+    </div>
+    <button type="submit" th:text="#{label.login.action}">submit</button>
+</form>
+
+<a th:href="@{/registration}" th:text="#{label.register.action}">register</a>
+</body>
+</html>
