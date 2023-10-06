@@ -15,7 +15,11 @@ const ErrorHandler = () => {
   };
   useSubscription("/user/queue/error", onErrorMessageReceived);
 
-  return (<></>);
+  return errorState.code === "" ?
+  (<></>) :
+  (<div>
+    An error occured: {errorState.code} {errorState.message}
+  </div>);
 }
 
 export default ErrorHandler

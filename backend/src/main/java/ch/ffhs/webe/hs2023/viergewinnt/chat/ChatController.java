@@ -27,7 +27,7 @@ public class ChatController {
     }
 
     @MessageMapping("/message")
-    @SendTo("/lobby/chat")
+    @SendTo("/topic/lobby/chat")
     public OutboundMessageDto receivePublicMessage(@Payload final InboundMessageDto message, final Principal user) {
         // todo get user from principal instead of temporary senderid on message
         final var sender = this.playerService.getPlayerById(message.getSenderId());
