@@ -16,7 +16,7 @@ public class WebSecurityConfig {
     public SecurityFilterChain filterChain(final HttpSecurity http) throws Exception {
         http.csrf(Customizer.withDefaults())
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/login", "/logout", "/registration", "/resources/**").permitAll()
+                        .requestMatchers("/login", "/logout", "/registration", "/resources/**", "/processRegistration").permitAll()
                         .anyRequest().authenticated())
                 .formLogin(formLogin -> formLogin
                         .loginPage("/login")
