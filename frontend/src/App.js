@@ -123,6 +123,7 @@ const useStyles = createUseStyles({
 function App() {
   useStyles(theme);
 
+  const [userId, setUserId] = useState(Math.floor(Math.random() * 1000));
   const [isLoading, setLoading] = useState(true);
   const [csrfHeaders, setCsrfHeaders] = useState({});
 
@@ -150,7 +151,7 @@ function App() {
       });
   };
 
-  return isLoading ? 
+  return isLoading ?
   (
     <div>L&auml;dt...</div>
   ) : (
@@ -162,8 +163,8 @@ function App() {
       >
         <ErrorHandler />
         <div className="layout">
-          <Lobby />
-          <Chat />
+          <Lobby userId={userId} />
+          <Chat userId={userId} />
         </div>
       </StompSessionProvider>
     </ThemeProvider>
