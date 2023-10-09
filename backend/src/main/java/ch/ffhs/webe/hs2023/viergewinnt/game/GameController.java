@@ -9,6 +9,8 @@ import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.stereotype.Controller;
 
+import java.util.List;
+
 @Slf4j
 @Controller
 public class GameController {
@@ -19,11 +21,15 @@ public class GameController {
         this.gameService = gameService;
     }
 
-    @MessageMapping("/create-game")
-    @SendTo("/topic/lobby/games")
+    @MessageMapping("/games/create")
+    @SendTo("/topic/lobby/games/create")
     public GameResponseDto createGame(@Payload GameRequestDto request) {
         return gameService.createGame(request);
     }
 
-
+    @MessageMapping("/games/all")
+    @SendTo("/topic/lobby/games/all")
+    public List<GameResponseDto> getAllGames() {
+        return gameService.getAllGames();
+    }
 }

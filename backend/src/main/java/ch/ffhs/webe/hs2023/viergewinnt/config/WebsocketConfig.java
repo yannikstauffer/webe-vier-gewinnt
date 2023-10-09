@@ -19,7 +19,8 @@ public class WebsocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void configureMessageBroker(final MessageBrokerRegistry registry) {
         registry.setApplicationDestinationPrefixes("/4gewinnt");
-        registry.enableSimpleBroker("/topic/lobby/chat", "/topic/lobby/game", "/queue/chat", "/queue/error");
+        // Für ../games/all etc. muss zustätzlich /topic/lobby/games eingefügt werden sonst geht es nicht -> allenfalls Bug bei dieser Version von Spring?
+        registry.enableSimpleBroker("/topic/lobby/chat", "/topic/lobby/games","/topic/lobby/games/*", "/queue/chat", "/queue/error");
         registry.setUserDestinationPrefix("/user");
     }
 }
