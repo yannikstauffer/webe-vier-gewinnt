@@ -32,4 +32,9 @@ public class GameController {
     public List<GameResponseDto> getAllGames() {
         return gameService.getAllGames();
     }
+
+    @MessageMapping("/games/deleteAll")
+    public void deleteAllGames(){
+        gameService.deleteAllGames();
+    }
 }

@@ -54,10 +54,21 @@ const Lobby = ({userId}) => {
         }
     };
 
+    const deleteAllGames = () => {
+        if (stompClient) {
+            console.log("Requesting to delete all games");
+            stompClient.publish({
+                destination: "/4gewinnt/games/deleteAll"
+            });
+            setGames([]);
+        }
+    };
+
     return (
         <div>
             <h1>Lobby</h1>
             <button onClick={createGame}>Neues Spiel erstellen</button>
+            <button onClick={deleteAllGames}>Liste löschen</button>
             <ul>
                 {games.map((gameData) => (
                     <li key={gameData.gameId} onClick={() => joinGame(gameData.gameId)}>

@@ -49,4 +49,8 @@ public class GameService {
                 .map(GameResponseDto::of)
                 .collect(Collectors.toList());
     }
+
+    public void deleteAllGames(){
+        gameRepository.deleteAll();
+    }
 }
