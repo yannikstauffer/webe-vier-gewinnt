@@ -32,6 +32,7 @@ public class GameService {
     public GameResponseDto createGame(GameRequestDto request) {
         Game newGame = new Game();
         newGame.setStatus(GameState.WAITING_FOR_PLAYERS);
+
         newGame.setUserOne(userService.getCurrentlyAuthenticatedUser());
 
         Game savedGame = gameRepository.save(newGame);
@@ -56,17 +57,30 @@ public class GameService {
         Game game = gameRepository.findById(Integer.parseInt(request.getGameId()))
                 .orElseThrow(() -> VierGewinntException.of(ErrorCode.GAME_NOT_FOUND, "Spiel nicht gefunden!"));
 
-        if (game.getUserTwo() == null && !game.getUserOne().equals(userService.getCurrentlyAuthenticatedUser())) {
+        if (game.getUserOne() != null && game.getUserTwo() == null) {
             game.setUserTwo(userService.getCurrentlyAuthenticatedUser());
             game.setStatus(GameState.IN_PROGRESS);
             gameRepository.save(game);
-        } else if (game.getUserOne().equals(userService.getCurrentlyAuthenticatedUser()) || game.getUserTwo().equals(userService.getCurrentlyAuthenticatedUser())) {
-            // todo: Handhabung wenn Benutzer bereits Teilnehmer ist
         } else {
             throw VierGewinntException.of(ErrorCode.GAME_FULL, "Das Spiel ist bereits voll!");
         }
 
         return GameResponseDto.of(game);
+    }
+
+    public void leftGame(GameRequestDto request) {
+        Game game = gameRepository.findById(Integer.parseInt(request.getGameId()))
+                .orElseThrow(() -> VierGewinntException.of(ErrorCode.GAME_NOT_FOUND, "Spiel nicht gefunden!"));
+
+        //todo: Behandlung wenn userOne rausgeht und userTwo noch drin ist.
+        if (game.getUserOne() == userService.getCurrentlyAuthenticatedUser()) {
+            gameRepository.deleteById(Integer.parseInt(request.getGameId()));
+            gameRepository.save(game);
+        } else if (game.getUserTwo() == userService.getCurrentlyAuthenticatedUser()) {
+            game.setUserTwo(null);
+            game.setStatus(GameState.WAITING_FOR_PLAYERS);
+            gameRepository.save(game);
+        }
     }
 
 

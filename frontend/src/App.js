@@ -168,6 +168,7 @@ function App() {
         <Router>
           <div className="layout">
             <Routes>
+              // todo: userId wird noch von Math generiert. Richtige id muss noch gesendet werden.
               <Route path="/" element={<Lobby userId={userId} />} />
               <Route path="/game/:gameId" element={<Game userId={userId} />} />
             </Routes>

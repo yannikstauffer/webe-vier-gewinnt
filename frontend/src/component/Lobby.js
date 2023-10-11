@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {useStompClient, useSubscription} from "react-stomp-hooks";
-import { useNavigate } from 'react-router-dom';
+import {useNavigate} from 'react-router-dom';
 
 const Lobby = ({userId}) => {
     const [games, setGames] = useState([]);
@@ -11,9 +11,7 @@ const Lobby = ({userId}) => {
         const newGame = JSON.parse(message.body);
         setGames(oldGames => [...oldGames, newGame]);
 
-        if (newGame.creatorId === userId) {
-            navigate(`/game/${newGame.gameId}`);
-        }
+        navigate(`/game/${newGame.gameId}`);
     });
 
     useSubscription("/topic/lobby/games/all", (message) => {
@@ -24,9 +22,8 @@ const Lobby = ({userId}) => {
 
     useSubscription("/topic/lobby/games/joined", (message) => {
         const joinedGame = JSON.parse(message.body);
-        if (joinedGame.userTwoId === userId) {
-            navigate(`/game/${joinedGame.gameId}`);
-        }
+
+        navigate(`/game/${joinedGame.gameId}`);
     });
 
     useEffect(() => {
@@ -41,7 +38,6 @@ const Lobby = ({userId}) => {
         if (stompClient) {
             const gameRequest = {
                 action: 'create',
-                userId: userId
             };
             console.log("Requesting to create a new game");
             stompClient.publish({
@@ -56,7 +52,6 @@ const Lobby = ({userId}) => {
             const joinRequest = {
                 action: 'join',
                 gameId: gameId.toString(),
-                userId: userId
             };
             console.log("Requesting to join game with ID:", gameId);
             stompClient.publish({

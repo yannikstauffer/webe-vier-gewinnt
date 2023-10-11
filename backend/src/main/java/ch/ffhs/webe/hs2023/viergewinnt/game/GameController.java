@@ -45,4 +45,11 @@ public class GameController {
     public GameResponseDto joinGame(@Payload GameRequestDto request) {
         return gameService.joinGame(request);
     }
+
+    @MessageMapping("/games/left")
+    @SendTo("/topic/lobby/games/all")
+    public List<GameResponseDto> leftGame(@Payload GameRequestDto request) {
+        gameService.leftGame(request);
+        return gameService.getAllGames();
+    }
 }
