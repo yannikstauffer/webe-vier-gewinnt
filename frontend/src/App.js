@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from "react";
 import Lobby from "./component/Lobby";
 import Chat from "./component/Chat";
+import Game from './component/Game';
 import ErrorHandler from "./component/ErrorHandler";
 import { StompSessionProvider } from "react-stomp-hooks";
 import { createUseStyles, ThemeProvider } from "react-jss";
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+
 
 const APP_URL = "http://localhost:9000/4gewinnt";
 const WS_URL = APP_URL + "/ws";
@@ -162,10 +165,15 @@ function App() {
         debug={(str) => console.log(str)}
       >
         <ErrorHandler />
-        <div className="layout">
-          <Lobby userId={userId} />
-          <Chat userId={userId} />
-        </div>
+        <Router>
+          <div className="layout">
+            <Routes>
+              <Route path="/" element={<Lobby userId={userId} />} />
+              <Route path="/game/:gameId" element={<Game userId={userId} />} />
+            </Routes>
+            <Chat userId={userId} />
+          </div>
+        </Router>
       </StompSessionProvider>
     </ThemeProvider>
   );

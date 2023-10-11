@@ -10,12 +10,14 @@ import lombok.Data;
 public class GameResponseDto {
     private int gameId;
     private GameState status;
+    private int creatorId;
     private String creatorName;
 
     public static GameResponseDto of(final Game game) {
         return GameResponseDto.builder()
                 .gameId(game.getId())
                 .status(game.getStatus())
+                .creatorId(game.getUserOne().getId())
                 .creatorName(game.getUserOne().getFirstName())
                 .build();
     }

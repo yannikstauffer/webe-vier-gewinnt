@@ -1,10 +1,14 @@
 import React, { useState } from 'react'
+import { useParams } from 'react-router-dom';
 
-const Game = () => {
+const Game = ({ userId }) => {
+    const { gameId } = useParams();
 
     return (
-        <div><h1>Game</h1></div>
-    )
+        <div>
+            <h2>Spiel ID: {gameId}</h2>
+        </div>
+    );
 }
 
 export default Game

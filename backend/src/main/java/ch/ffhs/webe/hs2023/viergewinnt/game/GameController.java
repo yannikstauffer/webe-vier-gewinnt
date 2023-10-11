@@ -34,7 +34,15 @@ public class GameController {
     }
 
     @MessageMapping("/games/deleteAll")
-    public void deleteAllGames(){
+    @SendTo("/topic/lobby/games/all")
+    public List<GameResponseDto> deleteAllGames() {
         gameService.deleteAllGames();
+        return gameService.getAllGames();
+    }
+
+    @MessageMapping("/games/join")
+    @SendTo("/topic/lobby/games/joined")
+    public GameResponseDto joinGame(@Payload GameRequestDto request) {
+        return gameService.joinGame(request);
     }
 }

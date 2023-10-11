@@ -1,20 +1,32 @@
 import React, {useEffect, useState} from 'react';
 import {useStompClient, useSubscription} from "react-stomp-hooks";
+import { useNavigate } from 'react-router-dom';
 
 const Lobby = ({userId}) => {
     const [games, setGames] = useState([]);
     const stompClient = useStompClient();
+    const navigate = useNavigate();
 
     useSubscription("/topic/lobby/games/create", (message) => {
         const newGame = JSON.parse(message.body);
-        console.log("Received payload newGame:", newGame);
         setGames(oldGames => [...oldGames, newGame]);
+
+        if (newGame.creatorId === userId) {
+            navigate(`/game/${newGame.gameId}`);
+        }
     });
 
     useSubscription("/topic/lobby/games/all", (message) => {
         const allGames = JSON.parse(message.body);
         console.log("Received payload allGames:", allGames);
         setGames(allGames);
+    });
+
+    useSubscription("/topic/lobby/games/joined", (message) => {
+        const joinedGame = JSON.parse(message.body);
+        if (joinedGame.userTwoId === userId) {
+            navigate(`/game/${joinedGame.gameId}`);
+        }
     });
 
     useEffect(() => {
@@ -43,12 +55,12 @@ const Lobby = ({userId}) => {
         if (stompClient) {
             const joinRequest = {
                 action: 'join',
-                gameId: gameId,
+                gameId: gameId.toString(),
                 userId: userId
             };
             console.log("Requesting to join game with ID:", gameId);
             stompClient.publish({
-                destination: "/4gewinnt/join-game",
+                destination: "/4gewinnt/games/join",
                 body: JSON.stringify(joinRequest)
             });
         }
@@ -60,7 +72,6 @@ const Lobby = ({userId}) => {
             stompClient.publish({
                 destination: "/4gewinnt/games/deleteAll"
             });
-            setGames([]);
         }
     };
 

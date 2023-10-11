@@ -11,6 +11,8 @@ public enum ErrorCode {
     USER_NOT_FOUND("error.user.notFound"),
     EMAIL_ALREADY_EXISTS("error.user.emailAlreadyExists"),
     INVALID_CREDENTIALS("error.user.invalidCredentials"),
+    GAME_NOT_FOUND("error.user.gameNotFound"),
+    GAME_FULL("error.user.gameIsFull"),
     UNKNOWN("error.unknown");
 
     private final String internationalizedMessageKey;

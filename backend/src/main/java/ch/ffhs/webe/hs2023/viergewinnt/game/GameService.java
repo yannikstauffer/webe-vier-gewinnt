@@ -1,5 +1,7 @@
 package ch.ffhs.webe.hs2023.viergewinnt.game;
 
+import ch.ffhs.webe.hs2023.viergewinnt.base.ErrorCode;
+import ch.ffhs.webe.hs2023.viergewinnt.base.VierGewinntException;
 import ch.ffhs.webe.hs2023.viergewinnt.game.dto.GameRequestDto;
 import ch.ffhs.webe.hs2023.viergewinnt.game.dto.GameResponseDto;
 import ch.ffhs.webe.hs2023.viergewinnt.game.model.Game;
@@ -50,7 +52,25 @@ public class GameService {
                 .collect(Collectors.toList());
     }
 
-    public void deleteAllGames(){
+    public GameResponseDto joinGame(GameRequestDto request) {
+        Game game = gameRepository.findById(Integer.parseInt(request.getGameId()))
+                .orElseThrow(() -> VierGewinntException.of(ErrorCode.GAME_NOT_FOUND, "Spiel nicht gefunden!"));
+
+        if (game.getUserTwo() == null && !game.getUserOne().equals(userService.getCurrentlyAuthenticatedUser())) {
+            game.setUserTwo(userService.getCurrentlyAuthenticatedUser());
+            game.setStatus(GameState.IN_PROGRESS);
+            gameRepository.save(game);
+        } else if (game.getUserOne().equals(userService.getCurrentlyAuthenticatedUser()) || game.getUserTwo().equals(userService.getCurrentlyAuthenticatedUser())) {
+            // todo: Handhabung wenn Benutzer bereits Teilnehmer ist
+        } else {
+            throw VierGewinntException.of(ErrorCode.GAME_FULL, "Das Spiel ist bereits voll!");
+        }
+
+        return GameResponseDto.of(game);
+    }
+
+
+    public void deleteAllGames() {
         gameRepository.deleteAll();
     }
 }
