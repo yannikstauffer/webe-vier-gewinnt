@@ -1,44 +1,32 @@
-import {useEffect, useState} from 'react';
+import React, {useEffect} from 'react';
 import {useLocation, useNavigate, useParams} from 'react-router-dom';
-import {useStompClient} from "react-stomp-hooks";
 
 const Game = ({userId}) => {
     const {gameId} = useParams();
-    const location = useLocation();
     const navigate = useNavigate();
-    const [previousLocation, setPreviousLocation] = useState();
-    const stompClient = useStompClient();
+    const location = useLocation();
 
     useEffect(() => {
-        // Handler-Funktion für das popstate-Event todo: geht noch nicht
-        const handlePopState = () => {
-            console.log("Zurück-Button wurde geklickt oder es wurde zur Lobby navigiert");
+        const handleBackButtonEvent = (e) => {
+            navigate(location.pathname);
+            e.preventDefault();
+        };
 
-            if (stompClient && stompClient.connected) {
-                stompClient.publish({
-                    destination: "/4gewinnt/games/left",
-                    body: JSON.stringify({
-                        gameId: gameId,
-                        message: "Das Spiel wurde verlassen"
-                    })
-                });
-            }
+        window.addEventListener('popstate', handleBackButtonEvent);
 
-            alert("Sie haben das Spiel verlassen.");
-        }
-
-        window.addEventListener('popstate', handlePopState);
-
+        // Dies wird aufgerufen, wenn die Komponente verlassen wird
         return () => {
-            window.removeEventListener('popstate', handlePopState);
-        }
-    }, [gameId, stompClient]);
+            console.log("Setting prevPath in sessionStorage from Game:", location.pathname);
+            sessionStorage.setItem('prevPath', location.pathname);
+            window.removeEventListener('popstate', handleBackButtonEvent);
+        };
+    }, [navigate, location.pathname]);
 
     return (
         <div>
             <h2>Spiel ID: {gameId}</h2>
         </div>
     );
-}
+};
 
-export default Game
+export default Game;

@@ -1,17 +1,18 @@
 import React, {useEffect, useState} from 'react';
 import {useStompClient, useSubscription} from "react-stomp-hooks";
-import {useNavigate} from 'react-router-dom';
+import {useLocation, useNavigate} from 'react-router-dom';
 
 const Lobby = ({userId}) => {
     const [games, setGames] = useState([]);
     const stompClient = useStompClient();
     const navigate = useNavigate();
+    const location = useLocation();
 
     useSubscription("/topic/lobby/games/create", (message) => {
         const newGame = JSON.parse(message.body);
         setGames(oldGames => [...oldGames, newGame]);
 
-        navigate(`/game/${newGame.gameId}`);
+        navigate(`/game/${newGame.gameId}`, {state: {prevPath: location.pathname}});
     });
 
     useSubscription("/topic/lobby/games/all", (message) => {
@@ -23,7 +24,7 @@ const Lobby = ({userId}) => {
     useSubscription("/topic/lobby/games/joined", (message) => {
         const joinedGame = JSON.parse(message.body);
 
-        navigate(`/game/${joinedGame.gameId}`);
+        navigate(`/game/${joinedGame.gameId}`, {state: {prevPath: location.pathname}});
     });
 
     useEffect(() => {
@@ -33,6 +34,27 @@ const Lobby = ({userId}) => {
             });
         }
     }, [stompClient]);
+
+    useEffect(() => {
+
+        const prevPath = sessionStorage.getItem('prevPath');
+        console.log("Fetched prevPath from sessionStorage:", prevPath);
+        if (prevPath && prevPath.startsWith('/game/')) {
+            console.log("Spiel wurde verlassen.");
+
+            const gameId = prevPath.split("/")[2];
+
+            if (stompClient && stompClient.connected) {
+                stompClient.publish({
+                    destination: "/4gewinnt/games/left",
+                    body: JSON.stringify({
+                        gameId: gameId,
+                        message: "Das Spiel wurde verlassen"
+                    })
+                });
+            }
+        }
+    }, [location, stompClient]);
 
     const createGame = () => {
         if (stompClient) {
@@ -84,6 +106,6 @@ const Lobby = ({userId}) => {
             </ul>
         </div>
     );
-}
+};
 
 export default Lobby;
