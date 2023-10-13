@@ -49,6 +49,7 @@ const Lobby = ({userId}) => {
                     destination: "/4gewinnt/games/left",
                     body: JSON.stringify({
                         gameId: gameId,
+                        userId: userId,
                         message: "Das Spiel wurde verlassen"
                     })
                 });
@@ -64,6 +65,7 @@ const Lobby = ({userId}) => {
             console.log("Requesting to create a new game");
             stompClient.publish({
                 destination: "/4gewinnt/games/create",
+                userId: userId,
                 body: JSON.stringify(gameRequest)
             });
         }
@@ -78,6 +80,7 @@ const Lobby = ({userId}) => {
             console.log("Requesting to join game with ID:", gameId);
             stompClient.publish({
                 destination: "/4gewinnt/games/join",
+                userId: userId,
                 body: JSON.stringify(joinRequest)
             });
         }

@@ -130,12 +130,30 @@ function App() {
   const [isLoading, setLoading] = useState(true);
   const [csrfHeaders, setCsrfHeaders] = useState({});
 
+  console.log("userID ladet GUI:   " + userId)
+
   useEffect(() => {
     loadCsrfStompHeaders().then((headers) => {
       console.log("CSRF headers loaded", headers);
       setCsrfHeaders(headers);
       setLoading(false);
     });
+  }, []);
+
+  useEffect(() => {
+    fetch(APP_URL + "/currentUserId")
+        .then(response => {
+          if (!response.ok) {
+            throw new Error("Network response was not ok");
+          }
+          return response.json();
+        })
+        .then(data => {
+          setUserId(data);
+        })
+        .catch(error => {
+          console.error("There was a problem with the fetch operation:", error);
+        });
   }, []);
 
   const loadCsrfStompHeaders = () => {
@@ -153,6 +171,8 @@ function App() {
         };
       });
   };
+
+
 
   return isLoading ?
   (

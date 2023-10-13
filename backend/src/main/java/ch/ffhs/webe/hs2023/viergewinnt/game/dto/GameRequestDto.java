@@ -7,7 +7,9 @@ import lombok.Data;
 @Data
 @Builder
 public class GameRequestDto {
-    private String gameId;
+    private int gameId;
+    private int userId;
     private GameState gameState;
+
 
 }
