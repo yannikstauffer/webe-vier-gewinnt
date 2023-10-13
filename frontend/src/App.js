@@ -130,8 +130,6 @@ function App() {
   const [isLoading, setLoading] = useState(true);
   const [csrfHeaders, setCsrfHeaders] = useState({});
 
-  console.log("userID ladet GUI:   " + userId)
-
   useEffect(() => {
     loadCsrfStompHeaders().then((headers) => {
       console.log("CSRF headers loaded", headers);

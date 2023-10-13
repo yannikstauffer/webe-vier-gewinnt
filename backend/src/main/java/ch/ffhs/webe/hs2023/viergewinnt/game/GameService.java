@@ -8,6 +8,7 @@ import ch.ffhs.webe.hs2023.viergewinnt.game.model.Game;
 import ch.ffhs.webe.hs2023.viergewinnt.game.repository.GameRepository;
 import ch.ffhs.webe.hs2023.viergewinnt.game.values.GameState;
 import ch.ffhs.webe.hs2023.viergewinnt.user.UserService;
+import ch.ffhs.webe.hs2023.viergewinnt.user.model.User;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -44,7 +45,6 @@ public class GameService {
     public List<GameResponseDto> getAllGames() {
         Iterable<Game> gamesIterable = gameRepository.findAll();
 
-        // Konvertierung von Iterable<Game> zu List<Game> mit ArrayList
         List<Game> games = new ArrayList<>();
         gamesIterable.forEach(games::add);
 
@@ -72,11 +72,12 @@ public class GameService {
         Game game = gameRepository.findById(request.getGameId())
                 .orElseThrow(() -> VierGewinntException.of(ErrorCode.GAME_NOT_FOUND, "Spiel nicht gefunden!"));
 
-        //todo: Behandlung wenn userOne rausgeht und userTwo noch drin ist.
-        if (game.getUserOne() == userService.getCurrentlyAuthenticatedUser()) {
+        User actualUser = userService.getCurrentlyAuthenticatedUser();
+
+        if (game.getUserOne().getId() == userService.getCurrentlyAuthenticatedUser().getId()) {
             gameRepository.deleteById(request.getGameId());
             gameRepository.save(game);
-        } else if (game.getUserTwo() == userService.getCurrentlyAuthenticatedUser()) {
+        } else if (game.getUserTwo().getId() == userService.getCurrentlyAuthenticatedUser().getId()) {
             game.setUserTwo(null);
             game.setStatus(GameState.WAITING_FOR_PLAYERS);
             gameRepository.save(game);

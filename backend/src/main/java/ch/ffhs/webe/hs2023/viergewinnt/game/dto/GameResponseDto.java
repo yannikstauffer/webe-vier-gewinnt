@@ -12,14 +12,27 @@ public class GameResponseDto {
     private GameState status;
     private int creatorId;
     private String creatorName;
+    private int userTwoId;
+    private String userTwoName;
 
     public static GameResponseDto of(final Game game) {
+        if(game.getUserTwo() == null){
+            return GameResponseDto.builder()
+                    .gameId(game.getId())
+                    .status(game.getStatus())
+                    .creatorId(game.getUserOne().getId())
+                    .creatorName(game.getUserOne().getFirstName())
+                    .build();
+        }
         return GameResponseDto.builder()
                 .gameId(game.getId())
                 .status(game.getStatus())
                 .creatorId(game.getUserOne().getId())
                 .creatorName(game.getUserOne().getFirstName())
+                .userTwoId(game.getUserTwo().getId())
+                .userTwoName(game.getUserTwo().getFirstName())
                 .build();
+
     }
 }
 
