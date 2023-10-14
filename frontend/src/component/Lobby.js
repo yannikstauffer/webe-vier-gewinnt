@@ -12,7 +12,7 @@ const Lobby = ({userId}) => {
         const newGame = JSON.parse(message.body);
         setGames(oldGames => [...oldGames, newGame]);
 
-        if(newGame.creatorId == userId){
+        if (newGame.creatorId == userId) {
             navigate(`/game/${newGame.gameId}`, {state: {prevPath: location.pathname}});
         }
 
@@ -27,7 +27,7 @@ const Lobby = ({userId}) => {
     useSubscription("/topic/lobby/games/joined", (message) => {
         const joinedGame = JSON.parse(message.body);
 
-        if(joinedGame.userTwoId == userId) {
+        if (joinedGame.userTwoId == userId) {
             navigate(`/game/${joinedGame.gameId}`, {state: {prevPath: location.pathname}});
         }
     });

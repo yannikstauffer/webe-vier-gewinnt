@@ -16,7 +16,6 @@ const Game = ({userId}) => {
 
         // Dies wird aufgerufen, wenn die Komponente verlassen wird
         return () => {
-            console.log("Setting prevPath in sessionStorage from Game:", location.pathname);
             sessionStorage.setItem('prevPath', location.pathname);
             window.removeEventListener('popstate', handleBackButtonEvent);
         };

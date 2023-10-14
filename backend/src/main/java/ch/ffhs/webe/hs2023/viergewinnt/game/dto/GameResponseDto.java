@@ -16,7 +16,7 @@ public class GameResponseDto {
     private String userTwoName;
 
     public static GameResponseDto of(final Game game) {
-        if(game.getUserTwo() == null){
+        if (game.getUserTwo() == null) {
             return GameResponseDto.builder()
                     .gameId(game.getId())
                     .status(game.getStatus())
