@@ -72,11 +72,8 @@ public class GameService {
         Game game = gameRepository.findById(request.getGameId())
                 .orElseThrow(() -> VierGewinntException.of(ErrorCode.GAME_NOT_FOUND, "Spiel nicht gefunden!"));
 
-        User actualUser = userService.getCurrentlyAuthenticatedUser();
-
         if (game.getUserOne().getId() == userService.getCurrentlyAuthenticatedUser().getId()) {
             gameRepository.deleteById(request.getGameId());
-            gameRepository.save(game);
         } else if (game.getUserTwo().getId() == userService.getCurrentlyAuthenticatedUser().getId()) {
             game.setUserTwo(null);
             game.setStatus(GameState.WAITING_FOR_PLAYERS);
