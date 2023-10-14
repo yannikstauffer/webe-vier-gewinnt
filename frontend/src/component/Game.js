@@ -1,5 +1,6 @@
 import React, {useEffect} from 'react';
 import {useLocation, useNavigate, useParams} from 'react-router-dom';
+import GameBoard from './GameBoard';
 
 const Game = ({userId}) => {
     const {gameId} = useParams();
@@ -14,7 +15,6 @@ const Game = ({userId}) => {
 
         window.addEventListener('popstate', handleBackButtonEvent);
 
-        // Dies wird aufgerufen, wenn die Komponente verlassen wird
         return () => {
             sessionStorage.setItem('prevPath', location.pathname);
             window.removeEventListener('popstate', handleBackButtonEvent);
@@ -24,6 +24,7 @@ const Game = ({userId}) => {
     return (
         <div>
             <h2>Spiel ID: {gameId}</h2>
+            <GameBoard />
         </div>
     );
 };

@@ -170,8 +170,6 @@ function App() {
       });
   };
 
-
-
   return isLoading ?
   (
     <div>L&auml;dt...</div>
