@@ -10,12 +10,11 @@ const Lobby = ({userId}) => {
 
     useSubscription("/topic/lobby/games/create", (message) => {
         const newGame = JSON.parse(message.body);
-        setGames(oldGames => [...oldGames, newGame]);
-        
-        if (newGame.userOne.userId == userId) {
+        setGames((oldGames) => [...oldGames, newGame]);
+
+        if (newGame.userOne.userId === userId) {
             navigate(`/game/${newGame.game.id}`, {state: {prevPath: location.pathname}});
         }
-
     });
 
     useSubscription("/topic/lobby/games/all", (message) => {
@@ -27,7 +26,7 @@ const Lobby = ({userId}) => {
     useSubscription("/topic/lobby/games/joined", (message) => {
         const joinedGame = JSON.parse(message.body);
 
-        if (joinedGame.userTwo.userId == userId) {
+        if (joinedGame.userTwo.userId === userId) {
             navigate(`/game/${joinedGame.game.id}`, {state: {prevPath: location.pathname}});
         }
     });
@@ -41,7 +40,6 @@ const Lobby = ({userId}) => {
     }, [stompClient]);
 
     useEffect(() => {
-
         const prevPath = sessionStorage.getItem('prevPath');
         console.log("Fetched prevPath from sessionStorage:", prevPath);
         if (prevPath && prevPath.startsWith('/game/')) {
@@ -53,10 +51,10 @@ const Lobby = ({userId}) => {
                 stompClient.publish({
                     destination: "/4gewinnt/games/left",
                     body: JSON.stringify({
-                        gameId: gameId,
-                        userId: userId,
-                        message: "Das Spiel wurde verlassen"
-                    })
+                        game: {
+                            id: gameId,
+                        },
+                    }),
                 });
             }
         }
@@ -71,7 +69,7 @@ const Lobby = ({userId}) => {
             stompClient.publish({
                 destination: "/4gewinnt/games/create",
                 userId: userId,
-                body: JSON.stringify(gameRequest)
+                body: JSON.stringify(gameRequest),
             });
         }
     };
@@ -79,14 +77,15 @@ const Lobby = ({userId}) => {
     const joinGame = (gameId) => {
         if (stompClient) {
             const joinRequest = {
-                action: 'join',
-                gameId: gameId.toString(),
+                game: {
+                    id: gameId,
+                },
             };
             console.log("Requesting to join game with ID:", gameId);
             stompClient.publish({
                 destination: "/4gewinnt/games/join",
                 userId: userId,
-                body: JSON.stringify(joinRequest)
+                body: JSON.stringify(joinRequest),
             });
         }
     };
@@ -95,7 +94,7 @@ const Lobby = ({userId}) => {
         if (stompClient) {
             console.log("Requesting to delete all games");
             stompClient.publish({
-                destination: "/4gewinnt/games/deleteAll"
+                destination: "/4gewinnt/games/deleteAll",
             });
         }
     };
@@ -109,7 +108,6 @@ const Lobby = ({userId}) => {
                 {games.map((gameData) => (
                     <li key={gameData.game.id} onClick={() => joinGame(gameData.game.id)}>
                         Spiel ID: {gameData.game.id} - Ersteller: {gameData.userOne.firstName}
-
                     </li>
                 ))}
             </ul>

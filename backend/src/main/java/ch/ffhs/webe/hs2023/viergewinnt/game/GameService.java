@@ -53,7 +53,7 @@ public class GameService {
     }
 
     public GameResponseDto joinGame(GameRequestDto request) {
-        Game game = gameRepository.findById(request.getGameId())
+        Game game = gameRepository.findById(request.getGame().getId())
                 .orElseThrow(() -> VierGewinntException.of(ErrorCode.GAME_NOT_FOUND, "Spiel nicht gefunden!"));
 
         if (game.getUserOne() != null && game.getUserTwo() == null) {
@@ -68,11 +68,11 @@ public class GameService {
     }
 
     public void leftGame(GameRequestDto request) {
-        Game game = gameRepository.findById(request.getGameId())
+        Game game = gameRepository.findById(request.getGame().getId())
                 .orElseThrow(() -> VierGewinntException.of(ErrorCode.GAME_NOT_FOUND, "Spiel nicht gefunden!"));
 
         if (game.getUserOne().getId() == userService.getCurrentlyAuthenticatedUser().getId()) {
-            gameRepository.deleteById(request.getGameId());
+            gameRepository.deleteById(request.getGame().getId());
         } else if (game.getUserTwo().getId() == userService.getCurrentlyAuthenticatedUser().getId()) {
             game.setUserTwo(null);
             game.setStatus(GameState.WAITING_FOR_PLAYERS);
