@@ -17,7 +17,6 @@ public class WebSecurityConfig {
         http.csrf(Customizer.withDefaults())
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/login", "/logout", "/registration", "/resources/**", "/processRegistration").permitAll()
-                        .requestMatchers(r -> r.getServletPath().matches("/currentUser/id")).authenticated()
                         .anyRequest().authenticated())
                 .formLogin(formLogin -> formLogin
                         .loginPage("/login")
