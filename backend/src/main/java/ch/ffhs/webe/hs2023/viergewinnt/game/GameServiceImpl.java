@@ -55,13 +55,13 @@ public class GameServiceImpl implements GameService {
         Game game = gameRepository.findById(request.getGame().getId())
                 .orElseThrow(() -> VierGewinntException.of(ErrorCode.GAME_NOT_FOUND, "Spiel nicht gefunden!"));
 
-        if (game.getUserOne() != null && game.getUserTwo() == null) {
-            game.setUserTwo(userService.getCurrentlyAuthenticatedUser());
-            game.setStatus(GameState.IN_PROGRESS);
-            gameRepository.save(game);
-        } else {
+        if (game.isFull()) {
             throw VierGewinntException.of(ErrorCode.GAME_FULL, "Das Spiel ist bereits voll!");
         }
+
+        game.setUserTwo(userService.getCurrentlyAuthenticatedUser());
+        game.setStatus(GameState.IN_PROGRESS);
+        gameRepository.save(game);
 
         return game;
     }

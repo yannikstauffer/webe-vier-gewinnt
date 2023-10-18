@@ -40,4 +40,7 @@ public class Game {
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdDate = LocalDateTime.now();
 
+    public boolean isFull() {
+        return userOne != null && userTwo != null;
+    }
 }
