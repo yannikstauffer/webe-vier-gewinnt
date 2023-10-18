@@ -3,7 +3,6 @@ package ch.ffhs.webe.hs2023.viergewinnt.user;
 import ch.ffhs.webe.hs2023.viergewinnt.base.VierGewinntException;
 import ch.ffhs.webe.hs2023.viergewinnt.user.dto.UserDto;
 import ch.ffhs.webe.hs2023.viergewinnt.user.model.User;
-import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.Optional;
 
