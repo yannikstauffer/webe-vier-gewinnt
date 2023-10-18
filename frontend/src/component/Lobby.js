@@ -106,8 +106,8 @@ const Lobby = ({userId}) => {
             <button onClick={deleteAllGames}>Liste löschen</button>
             <ul>
                 {games.map((gameData) => (
-                    <li key={gameData.game.id} onClick={() => joinGame(gameData.game.id)}>
-                        Spiel ID: {gameData.game.id} - Ersteller: {gameData.userOne.firstName}
+                    <li key={gameData.game?.id} onClick={() => joinGame(gameData.game?.id)}>
+                        Spiel ID: {gameData.game?.id} - Ersteller: {gameData.userOne?.firstName}
                     </li>
                 ))}
             </ul>
