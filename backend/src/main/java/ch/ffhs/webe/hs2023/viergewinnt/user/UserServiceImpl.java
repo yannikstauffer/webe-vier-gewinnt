@@ -9,6 +9,7 @@ import ch.ffhs.webe.hs2023.viergewinnt.user.values.Role;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -63,6 +64,16 @@ class UserServiceImpl implements UserService {
                         "User with email " + email + " not found"));
     }
 
+    /**
+     * Ruft den aktuell authentifizierten Benutzer ab
+     * @return User
+     */
+    @Override
+    public User getCurrentlyAuthenticatedUser() {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        return getUserByEmail(username);
+    }
+
     @Override
     public Optional<User> findUserById(final int id) {
         return this.userRepository.findById(id);
@@ -71,5 +82,7 @@ class UserServiceImpl implements UserService {
     private boolean emailExists(final String email) {
         return this.userRepository.findByEmail(email).isPresent();
     }
+
+
 
 }

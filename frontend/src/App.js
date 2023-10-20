@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from "react";
 import Lobby from "./component/Lobby";
 import Chat from "./component/Chat";
+import Game from './component/Game';
 import ErrorHandler from "./component/ErrorHandler";
 import { StompSessionProvider } from "react-stomp-hooks";
 import { createUseStyles, ThemeProvider } from "react-jss";
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+
 
 const APP_URL = "http://localhost:9000/4gewinnt";
 const WS_URL = APP_URL + "/ws";
@@ -123,6 +126,7 @@ const useStyles = createUseStyles({
 function App() {
   useStyles(theme);
 
+  const [userId, setUserId] = useState(Math.floor(Math.random() * 1000));
   const [isLoading, setLoading] = useState(true);
   const [csrfHeaders, setCsrfHeaders] = useState({});
 
@@ -132,6 +136,22 @@ function App() {
       setCsrfHeaders(headers);
       setLoading(false);
     });
+  }, []);
+
+  useEffect(() => {
+    fetch(APP_URL + "/currentUserId")
+        .then(response => {
+          if (!response.ok) {
+            throw new Error("Network response was not ok");
+          }
+          return response.json();
+        })
+        .then(data => {
+          setUserId(data);
+        })
+        .catch(error => {
+          console.error("There was a problem with the fetch operation:", error);
+        });
   }, []);
 
   const loadCsrfStompHeaders = () => {
@@ -150,7 +170,7 @@ function App() {
       });
   };
 
-  return isLoading ? 
+  return isLoading ?
   (
     <div>L&auml;dt...</div>
   ) : (
@@ -161,10 +181,16 @@ function App() {
         debug={(str) => console.log(str)}
       >
         <ErrorHandler />
-        <div className="layout">
-          <Lobby />
-          <Chat />
-        </div>
+        <Router>
+          <div className="layout">
+            <Routes>
+              // todo: userId wird noch von Math generiert. Richtige id muss noch gesendet werden.
+              <Route path="/" element={<Lobby userId={userId} />} />
+              <Route path="/game/:gameId" element={<Game userId={userId} />} />
+            </Routes>
+            <Chat userId={userId} />
+          </div>
+        </Router>
       </StompSessionProvider>
     </ThemeProvider>
   );

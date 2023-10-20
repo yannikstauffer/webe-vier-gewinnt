@@ -14,4 +14,6 @@ public interface UserService {
     User getUserByEmail(final String id) throws VierGewinntException;
 
     Optional<User> findUserById(final int id);
+
+    User getCurrentlyAuthenticatedUser() throws VierGewinntException;
 }

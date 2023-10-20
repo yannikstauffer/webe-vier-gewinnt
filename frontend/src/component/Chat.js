@@ -2,9 +2,6 @@ import React, { useState } from "react";
 import { useStompClient, useSubscription } from "react-stomp-hooks";
 import {createUseStyles, useTheme} from "react-jss";
 
-
-const userId = Math.floor(Math.random() * 1000);
-
 const useStyles = createUseStyles({
   layout: {
     display: "grid",
@@ -46,7 +43,7 @@ const useStyles = createUseStyles({
 
 });
 
-const Chat = () => {
+const Chat = ({ userId }) => {
   const theme = useTheme();
   const classes = useStyles(theme);
   const stompClient = useStompClient();
