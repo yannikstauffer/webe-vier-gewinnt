@@ -12,8 +12,8 @@ const Lobby = ({userId}) => {
         const newGame = JSON.parse(message.body);
         setGames((oldGames) => [...oldGames, newGame]);
 
-        if (newGame.userOne.userId === userId) {
-            navigate(`/game/${newGame.game.id}`, {state: {prevPath: location.pathname}});
+        if (newGame.userOne.id === userId) {
+            navigate(`/game/${newGame.id}`, {state: {prevPath: location.pathname}});
         }
     });
 
@@ -26,8 +26,8 @@ const Lobby = ({userId}) => {
     useSubscription("/topic/lobby/games/joined", (message) => {
         const joinedGame = JSON.parse(message.body);
 
-        if (joinedGame.userTwo.userId === userId) {
-            navigate(`/game/${joinedGame.game.id}`, {state: {prevPath: location.pathname}});
+        if (joinedGame.userTwo.id === userId) {
+            navigate(`/game/${joinedGame.id}`, {state: {prevPath: location.pathname}});
         }
     });
 
@@ -106,8 +106,8 @@ const Lobby = ({userId}) => {
             <button onClick={deleteAllGames}>Liste löschen</button>
             <ul>
                 {games.map((gameData) => (
-                    <li key={gameData.game?.id} onClick={() => joinGame(gameData.game?.id)}>
-                        Spiel ID: {gameData.game?.id} - Ersteller: {gameData.userOne?.firstName}
+                    <li key={gameData.id} onClick={() => joinGame(gameData.id)}>
+                        Spiel ID: {gameData.id} - Ersteller: {gameData.userOne?.firstName}
                     </li>
                 ))}
             </ul>
