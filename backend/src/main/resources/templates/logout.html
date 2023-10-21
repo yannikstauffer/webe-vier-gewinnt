@@ -1,0 +1,11 @@
+<!--suppress HtmlRequiredLangAttribute -->
+<html th:lang="${#locale.language}">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<meta charset="utf-8">
+<body onload="document.logout.submit()">
+<p th:text="#{info.logout.action}">form</p>
+<form th:action="@{/logout}" method="POST" name="logout">
+</form>
+
+</body>
+</html>

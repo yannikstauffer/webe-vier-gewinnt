@@ -3,12 +3,17 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
+    "net": "^1.0.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-jss": "^10.10.0",
     "react-scripts": "5.0.1",
+    "react-stomp-hooks": "^2.1.0",
+    "react-router-dom": "^6.16.0",
     "sockjs-client": "^1.6.1",
     "stompjs": "^2.3.3",
     "web-vitals": "^2.1.4"
@@ -16,6 +21,12 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
+    "rmdeploy": "rm -rf ../backend/src/main/resources/static/*",
+    "rmdeploy-windows": "rmdir /S /Q ..\\backend\\src\\main\\resources\\static\\ || exit 0",
+    "deploy": "mkdir -p ../backend/src/main/resources/static/ && cp -a build/. ../backend/src/main/resources/static/",
+    "deploy-windows": "if not exist ..\\backend\\src\\main\\resources\\static\\ mkdir ..\\backend\\src\\main\\resources\\static\\ && xcopy /E /I /Y build\\* ..\\backend\\src\\main\\resources\\static\\",
+    "clean-deploy": "npm run build && npm run rmdeploy && npm run deploy",
+    "clean-deploy-windows": "npm run build && npm run rmdeploy-windows && npm run deploy-windows",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },

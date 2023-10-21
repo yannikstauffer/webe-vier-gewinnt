@@ -2,4 +2,6 @@
 <configuration>
     <include resource="org/springframework/boot/logging/logback/base.xml"/>
     <logger name="ch.ffhs.webe.hs2023.viergewinnt" level="DEBUG"/>
+    <logger name="org.springframework.web.socket" level="DEBUG"/>
+    <logger name="org.springframework.web.socket.messaging.StompSubProtocolHandler" level="TRACE"/>
 </configuration>
