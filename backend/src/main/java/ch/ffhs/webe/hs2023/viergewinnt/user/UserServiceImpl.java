@@ -2,7 +2,7 @@ package ch.ffhs.webe.hs2023.viergewinnt.user;
 
 import ch.ffhs.webe.hs2023.viergewinnt.base.ErrorCode;
 import ch.ffhs.webe.hs2023.viergewinnt.base.VierGewinntException;
-import ch.ffhs.webe.hs2023.viergewinnt.user.dto.UserDto;
+import ch.ffhs.webe.hs2023.viergewinnt.user.dto.LoginDto;
 import ch.ffhs.webe.hs2023.viergewinnt.user.model.User;
 import ch.ffhs.webe.hs2023.viergewinnt.user.repository.UserRepository;
 import ch.ffhs.webe.hs2023.viergewinnt.user.values.Role;
@@ -30,19 +30,19 @@ class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User registerNewUserAccount(final UserDto userDto) throws VierGewinntException {
-        if (this.emailExists(userDto.getEmail())) {
+    public User registerNewUserAccount(final LoginDto loginDto) throws VierGewinntException {
+        if (this.emailExists(loginDto.getEmail())) {
             throw VierGewinntException.of(
                     ErrorCode.EMAIL_ALREADY_EXISTS,
-                    String.format("Email address %s already in use for another account", userDto.getEmail())
+                    String.format("Email address %s already in use for another account", loginDto.getEmail())
             );
         }
 
         final User user = new User();
-        user.setFirstName(userDto.getFirstName());
-        user.setLastName(userDto.getLastName());
-        user.setPassword(this.passwordEncoder.encode(userDto.getPassword()));
-        user.setEmail(userDto.getEmail());
+        user.setFirstName(loginDto.getFirstName());
+        user.setLastName(loginDto.getLastName());
+        user.setPassword(this.passwordEncoder.encode(loginDto.getPassword()));
+        user.setEmail(loginDto.getEmail());
         user.setRoles(Collections.singletonList(Role.USER));
 
         return this.userRepository.save(user);
@@ -66,12 +66,13 @@ class UserServiceImpl implements UserService {
 
     /**
      * Ruft den aktuell authentifizierten Benutzer ab
+     *
      * @return User
      */
     @Override
     public User getCurrentlyAuthenticatedUser() {
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        return getUserByEmail(username);
+        final String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        return this.getUserByEmail(username);
     }
 
     @Override
@@ -82,7 +83,6 @@ class UserServiceImpl implements UserService {
     private boolean emailExists(final String email) {
         return this.userRepository.findByEmail(email).isPresent();
     }
-
 
 
 }

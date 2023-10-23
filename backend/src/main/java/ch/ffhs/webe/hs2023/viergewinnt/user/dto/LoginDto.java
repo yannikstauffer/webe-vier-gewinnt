@@ -10,7 +10,7 @@ import java.io.Serializable;
 
 @Data
 @PasswordMatches
-public class UserDto implements Serializable {
+public class LoginDto implements Serializable {
     @NotNull
     @NotEmpty
     private String firstName;
