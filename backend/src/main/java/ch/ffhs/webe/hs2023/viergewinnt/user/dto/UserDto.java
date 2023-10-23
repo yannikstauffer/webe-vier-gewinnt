@@ -7,13 +7,13 @@ import lombok.Data;
 @Data
 @Builder
 public class UserDto {
-    private int userId;
+    private int id;
     private String firstName;
     private String lastName;
 
     public static UserDto of(final User user) {
         return UserDto.builder()
-                .userId(user.getId())
+                .id(user.getId())
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
                 .build();

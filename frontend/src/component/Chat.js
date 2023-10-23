@@ -53,7 +53,6 @@ const Chat = ({ userId }) => {
   const [tab, setTab] = useState("LOBBY");
   const [chatState, setChatState] = useState({
     text: "",
-    senderId: userId,
     receiverId: tab,
   });
 
@@ -88,7 +87,6 @@ const Chat = ({ userId }) => {
 
       let newMessage = {
         text: chatState.text,
-        sender: chatState.senderId,
         receiver: receiver,
       };
       console.log("sending message", newMessage);
@@ -111,13 +109,13 @@ const Chat = ({ userId }) => {
 
   const getMessageStyles = (message) => {
     let baseStyles = classes.message
-    if(message.sender.id === chatState.senderId) return classes.message + " self";
+    if(message.sender.id === userId) return classes.message + " self";
     return baseStyles;
   };
 
   return (
     <div className={classes.layout}>
-      <h1>Chat</h1>
+      <h2>Chat</h2>
       <ul className={classes.history}>
         {lobbyMessages.map((message, index) => (
           <li key={index} className={getMessageStyles(message)}>{message.text}</li>

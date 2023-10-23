@@ -7,13 +7,13 @@ import ch.ffhs.webe.hs2023.viergewinnt.user.model.User;
 import java.util.List;
 
 public interface GameService {
-    Game createGame(User creator);
+    Game createGame(User currentUser);
 
     List<Game> getAllGames();
 
-    Game joinGame(GameRequestDto request);
+    Game joinGame(GameRequestDto request, final User currentUser);
 
-    void leftGame(GameRequestDto request);
+    void leftGame(GameRequestDto request, final User currentUser);
 
     void deleteAllGames();
 }

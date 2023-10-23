@@ -129,7 +129,7 @@ const useStyles = createUseStyles({
 });
 
 function App() {
-  const classes = useStyles(theme);
+  useStyles(theme);
 
   const [userId, setUserId] = useState(Math.floor(Math.random() * 1000));
   const [isLoading, setLoading] = useState(true);
@@ -152,6 +152,7 @@ function App() {
         return response.json();
       })
       .then((data) => {
+        console.log("Current user id:", data);
         setUserId(data);
       })
       .catch((error) => {
@@ -196,8 +197,6 @@ function App() {
               </a>
             </div>
             <Routes>
-              // todo: userId wird noch von Math generiert. Richtige id muss
-              noch gesendet werden.
               <Route path="/" element={<Lobby userId={userId} />} />
               <Route path="/game/:gameId" element={<Game userId={userId} />} />
             </Routes>

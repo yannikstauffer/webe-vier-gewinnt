@@ -10,9 +10,10 @@ const Lobby = ({userId}) => {
 
     useSubscription("/topic/lobby/games/create", (message) => {
         const newGame = JSON.parse(message.body);
+        console.log("Received payload newGame:", newGame);
         setGames((oldGames) => [...oldGames, newGame]);
 
-        if (newGame.userOne.id === userId) {
+        if (newGame.userOne?.id === userId) {
             navigate(`/game/${newGame.id}`, {state: {prevPath: location.pathname}});
         }
     });
@@ -26,7 +27,7 @@ const Lobby = ({userId}) => {
     useSubscription("/topic/lobby/games/joined", (message) => {
         const joinedGame = JSON.parse(message.body);
 
-        if (joinedGame.userTwo.id === userId) {
+        if (joinedGame.userTwo?.id === userId) {
             navigate(`/game/${joinedGame.id}`, {state: {prevPath: location.pathname}});
         }
     });
@@ -45,15 +46,13 @@ const Lobby = ({userId}) => {
         if (prevPath && prevPath.startsWith('/game/')) {
             console.log("Spiel wurde verlassen.");
 
-            const gameId = prevPath.split("/")[2];
+            const gameId = +prevPath.split("/")[2];
 
             if (stompClient && stompClient.connected) {
                 stompClient.publish({
                     destination: "/4gewinnt/games/left",
                     body: JSON.stringify({
-                        game: {
-                            id: gameId,
-                        },
+                        gameId: gameId,
                     }),
                 });
             }
@@ -68,8 +67,6 @@ const Lobby = ({userId}) => {
             console.log("Requesting to create a new game");
             stompClient.publish({
                 destination: "/4gewinnt/games/create",
-                userId: userId,
-                body: JSON.stringify(gameRequest),
             });
         }
     };
@@ -77,14 +74,11 @@ const Lobby = ({userId}) => {
     const joinGame = (gameId) => {
         if (stompClient) {
             const joinRequest = {
-                game: {
-                    id: gameId,
-                },
+                gameId: gameId,
             };
             console.log("Requesting to join game with ID:", gameId);
             stompClient.publish({
                 destination: "/4gewinnt/games/join",
-                userId: userId,
                 body: JSON.stringify(joinRequest),
             });
         }
@@ -101,7 +95,7 @@ const Lobby = ({userId}) => {
 
     return (
         <div>
-            <h1>Lobby</h1>
+            <h2>Lobby</h2>
             <button onClick={createGame}>Neues Spiel erstellen</button>
             <button onClick={deleteAllGames}>Liste löschen</button>
             <ul>

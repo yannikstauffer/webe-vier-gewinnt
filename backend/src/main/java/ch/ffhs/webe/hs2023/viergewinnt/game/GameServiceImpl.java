@@ -6,7 +6,6 @@ import ch.ffhs.webe.hs2023.viergewinnt.game.dto.GameRequestDto;
 import ch.ffhs.webe.hs2023.viergewinnt.game.model.Game;
 import ch.ffhs.webe.hs2023.viergewinnt.game.repository.GameRepository;
 import ch.ffhs.webe.hs2023.viergewinnt.game.values.GameState;
-import ch.ffhs.webe.hs2023.viergewinnt.user.UserService;
 import ch.ffhs.webe.hs2023.viergewinnt.user.model.User;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,20 +19,18 @@ import java.util.List;
 public class GameServiceImpl implements GameService {
 
     private final GameRepository gameRepository;
-    private final UserService userService;
 
     @Autowired
-    public GameServiceImpl(final GameRepository gameRepository, final UserService userService) {
+    public GameServiceImpl(final GameRepository gameRepository) {
         this.gameRepository = gameRepository;
-        this.userService = userService;
     }
 
     @Override
-    public Game createGame(final User creator) {
+    public Game createGame(final User currentUser) {
         final Game newGame = new Game();
         newGame.setStatus(GameState.WAITING_FOR_PLAYERS);
 
-        newGame.setUserOne(creator);
+        newGame.setUserOne(currentUser);
 
         final Game savedGame = this.gameRepository.save(newGame);
         log.debug("Saved new game with ID: " + savedGame.getId());
@@ -52,15 +49,15 @@ public class GameServiceImpl implements GameService {
     }
 
     @Override
-    public Game joinGame(final GameRequestDto request) {
-        final Game game = this.gameRepository.findById(request.getGame().getId())
+    public Game joinGame(final GameRequestDto request, final User currentUser) {
+        final Game game = this.gameRepository.findById(request.getGameId())
                 .orElseThrow(() -> VierGewinntException.of(ErrorCode.GAME_NOT_FOUND, "Spiel nicht gefunden!"));
 
         if (game.isFull()) {
             throw VierGewinntException.of(ErrorCode.GAME_FULL, "Das Spiel ist bereits voll!");
         }
 
-        game.setUserTwo(this.userService.getCurrentlyAuthenticatedUser());
+        game.setUserTwo(currentUser);
         game.setStatus(GameState.IN_PROGRESS);
         this.gameRepository.save(game);
 
@@ -68,13 +65,13 @@ public class GameServiceImpl implements GameService {
     }
 
     @Override
-    public void leftGame(final GameRequestDto request) {
-        final Game game = this.gameRepository.findById(request.getGame().getId())
+    public void leftGame(final GameRequestDto request, final User currentUser) {
+        final Game game = this.gameRepository.findById(request.getGameId())
                 .orElseThrow(() -> VierGewinntException.of(ErrorCode.GAME_NOT_FOUND, "Spiel nicht gefunden!"));
 
-        if (game.getUserOne().getId() == this.userService.getCurrentlyAuthenticatedUser().getId()) {
-            this.gameRepository.deleteById(request.getGame().getId());
-        } else if (game.getUserTwo().getId() == this.userService.getCurrentlyAuthenticatedUser().getId()) {
+        if (game.getUserOne().getId() == currentUser.getId()) {
+            this.gameRepository.delete(game);
+        } else if (game.getUserTwo().getId() == currentUser.getId()) {
             game.setUserTwo(null);
             game.setStatus(GameState.WAITING_FOR_PLAYERS);
             this.gameRepository.save(game);

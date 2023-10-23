@@ -5,18 +5,28 @@ import ch.ffhs.webe.hs2023.viergewinnt.user.dto.UserDto;
 import lombok.Builder;
 import lombok.Data;
 
+import java.util.Collection;
+import java.util.List;
+
 @Data
 @Builder
 public class GameDto {
     private int id;
-    private UserDto playerOne;
-    private UserDto playerTwo;
+    private UserDto userOne;
+    private UserDto userTwo;
 
     public static GameDto of(final Game game) {
-        return GameDto.builder()
-                .id(game.getId())
-                .playerOne(UserDto.of(game.getUserOne()))
-                .playerTwo(UserDto.of(game.getUserTwo()))
-                .build();
+        final var builder =
+                GameDto.builder()
+                        .id(game.getId())
+                        .userOne(UserDto.of(game.getUserOne()));
+        if (game.getUserTwo() != null) {
+            builder.userTwo(UserDto.of(game.getUserTwo()));
+        }
+        return builder.build();
+    }
+
+    public static List<GameDto> of(final Collection<Game> games) {
+        return games.stream().map(GameDto::of).toList();
     }
 }
