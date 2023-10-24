@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from "react";
 import Lobby from "./component/Lobby";
 import Chat from "./component/Chat";
-import Game from './component/Game';
+import Game from "./component/Game";
 import ErrorHandler from "./component/ErrorHandler";
 import { StompSessionProvider } from "react-stomp-hooks";
 import { createUseStyles, ThemeProvider } from "react-jss";
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
-
-const APP_URL = "http://localhost:9000/4gewinnt";
-const WS_URL = APP_URL + "/ws";
+const BASE_URL = "http://localhost:9000";
+const VIERGEWINNT_URL = BASE_URL + "/4gewinnt";
+const WS_URL = VIERGEWINNT_URL + "/ws";
 
 const theme = {
   accentBackgroundColor: "rgb(240 240 240)",
@@ -88,6 +88,10 @@ const useStyles = createUseStyles({
       extend: buttonBase(theme),
     },
 
+    "a.button": {
+      extend: buttonBase(theme),
+    },
+
     input: {
       '[type="text"], [type="password"], [type="number"]': {
         extend: textInputBase,
@@ -116,6 +120,7 @@ const useStyles = createUseStyles({
     ".layout": {
       display: "grid",
       gridTemplateColumns: "2fr 1fr",
+      gridTemplateRows: "min-content auto",
       margin: "0 auto",
       height: "100%",
       gridGap: "5px",
@@ -139,23 +144,24 @@ function App() {
   }, []);
 
   useEffect(() => {
-    fetch(APP_URL + "/currentUserId")
-        .then(response => {
-          if (!response.ok) {
-            throw new Error("Network response was not ok");
-          }
-          return response.json();
-        })
-        .then(data => {
-          setUserId(data);
-        })
-        .catch(error => {
-          console.error("There was a problem with the fetch operation:", error);
-        });
+    fetch(VIERGEWINNT_URL + "/currentUserId")
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+        return response.json();
+      })
+      .then((data) => {
+        console.log("Current user id:", data);
+        setUserId(data);
+      })
+      .catch((error) => {
+        console.error("There was a problem with the fetch operation:", error);
+      });
   }, []);
 
   const loadCsrfStompHeaders = () => {
-    return fetch(APP_URL + "/csrf")
+    return fetch(VIERGEWINNT_URL + "/csrf")
       .then((response) => {
         if (response.ok) {
           return response.json();
@@ -170,8 +176,7 @@ function App() {
       });
   };
 
-  return isLoading ?
-  (
+  return isLoading ? (
     <div>L&auml;dt...</div>
   ) : (
     <ThemeProvider theme={theme}>
@@ -183,8 +188,15 @@ function App() {
         <ErrorHandler />
         <Router>
           <div className="layout">
+            <div>
+              <h1>4 gewinnt</h1>
+            </div>
+            <div>
+              <a className="button" href={BASE_URL + "/logout"}>
+                Logout
+              </a>
+            </div>
             <Routes>
-              // todo: userId wird noch von Math generiert. Richtige id muss noch gesendet werden.
               <Route path="/" element={<Lobby userId={userId} />} />
               <Route path="/game/:gameId" element={<Game userId={userId} />} />
             </Routes>

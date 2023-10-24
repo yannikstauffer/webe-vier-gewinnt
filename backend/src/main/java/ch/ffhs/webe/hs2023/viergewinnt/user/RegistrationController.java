@@ -1,7 +1,7 @@
 package ch.ffhs.webe.hs2023.viergewinnt.user;
 
 import ch.ffhs.webe.hs2023.viergewinnt.base.VierGewinntException;
-import ch.ffhs.webe.hs2023.viergewinnt.user.dto.UserDto;
+import ch.ffhs.webe.hs2023.viergewinnt.user.dto.LoginDto;
 import ch.ffhs.webe.hs2023.viergewinnt.user.model.User;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -28,20 +28,20 @@ public class RegistrationController {
 
     @GetMapping("/registration")
     public String showRegistrationForm(final WebRequest request, final Model model) {
-        final UserDto userDto = new UserDto();
-        model.addAttribute("user", userDto);
+        final LoginDto loginDto = new LoginDto();
+        model.addAttribute("user", loginDto);
         return "registration";
     }
 
     @PostMapping("/processRegistration")
     public ModelAndView registerUserAccount(
-            @ModelAttribute("user") @Valid final UserDto userDto,
+            @ModelAttribute("user") @Valid final LoginDto loginDto,
             final ModelAndView mav,
             final HttpServletRequest request,
             final Errors errors) {
 
         try {
-            final User registered = this.userService.registerNewUserAccount(userDto);
+            final User registered = this.userService.registerNewUserAccount(loginDto);
             log.debug("Registered new user with email: {}", registered.getEmail());
         } catch (final VierGewinntException exception) {
             mav.addObject("message", exception.getErrorCode());

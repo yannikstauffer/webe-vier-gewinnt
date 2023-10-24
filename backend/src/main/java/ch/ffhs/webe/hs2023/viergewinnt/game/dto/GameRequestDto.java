@@ -1,14 +1,15 @@
 package ch.ffhs.webe.hs2023.viergewinnt.game.dto;
 
-import ch.ffhs.webe.hs2023.viergewinnt.chat.dto.MessageUserDto;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class GameRequestDto {
-    private GameDto game;
-    private MessageUserDto userOne;
-    private MessageUserDto userTwo;
+    private Integer gameId;
 }
 

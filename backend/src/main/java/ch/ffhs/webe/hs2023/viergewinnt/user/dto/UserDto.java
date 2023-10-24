@@ -1,32 +1,22 @@
 package ch.ffhs.webe.hs2023.viergewinnt.user.dto;
 
-import ch.ffhs.webe.hs2023.viergewinnt.user.validation.PasswordMatches;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
+import ch.ffhs.webe.hs2023.viergewinnt.user.model.User;
+import lombok.Builder;
 import lombok.Data;
 
-import java.io.Serializable;
-
 @Data
-@PasswordMatches
-public class UserDto implements Serializable {
-    @NotNull
-    @NotEmpty
+@Builder
+public class UserDto {
+    private int id;
     private String firstName;
-
-    @NotNull
-    @NotEmpty
     private String lastName;
 
-    @NotNull
-    @NotEmpty
-    @Email
-    private String email;
-
-    @NotNull
-    @NotEmpty
-    private String password;
-    private String matchingPassword;
+    public static UserDto of(final User user) {
+        return UserDto.builder()
+                .id(user.getId())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .build();
+    }
 
 }
