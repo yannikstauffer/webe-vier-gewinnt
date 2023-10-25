@@ -60,7 +60,7 @@ const textInputBase = {
   lineHeight: "1.1",
 };
 
-const useStyles = createUseStyles({
+const useStyles = createUseStyles(theme=> ({
   "@global": {
     body: {
       margin: "0",
@@ -126,7 +126,7 @@ const useStyles = createUseStyles({
       gridGap: "5px",
     },
   },
-});
+}));
 
 function App() {
   useStyles(theme);
