@@ -26,8 +26,8 @@ public class ChatController {
         this.userService = userService;
     }
 
-    @MessageMapping("/message")
-    @SendTo("/topic/lobby/chat")
+    @MessageMapping(MessageSources.MESSAGE)
+    @SendTo(Topics.LOBBY_CHAT)
     public OutboundMessageDto receivePublicMessage(@Payload final InboundMessageDto message, final Principal user) {
         final var sender = this.userService.getUserByEmail(user.getName());
 
