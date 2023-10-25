@@ -9,11 +9,11 @@ import ch.ffhs.webe.hs2023.viergewinnt.user.values.Role;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -64,25 +64,31 @@ class UserServiceImpl implements UserService {
                         "User with email " + email + " not found"));
     }
 
-    /**
-     * Ruft den aktuell authentifizierten Benutzer ab
-     *
-     * @return User
-     */
-    @Override
-    public User getCurrentlyAuthenticatedUser() {
-        final String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        return this.getUserByEmail(username);
-    }
-
     @Override
     public Optional<User> findUserById(final int id) {
         return this.userRepository.findById(id);
     }
 
+    @Override
+    public void setSessionId(final String email, final String sessionId) throws VierGewinntException {
+        final var user = this.getUserByEmail(email);
+        user.addSession(sessionId);
+        this.userRepository.save(user);
+    }
+
+    @Override
+    public void removeSessionId(final String email, final String sessionId) throws VierGewinntException {
+        final var user = this.getUserByEmail(email);
+        user.removeSession(sessionId);
+        this.userRepository.save(user);
+    }
+
+    @Override
+    public List<User> getAllWithSession() {
+        return this.userRepository.findWithSession();
+    }
+
     private boolean emailExists(final String email) {
         return this.userRepository.findByEmail(email).isPresent();
     }
-
-
 }
