@@ -1,7 +1,10 @@
 package ch.ffhs.webe.hs2023.viergewinnt.websocket;
 
+import ch.ffhs.webe.hs2023.viergewinnt.chat.ChatService;
+import ch.ffhs.webe.hs2023.viergewinnt.chat.dto.ChatsDto;
 import ch.ffhs.webe.hs2023.viergewinnt.user.UserService;
 import ch.ffhs.webe.hs2023.viergewinnt.user.dto.UsersDto;
+import ch.ffhs.webe.hs2023.viergewinnt.websocket.values.Queues;
 import ch.ffhs.webe.hs2023.viergewinnt.websocket.values.Topics;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,12 +24,15 @@ import java.util.Objects;
 @Component
 public class StompEventListener implements ApplicationListener<SessionConnectEvent> {
     private final UserService userService;
-    private final MessageService messageService;
+    private final ChatService chatService;
+    private final StompMessageService stompMessageService;
+
 
     @Autowired
-    public StompEventListener(final UserService userService, final MessageService messageService) {
+    public StompEventListener(final StompMessageService messageService, final UserService userService, final ChatService chatService) {
         this.userService = userService;
-        this.messageService = messageService;
+        this.stompMessageService = messageService;
+        this.chatService = chatService;
     }
 
     @Override
@@ -70,8 +76,12 @@ public class StompEventListener implements ApplicationListener<SessionConnectEve
         final var userEmail = this.getUserName(event);
         final var currentUser = this.userService.getUserByEmail(userEmail);
         final var users = this.userService.getAllWithSession();
+        this.stompMessageService.send(Topics.USERS, UsersDto.of(currentUser, users));
 
-        this.messageService.send(Topics.USERS, UsersDto.of(currentUser, users));
+        final var publicMessages = this.chatService.getPublicMessages();
+        final var privateMessages = this.chatService.getPrivateMessages(currentUser);
+        final var chats = ChatsDto.of(privateMessages, publicMessages);
+        this.stompMessageService.sendToUser(Queues.CHATS, currentUser, chats);
     }
 
 
