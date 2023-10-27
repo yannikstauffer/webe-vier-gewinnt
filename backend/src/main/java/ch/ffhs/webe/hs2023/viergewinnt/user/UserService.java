@@ -4,6 +4,7 @@ import ch.ffhs.webe.hs2023.viergewinnt.base.VierGewinntException;
 import ch.ffhs.webe.hs2023.viergewinnt.user.dto.LoginDto;
 import ch.ffhs.webe.hs2023.viergewinnt.user.model.User;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface UserService {
@@ -11,9 +12,13 @@ public interface UserService {
 
     User getUserById(final int id) throws VierGewinntException;
 
-    User getUserByEmail(final String id) throws VierGewinntException;
+    User getUserByEmail(final String email) throws VierGewinntException;
 
     Optional<User> findUserById(final int id);
 
-    User getCurrentlyAuthenticatedUser() throws VierGewinntException;
+    List<User> getAllWithSession();
+
+    void setSessionId(final String email, final String sessionId) throws VierGewinntException;
+
+    void removeSessionId(final String email, String sessionId) throws VierGewinntException;
 }

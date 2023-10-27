@@ -7,6 +7,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.security.Principal;
+
 @Slf4j
 @RestController
 public class UserController {
@@ -14,16 +16,16 @@ public class UserController {
     private final UserService userService;
 
     @Autowired
-    public UserController(UserService userService) {
+    public UserController(final UserService userService) {
         this.userService = userService;
     }
 
     @RequestMapping("/4gewinnt/currentUserId")
-    public ResponseEntity<Integer> getCurrentUserId() {
+    public ResponseEntity<Integer> getCurrentUserId(final Principal user) {
         try {
-            User currentUser = userService.getCurrentlyAuthenticatedUser();
+            final User currentUser = this.userService.getUserByEmail(user.getName());
             return ResponseEntity.ok(currentUser.getId());
-        } catch (Exception e) {
+        } catch (final Exception e) {
             log.error("Error fetching current user ID", e);
             return ResponseEntity.badRequest().build();
         }

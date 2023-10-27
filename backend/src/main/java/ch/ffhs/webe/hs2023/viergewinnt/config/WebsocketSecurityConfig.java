@@ -15,7 +15,7 @@ public class WebsocketSecurityConfig {
         messages.nullDestMatcher().authenticated()
                 .simpDestMatchers("/4gewinnt/**").authenticated()
                 .simpSubscribeDestMatchers("/user/queue/error").permitAll()
-                .simpSubscribeDestMatchers("/user/queue/**", "/topic/lobby/**").authenticated()
+                .simpSubscribeDestMatchers("/user/queue/**", "/topic/lobby/**", "/topic/users/**").authenticated()
                 .anyMessage().denyAll();
 
         return messages.build();
