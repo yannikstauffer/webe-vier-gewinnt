@@ -80,17 +80,25 @@ const Chat = ({ userId }) => {
   });
 
   const onLobbyMessageReceived = (payload) => {
-    console.log("lobby message received", payload);
+    console.debug("lobby message received", payload);
     let payloadData = JSON.parse(payload.body);
 
-    lobbyMessages.push(payloadData);
-    setLobbyMessages([...lobbyMessages]);
+    addMessageToLobby(payloadData);
   };
 
   const onPrivateMessageReceived = (payload) => {
-    console.log("private message received", payload);
+    console.debug("private message received", payload);
     let privateMessagePayload = JSON.parse(payload.body);
 
+    addMessageToPrivateChat(privateMessagePayload);
+  };
+
+  const addMessageToLobby = (lobbyMessagePayload) => {
+    lobbyMessages.push(lobbyMessagePayload);
+    setLobbyMessages([...lobbyMessages]);
+  }
+
+  const addMessageToPrivateChat = (privateMessagePayload) => {
     let chatPartner = privateMessagePayload.sender.id === userId ?
         privateMessagePayload.receiver : privateMessagePayload.sender;
 
@@ -100,17 +108,23 @@ const Chat = ({ userId }) => {
     list.push(privateMessagePayload);
     privateChats.set(chatPartner.id, list);
     setPrivateChats(new Map(privateChats));
-  };
-
+  }
   const onUsersReceived = (payload) => {
-    console.log("users received", payload);
+    console.debug("users received", payload);
     let usersPayload = JSON.parse(payload.body);
 
     usersPayload.users.forEach(addUser);
   };
 
+  const onChatsReceived = (payload) => {
+    console.debug("chats received", payload);
+    let chatsPayload = JSON.parse(payload.body);
+
+    chatsPayload.privateMessages.forEach(addMessageToPrivateChat);
+    chatsPayload.lobbyMessages.forEach(addMessageToLobby);
+  };
+
   const addUser = (user) => {
-    console.trace("Storing user", user);
     privateChats.has(user.id) || privateChats.set(user.id, []);
     users.set(user.id, user);
 
@@ -119,6 +133,7 @@ const Chat = ({ userId }) => {
   };
 
   useSubscription("/topic/users", onUsersReceived);
+  useSubscription("/user/queue/chats", onChatsReceived);
   useSubscription("/topic/lobby/chat", onLobbyMessageReceived);
   useSubscription("/user/queue/chat", onPrivateMessageReceived);
 

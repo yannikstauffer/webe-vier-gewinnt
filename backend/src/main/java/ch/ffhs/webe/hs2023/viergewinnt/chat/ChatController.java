@@ -5,7 +5,7 @@ import ch.ffhs.webe.hs2023.viergewinnt.base.VierGewinntException;
 import ch.ffhs.webe.hs2023.viergewinnt.chat.dto.InboundMessageDto;
 import ch.ffhs.webe.hs2023.viergewinnt.chat.dto.OutboundMessageDto;
 import ch.ffhs.webe.hs2023.viergewinnt.user.UserService;
-import ch.ffhs.webe.hs2023.viergewinnt.websocket.MessageService;
+import ch.ffhs.webe.hs2023.viergewinnt.websocket.StompMessageService;
 import ch.ffhs.webe.hs2023.viergewinnt.websocket.values.MessageSources;
 import ch.ffhs.webe.hs2023.viergewinnt.websocket.values.Queues;
 import ch.ffhs.webe.hs2023.viergewinnt.websocket.values.Topics;
@@ -23,12 +23,12 @@ import java.security.Principal;
 public class ChatController {
     private final ChatService chatService;
     private final UserService userService;
-    private final MessageService messageService;
+    private final StompMessageService messageService;
 
     @Autowired
     public ChatController(final ChatService chatService,
                           final UserService userService,
-                          final MessageService messageService) {
+                          final StompMessageService messageService) {
         this.chatService = chatService;
         this.userService = userService;
         this.messageService = messageService;

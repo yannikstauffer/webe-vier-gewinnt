@@ -8,11 +8,11 @@ import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
-public class MessageService {
+public class StompMessageService {
     private final SimpMessagingTemplate simpMessagingTemplate;
 
     @Autowired
-    public MessageService(final SimpMessagingTemplate simpMessagingTemplate) {
+    public StompMessageService(final SimpMessagingTemplate simpMessagingTemplate) {
         this.simpMessagingTemplate = simpMessagingTemplate;
     }
 

@@ -25,7 +25,7 @@ public class WebsocketConfig implements WebSocketMessageBrokerConfigurer {
         registry.enableSimpleBroker(
                 Topics.LOBBY_CHAT, Topics.LOBBY_GAMES, Topics.LOBBY_GAMES + "/*",
                 Topics.USERS,
-                Queues.CHAT, Queues.ERROR);
+                Queues.CHAT, Queues.CHATS, Queues.ERROR);
         registry.setUserDestinationPrefix("/user");
     }
 }

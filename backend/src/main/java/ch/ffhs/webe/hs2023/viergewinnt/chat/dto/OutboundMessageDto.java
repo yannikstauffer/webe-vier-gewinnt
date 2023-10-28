@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @Builder
@@ -30,5 +31,11 @@ public class OutboundMessageDto {
         message.getReceiver().ifPresent(user -> builder.receiver(UserDto.of(user)));
 
         return builder.build();
+    }
+
+    public static List<OutboundMessageDto> of(final List<Message> messages) {
+        return messages.stream()
+                .map(OutboundMessageDto::of)
+                .toList();
     }
 }
