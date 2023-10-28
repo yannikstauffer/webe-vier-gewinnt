@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 @Service
@@ -62,18 +61,6 @@ class UserServiceImpl implements UserService {
                 .orElseThrow(() -> VierGewinntException.of(
                         ErrorCode.USER_NOT_FOUND,
                         "User with email " + email + " not found"));
-    }
-
-    @Override
-    public Optional<User> findUserById(final int id) {
-        return this.userRepository.findById(id);
-    }
-
-    @Override
-    public void setSessionId(final String email, final String sessionId) throws VierGewinntException {
-        final var user = this.getUserByEmail(email);
-        user.addSession(sessionId);
-        this.userRepository.save(user);
     }
 
     @Override
