@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useStompClient, useSubscription } from "react-stomp-hooks";
 import { createUseStyles, useTheme } from "react-jss";
+import { useTranslation } from 'react-i18next';
 
 const useStyles = createUseStyles(theme=> ({
     layout: {
@@ -66,6 +67,7 @@ const useStyles = createUseStyles(theme=> ({
 const LOBBY_TAB = "LOBBY";
 
 const Chat = ({ userId }) => {
+  const { t, i18n } = useTranslation();
   const theme = useTheme();
   const classes = useStyles(theme);
   const stompClient = useStompClient();
@@ -226,7 +228,7 @@ const Chat = ({ userId }) => {
       <div className="flex-row">
         <textarea
           type="text"
-          placeholder="Hier könnte ihre Nachricht stehen..."
+          placeholder={t('chat.placeholder')}
           value={chatState.text}
           onChange={handleMessageInput}
         />

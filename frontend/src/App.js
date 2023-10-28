@@ -6,6 +6,8 @@ import ErrorHandler from "./component/ErrorHandler";
 import { StompSessionProvider } from "react-stomp-hooks";
 import { createUseStyles, ThemeProvider } from "react-jss";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import './i18n';
 
 const BASE_URL = "http://localhost:9000";
 const VIERGEWINNT_URL = BASE_URL + "/4gewinnt";
@@ -40,8 +42,8 @@ const buttonBase = (theme) => ({
   backgroundColor: theme.accentBackgroundColor,
 
   "&:hover": {
-    backgroundColor: theme.accentColor,
-    color: theme.accentBackgroundColor,
+    backgroundColor: theme.accentHighlightBackgroundColor,
+    color: theme.accentHighlightColor,
     cursor: "pointer",
   },
 });
@@ -129,7 +131,8 @@ const useStyles = createUseStyles(theme=> ({
 }));
 
 function App() {
-  useStyles(theme);
+  const classes = useStyles(theme);
+  const { t, i18n } = useTranslation();
 
   const [userId, setUserId] = useState(Math.floor(Math.random() * 1000));
   const [isLoading, setLoading] = useState(true);
@@ -175,6 +178,9 @@ function App() {
         };
       });
   };
+  const changeLanguage = (language) => {
+    i18n.changeLanguage(language);
+  };
 
   return isLoading ? (
     <div>L&auml;dt...</div>
@@ -191,8 +197,14 @@ function App() {
             <div>
               <h1>4 gewinnt</h1>
             </div>
-            <div>
-              <a className="button" href={BASE_URL + "/logout"}>
+            <div className="flex-row">
+              <button className="button" onClick={() => changeLanguage('de')}>
+                DE
+              </button>
+              <button className="button" onClick={() => changeLanguage('en')}>
+                EN
+              </button>
+                <a className="button" href={BASE_URL + "/logout"}>
                 Logout
               </a>
             </div>
