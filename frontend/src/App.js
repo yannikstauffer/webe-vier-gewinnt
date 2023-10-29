@@ -131,7 +131,7 @@ const useStyles = createUseStyles(theme=> ({
 }));
 
 function App() {
-  const classes = useStyles(theme);
+  useStyles(theme);
   const { t, i18n } = useTranslation();
 
   const [userId, setUserId] = useState(Math.floor(Math.random() * 1000));
@@ -183,7 +183,7 @@ function App() {
   };
 
   return isLoading ? (
-    <div>L&auml;dt...</div>
+    <div>{t('app.loading')}</div>
   ) : (
     <ThemeProvider theme={theme}>
       <StompSessionProvider
@@ -195,7 +195,7 @@ function App() {
         <Router>
           <div className="layout">
             <div>
-              <h1>4 gewinnt</h1>
+              <h1>{t('app.title')}</h1>
             </div>
             <div className="flex-row">
               <button className="button" onClick={() => changeLanguage('de')}>
@@ -205,7 +205,7 @@ function App() {
                 EN
               </button>
                 <a className="button" href={BASE_URL + "/logout"}>
-                Logout
+                  {t('app.action.logout')}
               </a>
             </div>
             <Routes>

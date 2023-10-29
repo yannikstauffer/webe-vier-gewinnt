@@ -206,14 +206,14 @@ const Chat = ({ userId }) => {
 
   return (
     <div className={classes.layout}>
-      <h2>Chat</h2>
+      <h2>{t('chat.title')}</h2>
       <ul className={classes.tabs}>
         <li
           key={LOBBY_TAB}
           className={getTabStyles(LOBBY_TAB)}
           onClick={() => setTab(LOBBY_TAB)}
         >
-          Lobby
+          {t('chat.user.lobbyName')}
         </li>
         {getUserTabs()}
       </ul>
@@ -233,7 +233,7 @@ const Chat = ({ userId }) => {
           onChange={handleMessageInput}
         />
         <button type="button" onClick={sendMessage}>
-          Senden
+          {t('chat.send')}
         </button>
       </div>
     </div>
