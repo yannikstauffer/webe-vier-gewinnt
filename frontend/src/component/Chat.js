@@ -7,7 +7,7 @@ const useStyles = createUseStyles(theme=> ({
     layout: {
       display: "grid",
       gridTemplateRows: "auto  auto 1fr auto",
-      gridGap: "5px",
+      gap: "5px",
       margin: "0 auto",
       height: "100%",
       overflowY: "scroll",
@@ -17,7 +17,7 @@ const useStyles = createUseStyles(theme=> ({
       display: "flex",
       flexFlow: "column nowrap",
       justifyContent: "flex-start",
-      gridGap: "10px",
+      gap: "10px",
 
       margin: 0,
       listStyle: "none",
@@ -30,22 +30,35 @@ const useStyles = createUseStyles(theme=> ({
 
     tabs: {
       display: "flex",
-      flexFlow: "row nowrap",
+      flexFlow: "row wrap",
       justifyContent: "flex-start",
-      gridGap: "2px",
+      gap: "5px",
+      padding: 0,
+      maxHeight: "5.5em",
 
       margin: 0,
       listStyle: "none",
-      overflowX: "scroll",
+      overflowY: "scroll",
     },
 
     tab: {
+      cursor: "pointer",
       display: "flex",
+      flexGrow: 1,
+        flexShrink: 1,
+        flexBasis: "auto",
+        justifyContent: "center",
+        alignItems: "center",
       listStyleType: "none",
       border: "1px solid #ccc",
       borderRadius: "5px",
       padding: "5px",
-      width: "80%",
+      minWidth: "6em",
+      height: "1.2em",
+
+      whiteSpace: "nowrap",
+      textOverflow: "ellipsis",
+      overflow: "hidden",
       "&.selected": {
         backgroundColor: theme.accentBackgroundColor,
       },

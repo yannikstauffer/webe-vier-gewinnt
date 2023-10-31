@@ -18,5 +18,6 @@ dist/
 .env
 .DS_Store
 coverage/
+.idea/
 
 build/
