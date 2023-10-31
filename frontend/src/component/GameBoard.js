@@ -1,4 +1,5 @@
 import React, {useState} from 'react';
+import {useStompClient, useSubscription} from "react-stomp-hooks";
 import './GameBoard.css';
 
 const ROWS = 6;
@@ -11,17 +12,29 @@ const createEmptyBoard = () => {
     return Array(ROWS).fill(null).map(() => Array(COLUMNS).fill(EMPTY));
 };
 
-const GameBoard = () => {
-    const [board, setBoard] = useState(createEmptyBoard);
+const GameBoard = ({gameId}) => {
+    const [board, setBoard] = useState(createEmptyBoard());
     const [currentPlayer, setCurrentPlayer] = useState(PLAYER_ONE);
+    const stompClient = useStompClient();
+
+    useSubscription("/user/queue/game", (message) => {
+        const updatedGame = JSON.parse(message.body);
+        console.log("update:" + updatedGame);
+        // Aktualisierung Board und aktuellen Spieler
+    });
 
     const dropDisc = (column) => {
         for (let row = ROWS - 1; row >= 0; row--) {
             if (board[row][column] === EMPTY) {
-                const newBoard = [...board];
-                newBoard[row][column] = currentPlayer;
-                setBoard(newBoard);
-                setCurrentPlayer(currentPlayer === PLAYER_ONE ? PLAYER_TWO : PLAYER_ONE);
+                // Senden der Spielaktion an den Server
+                stompClient.publish({
+                    destination: "/4gewinnt/games/action",
+                    body: JSON.stringify({
+                        gameId: gameId,
+                        column: column,
+                        playerId: currentPlayer,
+                    }),
+                });
                 return;
             }
         }

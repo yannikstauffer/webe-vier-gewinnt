@@ -1,9 +1,13 @@
 package ch.ffhs.webe.hs2023.viergewinnt.game;
 
+import ch.ffhs.webe.hs2023.viergewinnt.game.dto.GameActionDto;
 import ch.ffhs.webe.hs2023.viergewinnt.game.dto.GameDto;
 import ch.ffhs.webe.hs2023.viergewinnt.game.dto.GameRequestDto;
+import ch.ffhs.webe.hs2023.viergewinnt.game.dto.GameStateDto;
 import ch.ffhs.webe.hs2023.viergewinnt.user.UserService;
+import ch.ffhs.webe.hs2023.viergewinnt.websocket.StompMessageService;
 import ch.ffhs.webe.hs2023.viergewinnt.websocket.values.MessageSources;
+import ch.ffhs.webe.hs2023.viergewinnt.websocket.values.Queues;
 import ch.ffhs.webe.hs2023.viergewinnt.websocket.values.Topics;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,13 +25,16 @@ public class GameController {
 
     private final GameService gameService;
     private final UserService userService;
+    private final StompMessageService messageService;
 
     @Autowired
-    public GameController(final GameService gameService, final UserService userService) {
+    public GameController(final GameService gameService, final UserService userService, final StompMessageService messageService) {
         this.gameService = gameService;
         this.userService = userService;
+        this.messageService = messageService;
     }
 
+    //todo: Kommunikation gem Konzept bereinigen
     @MessageMapping(MessageSources.GAMES + "/create")
     @SendTo(Topics.LOBBY_GAMES + "/create")
     public GameDto createGame(final Principal user) {
@@ -53,7 +60,7 @@ public class GameController {
     @SendTo(Topics.LOBBY_GAMES + "/joined")
     public GameDto joinGame(@Payload final GameRequestDto request, final Principal user) {
         final var sender = this.userService.getUserByEmail(user.getName());
-        final var game = this.gameService.joinGame(request, sender);
+        final var game = this.gameService.joinGame(request.getGameId(), sender);
         return GameDto.of(game);
     }
 
@@ -61,11 +68,18 @@ public class GameController {
     @SendTo(Topics.LOBBY_GAMES + "/all")
     public List<GameDto> leftGame(@Payload final GameRequestDto request, final Principal user) {
         final var sender = this.userService.getUserByEmail(user.getName());
-
-        this.gameService.leftGame(request, sender);
-
+        this.gameService.leftGame(request.getGameId(), sender);
         return this.allGames();
     }
+
+    @MessageMapping(MessageSources.GAMES + "/action")
+    public void gameAction(@Payload final GameActionDto request, Principal user) {
+        final var sender = userService.getUserByEmail(user.getName());
+        final var game = gameService.updateGameBoard(request.getGameId(), request.getGameId(), sender);
+
+        this.messageService.sendToUser(Queues.GAME, sender, GameStateDto.of(game, ""));
+    }
+
 
     private List<GameDto> allGames() {
         final var games = this.gameService.getAllGames();

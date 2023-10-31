@@ -2,7 +2,6 @@ package ch.ffhs.webe.hs2023.viergewinnt.game;
 
 import ch.ffhs.webe.hs2023.viergewinnt.base.ErrorCode;
 import ch.ffhs.webe.hs2023.viergewinnt.base.VierGewinntException;
-import ch.ffhs.webe.hs2023.viergewinnt.game.dto.GameRequestDto;
 import ch.ffhs.webe.hs2023.viergewinnt.game.model.Game;
 import ch.ffhs.webe.hs2023.viergewinnt.game.repository.GameRepository;
 import ch.ffhs.webe.hs2023.viergewinnt.game.values.GameState;
@@ -49,8 +48,8 @@ public class GameServiceImpl implements GameService {
     }
 
     @Override
-    public Game joinGame(final GameRequestDto request, final User currentUser) {
-        final Game game = this.gameRepository.findById(request.getGameId())
+    public Game joinGame(final int gameId, final User currentUser) {
+        final Game game = this.gameRepository.findById(gameId)
                 .orElseThrow(() -> VierGewinntException.of(ErrorCode.GAME_NOT_FOUND, "Spiel nicht gefunden!"));
 
         if (game.isFull()) {
@@ -65,8 +64,8 @@ public class GameServiceImpl implements GameService {
     }
 
     @Override
-    public void leftGame(final GameRequestDto request, final User currentUser) {
-        final Game game = this.gameRepository.findById(request.getGameId())
+    public void leftGame(final int gameId, final User currentUser) {
+        final Game game = this.gameRepository.findById(gameId)
                 .orElseThrow(() -> VierGewinntException.of(ErrorCode.GAME_NOT_FOUND, "Spiel nicht gefunden!"));
 
         if (game.getUserOne().getId() == currentUser.getId()) {
@@ -81,5 +80,28 @@ public class GameServiceImpl implements GameService {
     @Override
     public void deleteAllGames() {
         this.gameRepository.deleteAll();
+    }
+
+    @Override
+    public Game updateGameBoard(int gameId, int column, final User currentUser) {
+        final Game game = this.gameRepository.findById(gameId)
+                .orElseThrow(() -> VierGewinntException.of(ErrorCode.GAME_NOT_FOUND, "Spiel nicht gefunden!"));
+
+        // Hier Logik zur Aktualisierung des Boards
+
+        if (isBoardFull(game)) {
+            game.setStatus(GameState.FINISHED);
+        }
+
+        return gameRepository.save(game);
+    }
+
+    @Override
+    public boolean isBoardFull(Game game) {
+        ArrayList<ArrayList<Integer>> board = game.getBoard();
+
+        // Logik ob Board voll ist
+
+        return false;
     }
 }

@@ -13,6 +13,8 @@ public enum ErrorCode {
     INVALID_CREDENTIALS("error.user.invalidCredentials"),
     GAME_NOT_FOUND("error.game.notFound"),
     GAME_FULL("error.game.isFull"),
+    GAMEBOARD_READ_ERROR("error.game.cannotRead"),
+    GAMEBOARD_WRITE_ERROR("error.game.cannotWrite"),
     UNKNOWN("error.unknown");
 
     private final String internationalizedMessageKey;
