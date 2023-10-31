@@ -1,5 +1,6 @@
 package ch.ffhs.webe.hs2023.viergewinnt.config;
 
+import ch.ffhs.webe.hs2023.viergewinnt.websocket.values.MessageSources;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.Message;
@@ -13,9 +14,10 @@ public class WebsocketSecurityConfig {
     @Bean
     public AuthorizationManager<Message<?>> messageAuthorizationManager(final MessageMatcherDelegatingAuthorizationManager.Builder messages) {
         messages.nullDestMatcher().authenticated()
+                .simpDestMatchers("/4gewinnt" + MessageSources.GAMES + "/deleteAll").hasRole("ADMIN")
                 .simpDestMatchers("/4gewinnt/**").authenticated()
-                .simpSubscribeDestMatchers("/user/queue/error").permitAll()
-                .simpSubscribeDestMatchers("/user/queue/**", "/topic/lobby/**", "/topic/users/**").authenticated()
+                .simpSubscribeDestMatchers("/topic/system",
+                        "/user/queue/**", "/topic/lobby/**", "/topic/users/**").authenticated()
                 .anyMessage().denyAll();
 
         return messages.build();

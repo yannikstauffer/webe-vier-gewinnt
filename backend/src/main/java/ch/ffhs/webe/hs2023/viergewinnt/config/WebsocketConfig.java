@@ -24,7 +24,7 @@ public class WebsocketConfig implements WebSocketMessageBrokerConfigurer {
         // Für ../games/all etc. muss zustätzlich /topic/lobby/games eingefügt werden sonst geht es nicht -> allenfalls Bug bei dieser Version von Spring?
         registry.enableSimpleBroker(
                 Topics.LOBBY_CHAT, Topics.LOBBY_GAMES, Topics.LOBBY_GAMES + "/*",
-                Topics.USERS,
+                Topics.USERS, Topics.SYSTEM,
                 Queues.CHAT, Queues.CHATS, Queues.ERROR);
         registry.setUserDestinationPrefix("/user");
     }

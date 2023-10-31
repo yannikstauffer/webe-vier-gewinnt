@@ -1,0 +1,49 @@
+{
+  "app": {
+    "title": "4 gewinnt",
+    "action": {
+      "logout": "Abmelden"
+    },
+    "loading": "Lädt..."
+  },
+  "chat": {
+    "title": "Chat",
+    "placeholder" : "Hier könnte ihre Nachricht stehen...",
+    "send": "Senden",
+    "user": {
+      "lobbyName": "Lobby"
+    }
+  },
+  "lobby": {
+    "title": "Lobby",
+    "createNewGame": "Neues Spiel erstellen",
+    "deleteList": "Liste löschen"
+  },
+  "game": {
+    "title": "Spiel",
+    "label": {
+      "name": "Spiel",
+      "creator": "Ersteller"
+    }
+  },
+  "error": {
+    "label": {
+      "anErrorOccurred": "Es ist ein Fehler aufgetreten"
+    },
+    "user":{
+      "notFound":"Benutzer nicht gefunden",
+      "unknown": "Unbekannter Fehler"
+    },
+    "game": {
+      "notFound": "Spiel nicht gefunden"
+    }
+  },
+  "system": {
+    "label": {
+      "message": "Systemmitteilung"
+    },
+    "message": {
+      "serverIsShuttingDown": "Der Server wird heruntergefahren."
+    }
+  }
+}

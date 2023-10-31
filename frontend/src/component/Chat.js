@@ -1,12 +1,13 @@
 import React, { useState } from "react";
 import { useStompClient, useSubscription } from "react-stomp-hooks";
 import { createUseStyles, useTheme } from "react-jss";
+import { useTranslation } from 'react-i18next';
 
 const useStyles = createUseStyles(theme=> ({
     layout: {
       display: "grid",
       gridTemplateRows: "auto  auto 1fr auto",
-      gridGap: "5px",
+      gap: "5px",
       margin: "0 auto",
       height: "100%",
       overflowY: "scroll",
@@ -16,7 +17,7 @@ const useStyles = createUseStyles(theme=> ({
       display: "flex",
       flexFlow: "column nowrap",
       justifyContent: "flex-start",
-      gridGap: "10px",
+      gap: "10px",
 
       margin: 0,
       listStyle: "none",
@@ -29,22 +30,35 @@ const useStyles = createUseStyles(theme=> ({
 
     tabs: {
       display: "flex",
-      flexFlow: "row nowrap",
+      flexFlow: "row wrap",
       justifyContent: "flex-start",
-      gridGap: "2px",
+      gap: "5px",
+      padding: 0,
+      maxHeight: "5.5em",
 
       margin: 0,
       listStyle: "none",
-      overflowX: "scroll",
+      overflowY: "scroll",
     },
 
     tab: {
+      cursor: "pointer",
       display: "flex",
+      flexGrow: 1,
+        flexShrink: 1,
+        flexBasis: "auto",
+        justifyContent: "center",
+        alignItems: "center",
       listStyleType: "none",
       border: "1px solid #ccc",
       borderRadius: "5px",
       padding: "5px",
-      width: "80%",
+      minWidth: "6em",
+      height: "1.2em",
+
+      whiteSpace: "nowrap",
+      textOverflow: "ellipsis",
+      overflow: "hidden",
       "&.selected": {
         backgroundColor: theme.accentBackgroundColor,
       },
@@ -66,6 +80,7 @@ const useStyles = createUseStyles(theme=> ({
 const LOBBY_TAB = "LOBBY";
 
 const Chat = ({ userId }) => {
+  const { t, i18n } = useTranslation();
   const theme = useTheme();
   const classes = useStyles(theme);
   const stompClient = useStompClient();
@@ -204,14 +219,14 @@ const Chat = ({ userId }) => {
 
   return (
     <div className={classes.layout}>
-      <h2>Chat</h2>
+      <h2>{t('chat.title')}</h2>
       <ul className={classes.tabs}>
         <li
           key={LOBBY_TAB}
           className={getTabStyles(LOBBY_TAB)}
           onClick={() => setTab(LOBBY_TAB)}
         >
-          Lobby
+          {t('chat.user.lobbyName')}
         </li>
         {getUserTabs()}
       </ul>
@@ -226,12 +241,12 @@ const Chat = ({ userId }) => {
       <div className="flex-row">
         <textarea
           type="text"
-          placeholder="Hier könnte ihre Nachricht stehen..."
+          placeholder={t('chat.placeholder')}
           value={chatState.text}
           onChange={handleMessageInput}
         />
         <button type="button" onClick={sendMessage}>
-          Senden
+          {t('chat.send')}
         </button>
       </div>
     </div>

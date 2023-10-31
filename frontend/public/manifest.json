@@ -1,6 +1,6 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "4 gewinnt!",
+  "name": "Ein Spiel auf Basis von WebSockets",
   "icons": [
     {
       "src": "favicon.ico",

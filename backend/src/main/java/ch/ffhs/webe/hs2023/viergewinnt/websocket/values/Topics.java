@@ -10,4 +10,5 @@ public final class Topics {
     public static final String USERS = "/topic/users";
     public static final String LOBBY_CHAT = "/topic/lobby/chat";
     public static final String LOBBY_GAMES = "/topic/lobby/games";
+    public static final String SYSTEM = "/topic/system";
 }

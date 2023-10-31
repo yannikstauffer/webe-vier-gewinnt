@@ -2,10 +2,12 @@ import React, { useState, useEffect } from "react";
 import Lobby from "./component/Lobby";
 import Chat from "./component/Chat";
 import Game from "./component/Game";
-import ErrorHandler from "./component/ErrorHandler";
+import Banner from "./component/Banner";
 import { StompSessionProvider } from "react-stomp-hooks";
 import { createUseStyles, ThemeProvider } from "react-jss";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import './i18n';
 
 const BASE_URL = "http://localhost:9000";
 const VIERGEWINNT_URL = BASE_URL + "/4gewinnt";
@@ -16,6 +18,10 @@ const theme = {
   accentColor: "rgb(30 30 30)",
   accentHighlightBackgroundColor: "rgb(200 200 200)",
   accentHighlightColor: "rgb(10 10 10)",
+  errorBackgroundColor: "rgb(246,189,189)",
+  errorTextColor: "rgb(171,0,0)",
+  infoBackgroundColor: "rgb(178,212,252)",
+  infoTextColor: "rgb(0,52,131)",
 };
 
 const buttonBase = (theme) => ({
@@ -26,7 +32,7 @@ const buttonBase = (theme) => ({
   mozPaddingStart: "calc(10px - 3px)",
   margin: "4px 0",
   height: "40px",
-  boxShadow: "2px 2px 5px 1px rgb(0 0 0 / 30%)",
+  boxShadow: "1px 1px 2px 0.1px rgb(0 0 0 / 30%)",
   border: "none",
   borderRadius: "3px",
   cursor: "pointer",
@@ -40,8 +46,8 @@ const buttonBase = (theme) => ({
   backgroundColor: theme.accentBackgroundColor,
 
   "&:hover": {
-    backgroundColor: theme.accentColor,
-    color: theme.accentBackgroundColor,
+    backgroundColor: theme.accentHighlightBackgroundColor,
+    color: theme.accentHighlightColor,
     cursor: "pointer",
   },
 });
@@ -88,7 +94,7 @@ const useStyles = createUseStyles(theme=> ({
       extend: buttonBase(theme),
     },
 
-    "a.button": {
+    '.button': {
       extend: buttonBase(theme),
     },
 
@@ -113,9 +119,7 @@ const useStyles = createUseStyles(theme=> ({
       flexFlow: "row nowrap",
       justifyContent: "center",
       alignItems: "center",
-      "&> * + *": {
-        marginLeft: "5px",
-      },
+      gap: "5px",
     },
     ".layout": {
       display: "grid",
@@ -123,13 +127,14 @@ const useStyles = createUseStyles(theme=> ({
       gridTemplateRows: "min-content auto",
       margin: "0 auto",
       height: "100%",
-      gridGap: "5px",
+      gap: "5px",
     },
   },
 }));
 
 function App() {
   useStyles(theme);
+  const { t, i18n } = useTranslation();
 
   const [userId, setUserId] = useState(Math.floor(Math.random() * 1000));
   const [isLoading, setLoading] = useState(true);
@@ -175,9 +180,12 @@ function App() {
         };
       });
   };
+  const changeLanguage = (language) => {
+    i18n.changeLanguage(language);
+  };
 
   return isLoading ? (
-    <div>L&auml;dt...</div>
+    <div>{t('app.loading')}</div>
   ) : (
     <ThemeProvider theme={theme}>
       <StompSessionProvider
@@ -185,15 +193,21 @@ function App() {
         connectHeaders={csrfHeaders}
         debug={(str) => console.log(str)}
       >
-        <ErrorHandler />
+        <Banner />
         <Router>
           <div className="layout">
             <div>
-              <h1>4 gewinnt</h1>
+              <h1>{t('app.title')}</h1>
             </div>
-            <div>
-              <a className="button" href={BASE_URL + "/logout"}>
-                Logout
+            <div className="flex-row">
+              <button className="button" onClick={() => changeLanguage('de')}>
+                DE
+              </button>
+              <button className="button" onClick={() => changeLanguage('en')}>
+                EN
+              </button>
+                <a className="button" href={BASE_URL + "/logout"}>
+                  {t('app.action.logout')}
               </a>
             </div>
             <Routes>

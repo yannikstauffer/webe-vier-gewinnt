@@ -1,0 +1,49 @@
+{
+  "app": {
+    "title": "4 in a row",
+    "action": {
+      "logout": "Logout"
+    },
+    "loading": "Loading..."
+  },
+  "chat": {
+    "title": "Chat",
+    "placeholder": "This could be your message...",
+    "send": "Send",
+    "user": {
+      "lobbyName": "Lobby"
+    }
+  },
+  "lobby": {
+    "title": "Lobby",
+    "createNewGame": "Create new Game",
+    "deleteList": "Delete list"
+  },
+  "game": {
+    "title": "Game",
+    "label": {
+      "name": "Game",
+      "creator": "Creator"
+    }
+  },
+  "error": {
+    "label": {
+      "anErrorOccurred": "An error occurred"
+    },
+    "user": {
+      "notFound": "User not found",
+      "unknown": "Unknown error"
+    },
+    "game": {
+      "notFound": "Game not found"
+    }
+  },
+  "system": {
+    "label": {
+      "message": "System notification"
+    },
+    "message": {
+      "serverIsShuttingDown": "The server is shutting down."
+    }
+  }
+}
