@@ -42,7 +42,11 @@ class UserServiceImpl implements UserService {
         user.setLastName(loginDto.getLastName());
         user.setPassword(this.passwordEncoder.encode(loginDto.getPassword()));
         user.setEmail(loginDto.getEmail());
-        user.setRoles(Collections.singletonList(Role.USER));
+        if (this.userRepository.countUsers() == 0) {
+            user.setRoles(List.of(Role.USER, Role.ADMIN));
+        } else {
+            user.setRoles(Collections.singletonList(Role.USER));
+        }
 
         return this.userRepository.save(user);
     }

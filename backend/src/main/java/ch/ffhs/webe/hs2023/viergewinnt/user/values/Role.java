@@ -1,12 +1,11 @@
 package ch.ffhs.webe.hs2023.viergewinnt.user.values;
 
 import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
 
 @AllArgsConstructor(access = lombok.AccessLevel.PRIVATE)
 public enum Role {
-    USER(Role.Values.USER),
-    ADMIN(Role.Values.ADMIN);
+    USER("ROLE_USER"),
+    ADMIN("ROLE_ADMIN");
 
     private final String value;
 
@@ -15,10 +14,4 @@ public enum Role {
         return this.value;
     }
 
-
-    @NoArgsConstructor(access = lombok.AccessLevel.PRIVATE)
-    public static class Values {
-        public static final String USER = "ROLE_USER";
-        public static final String ADMIN = "ROLE_ADMIN";
-    }
 }
