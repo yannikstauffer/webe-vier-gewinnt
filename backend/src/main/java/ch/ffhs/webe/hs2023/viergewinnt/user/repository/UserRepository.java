@@ -15,4 +15,7 @@ public interface UserRepository extends CrudRepository<User, Integer> {
 
     @Query("SELECT DISTINCT u FROM users u INNER JOIN sessions s ON u = s.user")
     List<User> findWithSession();
+
+    @Query("SELECT COUNT (u) FROM users u")
+    int countUsers();
 }
