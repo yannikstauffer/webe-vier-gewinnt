@@ -41,6 +41,9 @@
   "system": {
     "label": {
       "message": "Systemmitteilung"
+    },
+    "message": {
+      "serverIsShuttingDown": "Der Server wird heruntergefahren."
     }
   }
 }

@@ -41,6 +41,9 @@
   "system": {
     "label": {
       "message": "System notification"
+    },
+    "message": {
+      "serverIsShuttingDown": "The server is shutting down."
     }
   }
 }
