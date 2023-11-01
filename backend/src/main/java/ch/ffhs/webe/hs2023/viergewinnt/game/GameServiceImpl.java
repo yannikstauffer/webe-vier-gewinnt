@@ -28,8 +28,10 @@ public class GameServiceImpl implements GameService {
     public Game createGame(final User currentUser) {
         final Game newGame = new Game();
         newGame.setStatus(GameState.WAITING_FOR_PLAYERS);
-
         newGame.setUserOne(currentUser);
+
+        GameBoard gameBoard = new GameBoard(); // Verwende GameBoard Klasse
+        newGame.setBoard(gameBoard.getBoard());
 
         final Game savedGame = this.gameRepository.save(newGame);
         log.debug("Saved new game with ID: " + savedGame.getId());
@@ -87,21 +89,19 @@ public class GameServiceImpl implements GameService {
         final Game game = this.gameRepository.findById(gameId)
                 .orElseThrow(() -> VierGewinntException.of(ErrorCode.GAME_NOT_FOUND, "Spiel nicht gefunden!"));
 
-        // Hier Logik zur Aktualisierung des Boards
+        // get Board
+        GameBoard gameBoard = new GameBoard();
+        gameBoard.setBoard(game.getBoard());
 
-        if (isBoardFull(game)) {
+        // Gamelogic
+        gameBoard.updateBoardColumn(column, currentUser.getId());
+
+        if (gameBoard.isFull()) {
             game.setStatus(GameState.FINISHED);
         }
 
+        // save Board
+        game.setBoard(gameBoard.getBoard());
         return gameRepository.save(game);
-    }
-
-    @Override
-    public boolean isBoardFull(Game game) {
-        ArrayList<ArrayList<Integer>> board = game.getBoard();
-
-        // Logik ob Board voll ist
-
-        return false;
     }
 }

@@ -74,7 +74,7 @@ public class GameController {
     @MessageMapping(MessageSources.GAMES + "/action")
     public void gameAction(@Payload final GameActionDto request, Principal user) {
         final var sender = userService.getUserByEmail(user.getName());
-        final var game = gameService.updateGameBoard(request.getGameId(), request.getGameId(), sender);
+        final var game = gameService.updateGameBoard(request.getGameId(), request.getColumn(), sender);
 
         this.messageService.sendToUser(Queues.GAME, sender, GameStateDto.of(game, ""));
     }

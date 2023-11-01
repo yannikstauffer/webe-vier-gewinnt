@@ -16,7 +16,5 @@ public interface GameService {
 
     Game updateGameBoard(final int gameId, final int column, final User currentUser);
 
-    boolean isBoardFull(Game game);
-
     void deleteAllGames();
 }

@@ -26,7 +26,6 @@ const GameBoard = ({gameId}) => {
     const dropDisc = (column) => {
         for (let row = ROWS - 1; row >= 0; row--) {
             if (board[row][column] === EMPTY) {
-                // Senden der Spielaktion an den Server
                 stompClient.publish({
                     destination: "/4gewinnt/games/action",
                     body: JSON.stringify({
