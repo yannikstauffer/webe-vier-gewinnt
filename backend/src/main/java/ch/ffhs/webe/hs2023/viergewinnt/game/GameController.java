@@ -34,9 +34,8 @@ public class GameController {
         this.messageService = messageService;
     }
 
-    //todo: Kommunikation gem Konzept bereinigen
     @MessageMapping(MessageSources.GAMES + "/create")
-    @SendTo(Topics.LOBBY_GAMES + "/create")
+    @SendTo(Topics.LOBBY_GAMES)
     public GameDto createGame(final Principal user) {
         final var sender = this.userService.getUserByEmail(user.getName());
         final var game = this.gameService.createGame(sender);
@@ -57,7 +56,7 @@ public class GameController {
     }
 
     @MessageMapping(MessageSources.GAMES + "/join")
-    @SendTo(Topics.LOBBY_GAMES + "/joined")
+    @SendTo(Topics.LOBBY_GAMES)
     public GameDto joinGame(@Payload final GameRequestDto request, final Principal user) {
         final var sender = this.userService.getUserByEmail(user.getName());
         final var game = this.gameService.joinGame(request.getGameId(), sender);
