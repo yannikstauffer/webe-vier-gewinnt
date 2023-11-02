@@ -39,7 +39,9 @@ class ChatServiceImplTest {
     void storePublicMessage() {
         // arrange
         final var sender = User.builder().id(1).build();
-        final var inboundMessageDto = this.inboundMessageDto(100);
+        final var inboundMessageDto = InboundMessageDto.builder()
+                .text("foo")
+                .build();
 
         when(this.messageRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -59,7 +61,10 @@ class ChatServiceImplTest {
         // arrange
         final var sender = User.builder().id(1).build();
         final var receiver = User.builder().id(100).build();
-        final var inboundMessageDto = this.inboundMessageDto(receiver.getId());
+        final var inboundMessageDto = InboundMessageDto.builder()
+                .text("foo")
+                .receiverId(receiver.getId())
+                .build();
 
         when(this.userService.getUserById(inboundMessageDto.getReceiverId())).thenReturn(receiver);
         when(this.messageRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
@@ -120,10 +125,4 @@ class ChatServiceImplTest {
         );
     }
 
-    InboundMessageDto inboundMessageDto(final int receiverId) {
-        return InboundMessageDto.builder()
-                .text("foo")
-                .receiverId(receiverId)
-                .build();
-    }
 }
