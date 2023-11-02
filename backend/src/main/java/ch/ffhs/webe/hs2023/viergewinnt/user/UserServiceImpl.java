@@ -68,13 +68,6 @@ class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void removeSessionId(final String email, final String sessionId) throws VierGewinntException {
-        final var user = this.getUserByEmail(email);
-        user.removeSession(sessionId);
-        this.userRepository.save(user);
-    }
-
-    @Override
     public List<User> getAllWithSession() {
         return this.userRepository.findWithSession();
     }
