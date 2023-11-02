@@ -149,7 +149,6 @@ class UserServiceImplTest {
     @Test
     void getUserByEmail_throwsVierGewinntException_ifUserIsNotFound() {
         // arrange
-        final var expectedUser = mock(User.class);
         when(this.userRepository.findByEmail("foo@bar.com")).thenReturn(Optional.empty());
 
         // act + assert
