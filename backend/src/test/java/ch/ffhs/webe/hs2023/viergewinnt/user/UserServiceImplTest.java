@@ -6,10 +6,9 @@ import ch.ffhs.webe.hs2023.viergewinnt.user.model.User;
 import ch.ffhs.webe.hs2023.viergewinnt.user.repository.UserRepository;
 import ch.ffhs.webe.hs2023.viergewinnt.user.values.Role;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
@@ -22,15 +21,17 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@ExtendWith(MockitoExtension.class)
+@SpringBootTest
 class UserServiceImplTest {
-    @Mock
-    UserRepository userRepository;
-    @Mock
-    PasswordEncoder passwordEncoder;
-    @InjectMocks
-    UserServiceImpl userServiceImpl;
 
+    @MockBean
+    UserRepository userRepository;
+
+    @MockBean
+    PasswordEncoder passwordEncoder;
+
+    @Autowired
+    UserServiceImpl userServiceImpl;
 
     @Test
     void registerNewUserAccount() {
