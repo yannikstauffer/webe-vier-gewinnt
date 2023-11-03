@@ -17,4 +17,7 @@ public interface GameService {
     Game updateGameBoard(final int gameId, final int column, final User currentUser);
 
     void deleteAllGames();
+
+    Game startGame(Game game);
+
 }

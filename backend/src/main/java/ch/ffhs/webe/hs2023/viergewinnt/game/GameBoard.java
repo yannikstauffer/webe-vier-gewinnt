@@ -20,13 +20,14 @@ public class GameBoard {
         return board;
     }
 
-    public void updateBoardColumn(int column, int playerId) {
+    public boolean updateBoardColumn(int column, int playerId) {
         for (int row = this.board.get(column).size() - 1; row >= 0; row--) {
             if (this.board.get(column).get(row) == 0) {
                 this.board.get(column).set(row, playerId);
                 break;
             }
         }
+        return false;
     }
 
     public boolean isFull() {

@@ -1,42 +1,59 @@
-import React, {useState} from 'react';
-import {useStompClient, useSubscription} from "react-stomp-hooks";
+import React, { useState, useEffect } from 'react';
+import { useStompClient, useSubscription } from "react-stomp-hooks";
+import { useTranslation } from 'react-i18next';
 import './GameBoard.css';
 
 const ROWS = 6;
 const COLUMNS = 7;
 const EMPTY = 'E';
-const PLAYER_ONE = '1';
-const PLAYER_TWO = '2';
 
 const createEmptyBoard = () => {
     return Array(ROWS).fill(null).map(() => Array(COLUMNS).fill(EMPTY));
 };
 
-const GameBoard = ({gameId}) => {
+const GameBoard = ({ gameId, userId }) => {
     const [board, setBoard] = useState(createEmptyBoard());
-    const [currentPlayer, setCurrentPlayer] = useState(PLAYER_ONE);
+    const [nextMove, setNextMove] = useState(null);
+    const [gameBoardState, setGameBoardState] = useState(null);
+    const { t } = useTranslation();
     const stompClient = useStompClient();
+
+    const [statusMessage, setStatusMessage] = useState('');
 
     useSubscription("/user/queue/game", (message) => {
         const updatedGame = JSON.parse(message.body);
-        console.log("update:" + updatedGame);
-        // Aktualisierung Board und aktuellen Spieler
+        console.log("update:", updatedGame);
+        setBoard(updatedGame.board);
+        setNextMove(updatedGame.nextMove);
+        setGameBoardState(updatedGame.gameBoardState);
     });
 
-    const dropDisc = (column) => {
-        for (let row = ROWS - 1; row >= 0; row--) {
-            if (board[row][column] === EMPTY) {
-                stompClient.publish({
-                    destination: "/4gewinnt/games/action",
-                    body: JSON.stringify({
-                        gameId: gameId,
-                        column: column,
-                        playerId: currentPlayer,
-                    }),
-                });
-                return;
-            }
+    useEffect(() => {
+        setStatusMessage(getGameStatusMessage());
+    }, [gameBoardState, nextMove]);
+
+    const getGameStatusMessage = () => {
+        switch(gameBoardState) {
+            case 'PLAYER_HAS_WON':
+                return nextMove === userId ? t('game.state.win') : t('game.state.lose');
+            case 'DRAW':
+                return t('game.state.draw');
+            case 'MOVE_EXPECTED':
+                return nextMove === userId ? t('game.state.yourTurn') : t('game.state.notYourTurn');
+            default:
+                return 'game.state.wait';
         }
+    };
+
+    const dropDisc = (column) => {
+        stompClient.publish({
+            destination: "/4gewinnt/games/action",
+            body: JSON.stringify({
+                gameId: gameId,
+                column: column,
+                playerId: userId,
+            }),
+        });
     };
 
     return (
@@ -46,16 +63,15 @@ const GameBoard = ({gameId}) => {
                 {board.map((row, rowIndex) => (
                     <tr key={rowIndex}>
                         {row.map((cell, colIndex) => (
-                            <td key={colIndex} onClick={() => dropDisc(colIndex)}>
-                                <div
-                                    className={cell === EMPTY ? 'empty' : cell === PLAYER_ONE ? 'player-one' : 'player-two'}></div>
+                            <td key={colIndex} onClick={() => nextMove === userId && dropDisc(colIndex)}>
+                                <div className={`cell ${cell === EMPTY ? 'empty' : cell === '1' ? 'player-one' : 'player-two'}`}></div>
                             </td>
                         ))}
                     </tr>
                 ))}
                 </tbody>
             </table>
-            <p>Current Player: {currentPlayer === PLAYER_ONE ? 'Player 1' : 'Player 2'}</p>
+            <p>{statusMessage}</p>
         </div>
     );
 };

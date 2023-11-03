@@ -15,6 +15,7 @@ public enum ErrorCode {
     GAME_FULL("error.game.isFull"),
     GAMEBOARD_READ_ERROR("error.game.cannotRead"),
     GAMEBOARD_WRITE_ERROR("error.game.cannotWrite"),
+    GAME_NOT_READY("error.game.notReady"),
     UNKNOWN("error.unknown");
 
     private final String internationalizedMessageKey;

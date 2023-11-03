@@ -4,6 +4,7 @@ import ch.ffhs.webe.hs2023.viergewinnt.base.ErrorCode;
 import ch.ffhs.webe.hs2023.viergewinnt.base.VierGewinntException;
 import ch.ffhs.webe.hs2023.viergewinnt.game.model.Game;
 import ch.ffhs.webe.hs2023.viergewinnt.game.repository.GameRepository;
+import ch.ffhs.webe.hs2023.viergewinnt.game.values.GameBoardState;
 import ch.ffhs.webe.hs2023.viergewinnt.game.values.GameState;
 import ch.ffhs.webe.hs2023.viergewinnt.user.model.User;
 import lombok.extern.slf4j.Slf4j;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 @Slf4j
 @Service
@@ -27,10 +29,10 @@ public class GameServiceImpl implements GameService {
     @Override
     public Game createGame(final User currentUser) {
         final Game newGame = new Game();
-        newGame.setStatus(GameState.WAITING_FOR_PLAYERS);
+        newGame.setGameState(GameState.WAITING_FOR_PLAYERS);
         newGame.setUserOne(currentUser);
 
-        GameBoard gameBoard = new GameBoard(); // Verwende GameBoard Klasse
+        GameBoard gameBoard = new GameBoard();
         newGame.setBoard(gameBoard.getBoard());
 
         final Game savedGame = this.gameRepository.save(newGame);
@@ -51,18 +53,29 @@ public class GameServiceImpl implements GameService {
 
     @Override
     public Game joinGame(final int gameId, final User currentUser) {
-        final Game game = this.gameRepository.findById(gameId)
+        Game game = this.gameRepository.findById(gameId)
                 .orElseThrow(() -> VierGewinntException.of(ErrorCode.GAME_NOT_FOUND, "Spiel nicht gefunden!"));
 
         if (game.isFull()) {
             throw VierGewinntException.of(ErrorCode.GAME_FULL, "Das Spiel ist bereits voll!");
         }
 
-        game.setUserTwo(currentUser);
-        game.setStatus(GameState.IN_PROGRESS);
-        this.gameRepository.save(game);
+        if (game.getUserOne() != null && game.getUserTwo() == null) {
+            game.setUserTwo(currentUser);
+            game = startGame(game);
+        }
 
         return game;
+    }
+
+    @Override
+    public Game startGame(Game game) {
+        if (game.getGameState() == GameState.WAITING_FOR_PLAYERS && game.getUserOne() != null && game.getUserTwo() != null) {
+            game.setGameState(GameState.IN_PROGRESS);
+            game.setGameBoardState(GameBoardState.MOVE_EXPECTED);
+            game.setNextMove(new Random().nextBoolean() ? game.getUserOne().getId() : game.getUserTwo().getId());
+        }
+        return this.gameRepository.save(game);
     }
 
     @Override
@@ -74,7 +87,7 @@ public class GameServiceImpl implements GameService {
             this.gameRepository.delete(game);
         } else if (game.getUserTwo().getId() == currentUser.getId()) {
             game.setUserTwo(null);
-            game.setStatus(GameState.WAITING_FOR_PLAYERS);
+            game.setGameState(GameState.WAITING_FOR_PLAYERS);
             this.gameRepository.save(game);
         }
     }
@@ -89,18 +102,31 @@ public class GameServiceImpl implements GameService {
         final Game game = this.gameRepository.findById(gameId)
                 .orElseThrow(() -> VierGewinntException.of(ErrorCode.GAME_NOT_FOUND, "Spiel nicht gefunden!"));
 
-        // get Board
+        if (game.getUserOne() == null || game.getUserTwo() == null) {
+            throw VierGewinntException.of(ErrorCode.GAME_NOT_READY, "Warten auf Spieler!");
+        }
+
+        if (game.getGameState() == GameState.WAITING_FOR_PLAYERS) {
+            game.setGameState(GameState.IN_PROGRESS);
+        }
+
         GameBoard gameBoard = new GameBoard();
         gameBoard.setBoard(game.getBoard());
 
-        // Gamelogic
-        gameBoard.updateBoardColumn(column, currentUser.getId());
+        boolean hasWon = gameBoard.updateBoardColumn(column, currentUser.getId());
 
-        if (gameBoard.isFull()) {
-            game.setStatus(GameState.FINISHED);
+        if (hasWon) {
+            game.setGameBoardState(GameBoardState.PLAYER_HAS_WON);
+            game.setGameState(GameState.FINISHED);
+        } else if (gameBoard.isFull()) {
+            game.setGameBoardState(GameBoardState.DRAW);
+            game.setGameState(GameState.FINISHED);
+        } else {
+            game.setGameBoardState(GameBoardState.MOVE_EXPECTED);
+            game.setNextMove(game.getNextMove().equals(game.getUserOne().getId()) ?
+                    game.getUserTwo().getId() : game.getUserOne().getId());
         }
 
-        // save Board
         game.setBoard(gameBoard.getBoard());
         return gameRepository.save(game);
     }

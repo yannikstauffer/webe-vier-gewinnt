@@ -24,6 +24,14 @@
     "label": {
       "name": "Spiel",
       "creator": "Ersteller"
+    },
+    "state": {
+      "win": "Du hast gewonnen!",
+      "lose": "Du hast verloren.",
+      "draw": "Das Spiel endet unentschieden.",
+      "yourTurn": "Du bist am Zug.",
+      "notYourTurn": "Du bist nicht am Zug.",
+      "wait": "Das Spiel hat noch nicht gestartet"
     }
   },
   "error": {
