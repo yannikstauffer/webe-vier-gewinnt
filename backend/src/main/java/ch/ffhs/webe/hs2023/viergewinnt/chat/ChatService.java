@@ -4,6 +4,7 @@ import ch.ffhs.webe.hs2023.viergewinnt.chat.dto.InboundMessageDto;
 import ch.ffhs.webe.hs2023.viergewinnt.chat.model.Message;
 import ch.ffhs.webe.hs2023.viergewinnt.user.model.User;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface ChatService {
@@ -13,5 +14,5 @@ public interface ChatService {
 
     List<Message> getPrivateMessages(User user);
 
-    List<Message> getPublicMessages();
+    List<Message> getPublicMessages(LocalDateTime since);
 }

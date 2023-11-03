@@ -58,8 +58,8 @@ class ChatServiceImpl implements ChatService {
     }
 
     @Override
-    public List<Message> getPublicMessages() {
-        return this.messageRepository.findPublicBy(LocalDateTime.now().minusMinutes(10));
+    public List<Message> getPublicMessages(final LocalDateTime since) {
+        return this.messageRepository.findPublicBy(since);
     }
 
     void validate(final InboundMessageDto inboundMessageDto, final MessageType messageType) {

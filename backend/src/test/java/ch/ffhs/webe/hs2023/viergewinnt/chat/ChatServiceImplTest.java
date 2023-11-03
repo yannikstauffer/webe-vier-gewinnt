@@ -2,6 +2,7 @@ package ch.ffhs.webe.hs2023.viergewinnt.chat;
 
 import ch.ffhs.webe.hs2023.viergewinnt.base.VierGewinntException;
 import ch.ffhs.webe.hs2023.viergewinnt.chat.dto.InboundMessageDto;
+import ch.ffhs.webe.hs2023.viergewinnt.chat.model.Message;
 import ch.ffhs.webe.hs2023.viergewinnt.chat.repository.MessageRepository;
 import ch.ffhs.webe.hs2023.viergewinnt.chat.values.MessageType;
 import ch.ffhs.webe.hs2023.viergewinnt.user.UserService;
@@ -14,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
+import java.util.Collections;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -78,6 +80,38 @@ class ChatServiceImplTest {
         assertThat(actualMessage.getSender()).isEqualTo(sender);
         assertThat(actualMessage.getReceiver()).contains(receiver);
         assertThat(actualMessage.getText()).isEqualTo(inboundMessageDto.getText());
+    }
+
+    @Test
+    void getPrivateMessages() {
+        // arrange
+        final var user = User.builder().id(1).build();
+        final var expectedMessage = Message.builder().build();
+
+        when(this.messageRepository.findPrivateBy(user)).thenReturn(Collections.singletonList(expectedMessage));
+
+        // act
+        final var actualMessages = this.chatServiceImpl.getPrivateMessages(user);
+
+        // assert
+        verify(this.messageRepository, times(1)).findPrivateBy(user);
+        assertThat(actualMessages).containsExactly(expectedMessage);
+    }
+
+    @Test
+    void getPublicMessages() {
+        // arrange
+        final var time = java.time.LocalDateTime.now();
+        final var expectedMessage = Message.builder().build();
+
+        when(this.messageRepository.findPublicBy(time)).thenReturn(Collections.singletonList(expectedMessage));
+
+        // act
+        final var actualMessages = this.chatServiceImpl.getPublicMessages(time);
+
+        // assert
+        verify(this.messageRepository, times(1)).findPublicBy(time);
+        assertThat(actualMessages).containsExactly(expectedMessage);
     }
 
     @ParameterizedTest

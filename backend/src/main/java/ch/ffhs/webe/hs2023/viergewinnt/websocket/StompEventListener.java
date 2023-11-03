@@ -22,6 +22,7 @@ import org.springframework.web.socket.messaging.SessionConnectedEvent;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 import org.springframework.web.socket.messaging.SessionSubscribeEvent;
 
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Slf4j
@@ -89,7 +90,7 @@ public class StompEventListener implements ApplicationListener<SessionConnectEve
     }
 
     private void publishAllChatsTo(final User recipient) {
-        final var publicMessages = this.chatService.getPublicMessages();
+        final var publicMessages = this.chatService.getPublicMessages(LocalDateTime.now().minusMinutes(10));
         final var privateMessages = this.chatService.getPrivateMessages(recipient);
         final var chats = ChatsDto.of(privateMessages, publicMessages);
         this.stompMessageService.sendToUser(Queues.CHATS, recipient, chats);
