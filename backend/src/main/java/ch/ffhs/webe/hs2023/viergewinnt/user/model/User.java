@@ -41,12 +41,14 @@ public class User {
     private String email;
     private String password;
 
+    @Builder.Default
     @Enumerated(EnumType.STRING)
     private List<Role> roles = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.MERGE, orphanRemoval = true, fetch = FetchType.EAGER)
     @Getter(AccessLevel.NONE)
     @Setter(AccessLevel.NONE)
+    @Builder.Default
     private List<Session> sessions = new ArrayList<>();
 
     public void removeSession(final String sessionId) {
