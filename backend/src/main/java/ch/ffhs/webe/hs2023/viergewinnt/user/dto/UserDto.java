@@ -4,6 +4,8 @@ import ch.ffhs.webe.hs2023.viergewinnt.user.model.User;
 import lombok.Builder;
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 @Builder
 public class UserDto {
@@ -17,6 +19,12 @@ public class UserDto {
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
                 .build();
+    }
+
+    public static List<UserDto> of(final List<User> users) {
+        return users.stream()
+                .map(UserDto::of)
+                .toList();
     }
 
 }

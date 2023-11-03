@@ -4,8 +4,10 @@ import ch.ffhs.webe.hs2023.viergewinnt.chat.ChatService;
 import ch.ffhs.webe.hs2023.viergewinnt.chat.dto.ChatsDto;
 import ch.ffhs.webe.hs2023.viergewinnt.user.SessionService;
 import ch.ffhs.webe.hs2023.viergewinnt.user.UserService;
-import ch.ffhs.webe.hs2023.viergewinnt.user.dto.UsersDto;
+import ch.ffhs.webe.hs2023.viergewinnt.user.dto.UserDto;
+import ch.ffhs.webe.hs2023.viergewinnt.user.dto.UserUpdateDto;
 import ch.ffhs.webe.hs2023.viergewinnt.user.model.User;
+import ch.ffhs.webe.hs2023.viergewinnt.user.values.UserUpdateType;
 import ch.ffhs.webe.hs2023.viergewinnt.websocket.values.Queues;
 import ch.ffhs.webe.hs2023.viergewinnt.websocket.values.Topics;
 import lombok.extern.slf4j.Slf4j;
@@ -19,7 +21,6 @@ import org.springframework.web.socket.messaging.SessionConnectEvent;
 import org.springframework.web.socket.messaging.SessionConnectedEvent;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 import org.springframework.web.socket.messaging.SessionSubscribeEvent;
-import org.springframework.web.socket.messaging.SessionUnsubscribeEvent;
 
 import java.util.Objects;
 
@@ -56,59 +57,51 @@ public class StompEventListener implements ApplicationListener<SessionConnectEve
         log.info("[Connected] {}", currentUser.getEmail());
         this.sessionService.addSession(currentUser, sessionId);
         log.debug("SessionId {} added for user {}", sessionId, currentUser.getEmail());
+
+        this.publishUserUpdate(currentUser, UserUpdateType.ONLINE);
     }
 
     @EventListener
     public void onSocketDisconnected(final SessionDisconnectEvent event) {
-        final var userEmail = this.getUserName(event);
+        final var currentUser = this.getUser(event);
         final var sessionId = this.getSessionId(event);
 
-        log.info("[Disconnected] {}", userEmail);
-        this.userService.removeSessionId(userEmail, sessionId);
-        log.debug("SessionId {} removed for user {}", sessionId, userEmail);
+        log.info("[Disconnected] {}", currentUser.getEmail());
+        this.sessionService.removeSession(currentUser, sessionId);
+        log.debug("Session {} removed for user {}", sessionId, currentUser.getEmail());
+
+        if (currentUser.getSessions().isEmpty()) {
+            log.debug("User {} no longer online. Sending update to all subscribers.", currentUser.getEmail());
+            this.publishUserUpdate(currentUser, UserUpdateType.OFFLINE);
+        }
     }
 
     @EventListener
     public void onTopicSubscribe(final SessionSubscribeEvent event) {
         final var subscription = event.getMessage().getHeaders().get("simpDestination");
+        final var currentUser = this.getUser(event);
+
         if (Topics.LOBBY_CHAT.equals(subscription)) {
-            this.onLobbyChatSubscribe(event);
+            this.publishAllUsersTo(currentUser);
+        } else if (Topics.USERS.equals(subscription)) {
+            this.publishAllChatsTo(currentUser);
         }
     }
 
-    @EventListener
-    public void onTopicUnsubscribe(final SessionUnsubscribeEvent event) {
-        final var subscription = event.getMessage().getHeaders().get("simpDestination");
-        if (Topics.USERS.equals(subscription)) {
-            this.onUsersUnsubscribe(event);
-        }
-
-    }
-
-    private void onLobbyChatSubscribe(final SessionSubscribeEvent event) {
-        final var currentUser = this.getUser(event);
-        this.publishAllUsers(currentUser);
-        this.publishAllChats(currentUser);
-    }
-
-
-    private void onUsersUnsubscribe(final SessionUnsubscribeEvent event) {
-        final var currentUser = this.getUser(event);
-        this.sessionService.deleteByUser(currentUser);
-
-        this.publishAllUsers(currentUser);
-    }
-
-    private void publishAllChats(final User recipient) {
+    private void publishAllChatsTo(final User recipient) {
         final var publicMessages = this.chatService.getPublicMessages();
         final var privateMessages = this.chatService.getPrivateMessages(recipient);
         final var chats = ChatsDto.of(privateMessages, publicMessages);
         this.stompMessageService.sendToUser(Queues.CHATS, recipient, chats);
     }
 
-    private void publishAllUsers(final User currentUser) {
+    private void publishAllUsersTo(final User recipient) {
         final var users = this.userService.getAllWithSession();
-        this.stompMessageService.send(Topics.USERS, UsersDto.of(currentUser, users));
+        this.stompMessageService.sendToUser(Queues.USERS, recipient, UserDto.of(users));
+    }
+
+    private void publishUserUpdate(final User user, final UserUpdateType userUpdateType) {
+        this.stompMessageService.send(Topics.USERS, UserUpdateDto.of(user, userUpdateType));
     }
 
     private User getUser(final AbstractSubProtocolEvent event) {

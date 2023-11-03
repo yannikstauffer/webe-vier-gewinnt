@@ -8,6 +8,9 @@ import lombok.Getter;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public enum ErrorCode {
     // die Werte aus dem Enum müssen im Frontend unter /public/locales/* in den translation.json definiert werden
+    RECEIVER_NOT_SET("error.chat.receiverNotSet"),
+    RECEIVER_ON_PUBLIC_MESSAGE("error.chat.receiverShouldNotBeSetOnPublicMessage"),
+    MESSAGE_TEXT_EMPTY("error.chat.messageTextEmpty"),
     USER_NOT_FOUND("error.user.notFound"),
     EMAIL_ALREADY_EXISTS("error.user.emailAlreadyExists"),
     INVALID_CREDENTIALS("error.user.invalidCredentials"),

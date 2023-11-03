@@ -32,5 +32,14 @@ public class SessionServiceImpl implements SessionService {
         this.repository.save(newSession);
     }
 
-
+    @Override
+    public void removeSession(final User user, final String stompSessionId) throws VierGewinntException {
+        final var session = this.repository.findByUserAndSessionId(user, stompSessionId);
+        session.ifPresent(
+                s -> {
+                    user.removeSession(s.getSessionId());
+                    this.repository.deleteById(s.getSessionId());
+                }
+        );
+    }
 }
