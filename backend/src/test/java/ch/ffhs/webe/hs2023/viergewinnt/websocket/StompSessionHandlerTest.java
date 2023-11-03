@@ -7,9 +7,10 @@ import ch.ffhs.webe.hs2023.viergewinnt.user.model.User;
 import ch.ffhs.webe.hs2023.viergewinnt.user.values.UserUpdateType;
 import ch.ffhs.webe.hs2023.viergewinnt.websocket.values.Topics;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.web.socket.CloseStatus;
@@ -29,18 +30,18 @@ import static org.springframework.messaging.simp.SimpMessageHeaderAccessor.DESTI
 import static org.springframework.messaging.simp.SimpMessageHeaderAccessor.SESSION_ID_HEADER;
 import static org.springframework.messaging.simp.SimpMessageHeaderAccessor.USER_HEADER;
 
-@SpringBootTest
+@ExtendWith(MockitoExtension.class)
 class StompSessionHandlerTest {
-    @MockBean
+    @Mock
     UserService userService;
 
-    @MockBean
+    @Mock
     StompSessionMessagesProxy stompSessionMessagesProxy;
 
-    @MockBean
+    @Mock
     SessionService sessionService;
 
-    @Autowired
+    @InjectMocks
     StompSessionHandler stompSessionHandler;
 
     @Test

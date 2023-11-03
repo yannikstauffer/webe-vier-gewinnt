@@ -8,12 +8,13 @@ import ch.ffhs.webe.hs2023.viergewinnt.chat.values.MessageType;
 import ch.ffhs.webe.hs2023.viergewinnt.user.UserService;
 import ch.ffhs.webe.hs2023.viergewinnt.user.model.User;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Collections;
 import java.util.stream.Stream;
@@ -26,15 +27,15 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@SpringBootTest
+@ExtendWith(MockitoExtension.class)
 class ChatServiceImplTest {
-    @MockBean
+    @Mock
     MessageRepository messageRepository;
 
-    @MockBean
+    @Mock
     UserService userService;
 
-    @Autowired
+    @InjectMocks
     ChatServiceImpl chatServiceImpl;
 
     @Test

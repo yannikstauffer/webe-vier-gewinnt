@@ -13,10 +13,11 @@ import ch.ffhs.webe.hs2023.viergewinnt.user.values.UserUpdateType;
 import ch.ffhs.webe.hs2023.viergewinnt.websocket.values.Queues;
 import ch.ffhs.webe.hs2023.viergewinnt.websocket.values.Topics;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 
@@ -26,19 +27,19 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@SpringBootTest
+@ExtendWith(MockitoExtension.class)
 class StompSessionMessagesProxyTest {
 
-    @MockBean
+    @Mock
     UserService userService;
 
-    @MockBean
+    @Mock
     ChatService chatService;
 
-    @MockBean
+    @Mock
     StompMessageService stompMessageService;
 
-    @Autowired
+    @InjectMocks
     StompSessionMessagesProxy stompSessionMessagesProxy;
 
     @Test
