@@ -6,7 +6,6 @@ import ch.ffhs.webe.hs2023.viergewinnt.chat.model.Message;
 import ch.ffhs.webe.hs2023.viergewinnt.chat.repository.MessageRepository;
 import ch.ffhs.webe.hs2023.viergewinnt.chat.values.MessageType;
 import ch.ffhs.webe.hs2023.viergewinnt.user.UserService;
-import ch.ffhs.webe.hs2023.viergewinnt.user.model.User;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -19,6 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Collections;
 import java.util.stream.Stream;
 
+import static ch.ffhs.webe.hs2023.viergewinnt.user.UserTestUtils.user;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -41,7 +41,7 @@ class ChatServiceImplTest {
     @Test
     void storePublicMessage() {
         // arrange
-        final var sender = User.builder().id(1).build();
+        final var sender = user(1);
         final var inboundMessageDto = InboundMessageDto.builder()
                 .text("foo")
                 .build();
@@ -62,8 +62,8 @@ class ChatServiceImplTest {
     @Test
     void storePrivateMessage() {
         // arrange
-        final var sender = User.builder().id(1).build();
-        final var receiver = User.builder().id(100).build();
+        final var sender = user(2);
+        final var receiver = user(200);
         final var inboundMessageDto = InboundMessageDto.builder()
                 .text("foo")
                 .receiverId(receiver.getId())
@@ -86,7 +86,7 @@ class ChatServiceImplTest {
     @Test
     void getPrivateMessages() {
         // arrange
-        final var user = User.builder().id(1).build();
+        final var user = user(3);
         final var expectedMessage = Message.builder().build();
 
         when(this.messageRepository.findPrivateBy(user)).thenReturn(Collections.singletonList(expectedMessage));

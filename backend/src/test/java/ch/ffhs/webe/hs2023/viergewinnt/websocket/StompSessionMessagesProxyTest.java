@@ -8,7 +8,6 @@ import ch.ffhs.webe.hs2023.viergewinnt.chat.values.MessageType;
 import ch.ffhs.webe.hs2023.viergewinnt.user.UserService;
 import ch.ffhs.webe.hs2023.viergewinnt.user.dto.UserDto;
 import ch.ffhs.webe.hs2023.viergewinnt.user.dto.UserUpdateDto;
-import ch.ffhs.webe.hs2023.viergewinnt.user.model.User;
 import ch.ffhs.webe.hs2023.viergewinnt.user.values.UserUpdateType;
 import ch.ffhs.webe.hs2023.viergewinnt.websocket.values.Queues;
 import ch.ffhs.webe.hs2023.viergewinnt.websocket.values.Topics;
@@ -21,6 +20,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 
+import static ch.ffhs.webe.hs2023.viergewinnt.user.UserTestUtils.user;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -45,7 +45,7 @@ class StompSessionMessagesProxyTest {
     @Test
     void publishAllChatsTo() {
         // arrange
-        final var recipient = this.user(1);
+        final var recipient = user(1);
         final var privateMessage = this.message(100, MessageType.PRIVATE);
         final var publicMessage = this.message(200, MessageType.PUBLIC);
         when(this.chatService.getPublicMessages(any())).thenReturn(List.of(publicMessage));
@@ -66,8 +66,8 @@ class StompSessionMessagesProxyTest {
     @Test
     void publishAllUsersTo() {
         // arrange
-        final var recipient = this.user(1);
-        final var users = List.of(this.user(100));
+        final var recipient = user(1);
+        final var users = List.of(user(100));
         when(this.userService.getAllWithSession()).thenReturn(users);
 
         // act
@@ -81,7 +81,7 @@ class StompSessionMessagesProxyTest {
     @Test
     void publishUserUpdate() {
         // arrange
-        final var user = this.user(1);
+        final var user = user(1);
         final var userUpdateType = UserUpdateType.ONLINE;
 
         // act
@@ -95,17 +95,10 @@ class StompSessionMessagesProxyTest {
         return Message.builder()
                 .id(id)
                 .messageType(messageType)
-                .sender(this.user(1))
-                .receiver(this.user(100))
+                .sender(user(1))
+                .receiver(user(100))
                 .text("foo")
                 .build();
     }
 
-    User user(final int id) {
-        return User.builder()
-                .id(id)
-                .firstName("foo")
-                .lastName("bar")
-                .build();
-    }
 }

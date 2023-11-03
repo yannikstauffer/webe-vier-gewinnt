@@ -20,8 +20,8 @@ import org.springframework.web.socket.messaging.SessionSubscribeEvent;
 
 import java.security.Principal;
 import java.util.Collections;
-import java.util.List;
 
+import static ch.ffhs.webe.hs2023.viergewinnt.user.UserTestUtils.user;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -47,7 +47,7 @@ class StompSessionHandlerTest {
     @Test
     void onSocketConnected() {
         // arrange
-        final var sender = this.sender();
+        final var sender = user(1);
         final var sessionId = "1";
         final var message = this.message(sender, sessionId);
         final var event = new SessionConnectedEvent("test-connected", message);
@@ -63,8 +63,8 @@ class StompSessionHandlerTest {
     @Test
     void onSocketDisconnected_doesNotSendMessages_ifAdditionalSessionsExist() {
         // arrange
-        final var sender = this.sender(Collections.singletonList(mock(Session.class)));
-        final var sessionId = "2";
+        final var sender = user(2, Collections.singletonList(mock(Session.class)));
+        final var sessionId = "200";
         final var message = this.message(sender, sessionId);
         final var event = new SessionDisconnectEvent("test-disconnected", message, sessionId, CloseStatus.NORMAL);
 
@@ -79,7 +79,7 @@ class StompSessionHandlerTest {
     @Test
     void onSocketDisconnected_doesSendUpdateMessages_ifNoMoreSessionsExist() {
         // arrange
-        final var sender = this.sender(Collections.emptyList());
+        final var sender = user(3, Collections.emptyList());
         final var sessionId = "3";
         final var message = this.message(sender, sessionId);
         final var event = new SessionDisconnectEvent("test-disconnected", message, sessionId, CloseStatus.NORMAL);
@@ -95,7 +95,7 @@ class StompSessionHandlerTest {
     @Test
     void onTopicSubscribe_publishesAllChats_whenSubscribeToLobbyChatTopic() {
         // arrange
-        final var sender = this.sender();
+        final var sender = user(4);
         final var sessionId = "4";
         final var message = this.message(sender, sessionId, Topics.LOBBY_CHAT);
         final var event = new SessionSubscribeEvent("test-topic-subscribe-chat", message);
@@ -110,7 +110,7 @@ class StompSessionHandlerTest {
     @Test
     void onTopicSubscribe_publishesAllUsers_whenSubscribeToLobbyChatTopic() {
         // arrange
-        final var sender = this.sender();
+        final var sender = user(5);
         final var sessionId = "5";
         final var message = this.message(sender, sessionId, Topics.USERS);
         final var event = new SessionSubscribeEvent("test-topic-subscribe-user", message);
@@ -120,20 +120,6 @@ class StompSessionHandlerTest {
 
         // assert
         verify(this.stompSessionMessagesProxy).publishAllUsersTo(sender);
-    }
-
-
-    User sender() {
-        return this.sender(null);
-    }
-
-    User sender(final List<Session> sessions) {
-        final var builder = User.builder()
-                .email("foo@bar.com");
-
-        if (sessions != null) builder.sessions(sessions);
-
-        return builder.build();
     }
 
     Message<byte[]> message(final User sender, final String sessionId) {
