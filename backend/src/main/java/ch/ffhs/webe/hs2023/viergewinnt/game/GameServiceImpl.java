@@ -111,8 +111,9 @@ public class GameServiceImpl implements GameService {
 
         GameBoard gameBoard = new GameBoard();
         gameBoard.setBoard(game.getBoard());
+        gameBoard.updateBoardColumn(column, currentUser.getId());
 
-        boolean hasWon = gameBoard.updateBoardColumn(column, currentUser.getId());
+        boolean hasWon = false; //todo
 
         if (hasWon) {
             game.setGameBoardState(GameBoardState.PLAYER_HAS_WON);

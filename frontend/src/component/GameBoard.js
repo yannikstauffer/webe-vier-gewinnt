@@ -19,6 +19,8 @@ const GameBoard = ({gameId, userId}) => {
     const stompClient = useStompClient();
     const [statusMessage, setStatusMessage] = useState('');
     const [buttonState, setButtonState] = useState('start');
+    const [playerOneId, setPlayerOneId] = useState(null);
+    const [playerTwoId, setPlayerTwoId] = useState(null);
 
     useSubscription("/user/queue/game", (message) => {
         const updatedGame = JSON.parse(message.body);
@@ -27,9 +29,16 @@ const GameBoard = ({gameId, userId}) => {
         setNextMove(updatedGame.nextMove);
         setGameBoardState(updatedGame.gameBoardState);
 
+        if (!playerOneId || !playerTwoId) {
+            setPlayerOneId(updatedGame.userOne?.id);
+            setPlayerTwoId(updatedGame.userTwo?.id);
+        }
+
         if (updatedGame.gameBoardState === 'READY_TO_START') {
             setButtonState('start');
         }
+
+        setBoard(updatedGame.board);
     });
 
     useEffect(() => {
@@ -112,12 +121,22 @@ const GameBoard = ({gameId, userId}) => {
                 <tbody>
                 {board.map((row, rowIndex) => (
                     <tr key={rowIndex}>
-                        {row.map((cell, colIndex) => (
-                            <td key={colIndex} onClick={() => nextMove === userId && dropDisc(colIndex)}>
-                                <div
-                                    className={`cell ${cell === EMPTY ? 'empty' : cell === '1' ? 'player-one' : 'player-two'}`}></div>
-                            </td>
-                        ))}
+                        {row.map((cell, colIndex) => {
+                            let cellClass = 'empty';
+                            if (cell !== EMPTY) {
+                                if (cell === playerOneId) {
+                                    cellClass = 'player-one';
+                                } else if (cell === playerTwoId) {
+                                    cellClass = 'player-two';
+                                }
+                            }
+
+                            return (
+                                <td key={colIndex} onClick={() => nextMove === userId && dropDisc(colIndex)}>
+                                    <div className={`cell ${cellClass}`}></div>
+                                </td>
+                            );
+                        })}
                     </tr>
                 ))}
                 </tbody>

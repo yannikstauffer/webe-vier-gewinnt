@@ -10,21 +10,21 @@ public class GameBoard {
 
     private ArrayList<ArrayList<Integer>> initializeBoard() {
         ArrayList<ArrayList<Integer>> board = new ArrayList<>();
-        for (int i = 0; i < 6; i++) {
-            ArrayList<Integer> column = new ArrayList<>();
-            for (int j = 0; j < 7; j++) {
-                column.add(0);
+        for (int row = 0; row < 6; row++) {
+            ArrayList<Integer> newRow = new ArrayList<>();
+            for (int col = 0; col < 7; col++) {
+                newRow.add(0);
             }
-            board.add(column);
+            board.add(newRow);
         }
         return board;
     }
 
     public boolean updateBoardColumn(int column, int playerId) {
-        for (int row = this.board.get(column).size() - 1; row >= 0; row--) {
-            if (this.board.get(column).get(row) == 0) {
-                this.board.get(column).set(row, playerId);
-                break;
+        for (int row = this.board.size() - 1; row >= 0; row--) {
+            if (this.board.get(row).get(column) == 0) {
+                this.board.get(row).set(column, playerId);
+                return true;
             }
         }
         return false;
