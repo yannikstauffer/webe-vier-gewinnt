@@ -11,5 +11,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class GameRequestDto {
     private Integer gameId;
+    private String message;
 }
 

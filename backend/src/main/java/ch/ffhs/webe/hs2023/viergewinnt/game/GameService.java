@@ -10,6 +10,8 @@ public interface GameService {
 
     List<Game> getAllGames();
 
+    Game getGameById(final int gameId);
+
     Game joinGame(final int gameId, final User currentUser);
 
     void leftGame(final int gameId, final User currentUser);

@@ -32,6 +32,10 @@
       "yourTurn": "It's your turn.",
       "notYourTurn": "It's not your turn.",
       "wait": "The game has not started yet"
+    },
+    "button": {
+      "newGame": "Start New Game",
+      "break": "Pause Game"
     }
   },
   "error": {

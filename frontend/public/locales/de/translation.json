@@ -32,6 +32,10 @@
       "yourTurn": "Du bist am Zug.",
       "notYourTurn": "Du bist nicht am Zug.",
       "wait": "Das Spiel hat noch nicht gestartet"
+    },
+    "button": {
+      "newGame": "Neues Spiel starten",
+      "break": "Spiel pausieren"
     }
   },
   "error": {

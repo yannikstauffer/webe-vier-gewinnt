@@ -4,7 +4,6 @@ import ch.ffhs.webe.hs2023.viergewinnt.game.dto.GameActionDto;
 import ch.ffhs.webe.hs2023.viergewinnt.game.dto.GameDto;
 import ch.ffhs.webe.hs2023.viergewinnt.game.dto.GameRequestDto;
 import ch.ffhs.webe.hs2023.viergewinnt.game.dto.GameStateDto;
-import ch.ffhs.webe.hs2023.viergewinnt.game.values.GameState;
 import ch.ffhs.webe.hs2023.viergewinnt.user.UserService;
 import ch.ffhs.webe.hs2023.viergewinnt.websocket.StompMessageService;
 import ch.ffhs.webe.hs2023.viergewinnt.websocket.values.MessageSources;
@@ -62,12 +61,6 @@ public class GameController {
         final var sender = this.userService.getUserByEmail(user.getName());
         final var game = this.gameService.joinGame(request.getGameId(), sender);
 
-        // Aktualisierung für Gamestart senden
-        if(game.getGameState() == GameState.IN_PROGRESS){
-            this.messageService.sendToUser(Queues.GAME, this.userService.getUserById(game.getUserOne().getId()), GameStateDto.of(game));
-            this.messageService.sendToUser(Queues.GAME, this.userService.getUserById(game.getUserTwo().getId()), GameStateDto.of(game));
-        }
-
         return GameDto.of(game);
     }
 
@@ -77,6 +70,22 @@ public class GameController {
         final var sender = this.userService.getUserByEmail(user.getName());
         this.gameService.leftGame(request.getGameId(), sender);
         return this.allGames();
+    }
+
+    @MessageMapping(MessageSources.GAMES + "/control")
+    public void gameAction(@Payload final GameRequestDto request, Principal user) {
+        final var sender = userService.getUserByEmail(user.getName());
+        final var game = gameService.getGameById(request.getGameId());
+
+        if (game.getUserOne() != null && game.getUserTwo() != null) {
+            this.gameService.startGame(game);
+        }
+
+        this.messageService.sendToUser(Queues.GAME, this.userService.getUserById(game.getUserOne().getId()), GameStateDto.of(game));
+
+        if (game.getUserTwo() != null) {
+            this.messageService.sendToUser(Queues.GAME, this.userService.getUserById(game.getUserTwo().getId()), GameStateDto.of(game));
+        }
     }
 
     @MessageMapping(MessageSources.GAMES + "/action")

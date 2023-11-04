@@ -62,7 +62,6 @@ public class GameServiceImpl implements GameService {
 
         if (game.getUserOne() != null && game.getUserTwo() == null) {
             game.setUserTwo(currentUser);
-            startGame(game);
         }
 
         return this.gameRepository.save(game);
@@ -74,6 +73,7 @@ public class GameServiceImpl implements GameService {
             game.setGameState(GameState.IN_PROGRESS);
             game.setGameBoardState(GameBoardState.MOVE_EXPECTED);
             game.setNextMove(new Random().nextBoolean() ? game.getUserOne().getId() : game.getUserTwo().getId());
+            this.gameRepository.save(game);
         }
     }
 
@@ -121,12 +121,19 @@ public class GameServiceImpl implements GameService {
             game.setGameBoardState(GameBoardState.DRAW);
             game.setGameState(GameState.FINISHED);
         } else {
-            game.setGameBoardState(GameBoardState.MOVE_EXPECTED);
             game.setNextMove(game.getNextMove().equals(game.getUserOne().getId()) ?
                     game.getUserTwo().getId() : game.getUserOne().getId());
         }
 
         game.setBoard(gameBoard.getBoard());
         return gameRepository.save(game);
+    }
+
+    @Override
+    public Game getGameById(final int gameId) {
+        final Game game = this.gameRepository.findById(gameId)
+                .orElseThrow(() -> VierGewinntException.of(ErrorCode.GAME_NOT_FOUND, "Spiel nicht gefunden!"));
+
+        return this.gameRepository.save(game);
     }
 }
