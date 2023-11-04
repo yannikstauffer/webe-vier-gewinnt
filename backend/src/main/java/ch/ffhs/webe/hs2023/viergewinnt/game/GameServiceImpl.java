@@ -53,7 +53,7 @@ public class GameServiceImpl implements GameService {
 
     @Override
     public Game joinGame(final int gameId, final User currentUser) {
-        Game game = this.gameRepository.findById(gameId)
+        final Game game = this.gameRepository.findById(gameId)
                 .orElseThrow(() -> VierGewinntException.of(ErrorCode.GAME_NOT_FOUND, "Spiel nicht gefunden!"));
 
         if (game.isFull()) {
@@ -62,20 +62,19 @@ public class GameServiceImpl implements GameService {
 
         if (game.getUserOne() != null && game.getUserTwo() == null) {
             game.setUserTwo(currentUser);
-            game = startGame(game);
+            startGame(game);
         }
 
-        return game;
+        return this.gameRepository.save(game);
     }
 
     @Override
-    public Game startGame(Game game) {
+    public void startGame(Game game) {
         if (game.getGameState() == GameState.WAITING_FOR_PLAYERS && game.getUserOne() != null && game.getUserTwo() != null) {
             game.setGameState(GameState.IN_PROGRESS);
             game.setGameBoardState(GameBoardState.MOVE_EXPECTED);
             game.setNextMove(new Random().nextBoolean() ? game.getUserOne().getId() : game.getUserTwo().getId());
         }
-        return this.gameRepository.save(game);
     }
 
     @Override

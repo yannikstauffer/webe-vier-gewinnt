@@ -10,9 +10,9 @@ public class GameBoard {
 
     private ArrayList<ArrayList<Integer>> initializeBoard() {
         ArrayList<ArrayList<Integer>> board = new ArrayList<>();
-        for (int i = 0; i < 7; i++) {
+        for (int i = 0; i < 6; i++) {
             ArrayList<Integer> column = new ArrayList<>();
-            for (int j = 0; j < 6; j++) {
+            for (int j = 0; j < 7; j++) {
                 column.add(0);
             }
             board.add(column);

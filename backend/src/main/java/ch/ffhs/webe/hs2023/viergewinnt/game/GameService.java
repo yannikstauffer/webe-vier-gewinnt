@@ -18,6 +18,6 @@ public interface GameService {
 
     void deleteAllGames();
 
-    Game startGame(Game game);
+    void startGame(Game game);
 
 }
