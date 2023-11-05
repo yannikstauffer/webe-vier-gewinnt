@@ -44,7 +44,6 @@ const GameBoard = ({gameId, userId}) => {
     useEffect(() => {
         setStatusMessage(getGameStatusMessage());
 
-        // Hier setzen wir den initialen Button-Zustand basierend auf dem initialen Spielzustand
         if (gameBoardState === 'READY_TO_START' || gameBoardState === 'NOT_STARTED') {
             setButtonState('start');
         } else if (gameBoardState === 'PLAYER_HAS_WON' || gameBoardState === 'DRAW') {
@@ -61,7 +60,7 @@ const GameBoard = ({gameId, userId}) => {
             case 'MOVE_EXPECTED':
                 return nextMove === userId ? t('game.state.yourTurn') : t('game.state.notYourTurn');
             default:
-                return 'game.state.wait';
+                return t('game.state.wait');
         }
     };
 
@@ -83,12 +82,9 @@ const GameBoard = ({gameId, userId}) => {
 
         if (gameBoardState === 'READY_TO_START' || gameBoardState === 'PLAYER_HAS_WON' || gameBoardState === 'DRAW') {
             actionName = 'start';
-            setBoard(createEmptyBoard()); // Setzen Sie das Spielbrett zurück, wenn ein neues Spiel gestartet wird
-        } else if (gameBoardState === 'MOVE_EXPECTED') {
-            actionName = 'pause';
+            setBoard(createEmptyBoard());
         }
 
-        // Nur Nachrichten senden und den Zustand ändern, wenn der Button aktiv sein sollte
         if (gameBoardState !== 'NOT_STARTED') {
             if (stompClient && stompClient.connected) {
                 stompClient.publish({

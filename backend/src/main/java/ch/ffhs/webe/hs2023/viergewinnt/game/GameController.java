@@ -74,7 +74,6 @@ public class GameController {
 
     @MessageMapping(MessageSources.GAMES + "/control")
     public void gameAction(@Payload final GameRequestDto request, Principal user) {
-        final var sender = userService.getUserByEmail(user.getName());
         final var game = gameService.getGameById(request.getGameId());
 
         if (game.getUserOne() != null && game.getUserTwo() != null) {

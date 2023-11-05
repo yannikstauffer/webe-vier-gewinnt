@@ -72,4 +72,8 @@ public class GameBoard {
         }
         return true;
     }
+
+    public void resetBoard() {
+        this.board = initializeBoard();
+    }
 }

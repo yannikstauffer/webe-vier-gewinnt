@@ -69,12 +69,19 @@ public class GameServiceImpl implements GameService {
 
     @Override
     public void startGame(Game game) {
-        if (game.getGameState() == GameState.WAITING_FOR_PLAYERS && game.getUserOne() != null && game.getUserTwo() != null) {
+        if (game.getGameState() == GameState.FINISHED) {
+            GameBoard gameBoard = new GameBoard();
+            gameBoard.resetBoard();
+            game.setBoard(gameBoard.getBoard());
+        }
+
+        if (game.getGameState() == GameState.WAITING_FOR_PLAYERS || game.getGameState() == GameState.FINISHED) {
             game.setGameState(GameState.IN_PROGRESS);
             game.setGameBoardState(GameBoardState.MOVE_EXPECTED);
             game.setNextMove(new Random().nextBoolean() ? game.getUserOne().getId() : game.getUserTwo().getId());
             this.gameRepository.save(game);
         }
+
     }
 
     @Override
