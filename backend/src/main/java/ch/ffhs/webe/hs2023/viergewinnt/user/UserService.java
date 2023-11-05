@@ -15,5 +15,4 @@ public interface UserService {
 
     List<User> getAllWithSession();
 
-    void removeSessionId(final String email, String sessionId) throws VierGewinntException;
 }

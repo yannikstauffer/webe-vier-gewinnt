@@ -9,4 +9,6 @@ public interface SessionService {
     void deleteByUser(final User user);
 
     void addSession(final User user, final String stompSessionId) throws VierGewinntException;
+
+    void removeSession(final User user, final String stompSessionId) throws VierGewinntException;
 }

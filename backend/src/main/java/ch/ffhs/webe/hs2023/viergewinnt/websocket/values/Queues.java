@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
  */
 @NoArgsConstructor(access = lombok.AccessLevel.PRIVATE)
 public final class Queues {
+    public static final String USERS = "/queue/users";
     public static final String CHAT = "/queue/chat";
     public static final String CHATS = "/queue/chats";
     public static final String ERROR = "/queue/error";

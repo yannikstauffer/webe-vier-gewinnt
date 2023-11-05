@@ -41,6 +41,11 @@
     "label": {
       "anErrorOccurred": "An error occurred"
     },
+    "chat": {
+      "receiverNotSet": "Receiver not set",
+      "messageTextEmpty": "Message text is empty",
+      "receiverShouldNotBeSetOnPublicMessage": "Receiver should not be set on public message"
+    },
     "user": {
       "notFound": "User not found",
       "unknown": "Unknown error"

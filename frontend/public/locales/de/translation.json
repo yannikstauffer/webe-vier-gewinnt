@@ -41,6 +41,11 @@
     "label": {
       "anErrorOccurred": "Es ist ein Fehler aufgetreten"
     },
+    "chat": {
+      "receiverNotSet": "Empfänger fehlt",
+      "messageTextEmpty": "Nachrichtentext ist leer",
+      "receiverShouldNotBeSetOnPublicMessage": "Empfänger sollte auf einer öffentlichen Nachricht nicht gesetzt sein"
+    },
     "user":{
       "notFound":"Benutzer nicht gefunden",
       "unknown": "Unbekannter Fehler"
