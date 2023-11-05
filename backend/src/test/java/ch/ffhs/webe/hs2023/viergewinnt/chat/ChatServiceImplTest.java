@@ -2,20 +2,23 @@ package ch.ffhs.webe.hs2023.viergewinnt.chat;
 
 import ch.ffhs.webe.hs2023.viergewinnt.base.VierGewinntException;
 import ch.ffhs.webe.hs2023.viergewinnt.chat.dto.InboundMessageDto;
+import ch.ffhs.webe.hs2023.viergewinnt.chat.model.Message;
 import ch.ffhs.webe.hs2023.viergewinnt.chat.repository.MessageRepository;
 import ch.ffhs.webe.hs2023.viergewinnt.chat.values.MessageType;
 import ch.ffhs.webe.hs2023.viergewinnt.user.UserService;
-import ch.ffhs.webe.hs2023.viergewinnt.user.model.User;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Collections;
 import java.util.stream.Stream;
 
+import static ch.ffhs.webe.hs2023.viergewinnt.user.UserTestUtils.user;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -24,21 +27,21 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@SpringBootTest
+@ExtendWith(MockitoExtension.class)
 class ChatServiceImplTest {
-    @MockBean
+    @Mock
     MessageRepository messageRepository;
 
-    @MockBean
+    @Mock
     UserService userService;
 
-    @Autowired
+    @InjectMocks
     ChatServiceImpl chatServiceImpl;
 
     @Test
     void storePublicMessage() {
         // arrange
-        final var sender = User.builder().id(1).build();
+        final var sender = user(1);
         final var inboundMessageDto = InboundMessageDto.builder()
                 .text("foo")
                 .build();
@@ -59,8 +62,8 @@ class ChatServiceImplTest {
     @Test
     void storePrivateMessage() {
         // arrange
-        final var sender = User.builder().id(1).build();
-        final var receiver = User.builder().id(100).build();
+        final var sender = user(2);
+        final var receiver = user(200);
         final var inboundMessageDto = InboundMessageDto.builder()
                 .text("foo")
                 .receiverId(receiver.getId())
@@ -78,6 +81,38 @@ class ChatServiceImplTest {
         assertThat(actualMessage.getSender()).isEqualTo(sender);
         assertThat(actualMessage.getReceiver()).contains(receiver);
         assertThat(actualMessage.getText()).isEqualTo(inboundMessageDto.getText());
+    }
+
+    @Test
+    void getPrivateMessages() {
+        // arrange
+        final var user = user(3);
+        final var expectedMessage = Message.builder().build();
+
+        when(this.messageRepository.findPrivateBy(user)).thenReturn(Collections.singletonList(expectedMessage));
+
+        // act
+        final var actualMessages = this.chatServiceImpl.getPrivateMessages(user);
+
+        // assert
+        verify(this.messageRepository, times(1)).findPrivateBy(user);
+        assertThat(actualMessages).containsExactly(expectedMessage);
+    }
+
+    @Test
+    void getPublicMessages() {
+        // arrange
+        final var time = java.time.LocalDateTime.now();
+        final var expectedMessage = Message.builder().build();
+
+        when(this.messageRepository.findPublicBy(time)).thenReturn(Collections.singletonList(expectedMessage));
+
+        // act
+        final var actualMessages = this.chatServiceImpl.getPublicMessages(time);
+
+        // assert
+        verify(this.messageRepository, times(1)).findPublicBy(time);
+        assertThat(actualMessages).containsExactly(expectedMessage);
     }
 
     @ParameterizedTest

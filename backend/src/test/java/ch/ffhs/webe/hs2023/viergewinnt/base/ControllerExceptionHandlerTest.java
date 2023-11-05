@@ -1,19 +1,20 @@
 package ch.ffhs.webe.hs2023.viergewinnt.base;
 
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.mockito.InjectMocks;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-@SpringBootTest
+@ExtendWith(MockitoExtension.class)
 class ControllerExceptionHandlerTest {
 
-    @Autowired
+    @InjectMocks
     ControllerExceptionHandler controllerExceptionHandler;
 
     @ParameterizedTest

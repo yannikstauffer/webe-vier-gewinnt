@@ -11,30 +11,32 @@ import ch.ffhs.webe.hs2023.viergewinnt.user.model.User;
 import ch.ffhs.webe.hs2023.viergewinnt.websocket.StompMessageService;
 import ch.ffhs.webe.hs2023.viergewinnt.websocket.values.Queues;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.security.Principal;
 
+import static ch.ffhs.webe.hs2023.viergewinnt.user.UserTestUtils.user;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@SpringBootTest
+@ExtendWith(MockitoExtension.class)
 class ChatControllerTest {
-    @MockBean
+    @Mock
     ChatService chatService;
 
-    @MockBean
+    @Mock
     UserService userService;
 
-    @MockBean
+    @Mock
     StompMessageService messageService;
 
-    @Autowired
+    @InjectMocks
     ChatController chatController;
 
     @Test
@@ -60,9 +62,9 @@ class ChatControllerTest {
     @Test
     void receivePrivateMessage() {
         // arrange
-        final var sender = this.sender();
+        final var sender = this.sender(1);
         final var principal = this.principal(sender);
-        final var receiver = User.builder().id(100).build();
+        final var receiver = user(100);
         final var inboundMessageDto = InboundMessageDto.builder().receiverId(100).build();
         final var storedMessage = this.privateMessage(sender, receiver);
         final var expectedOutboundMessage = this.outboundMessageDto(storedMessage);
@@ -80,7 +82,7 @@ class ChatControllerTest {
     @Test
     void receivePrivateMessage_throwsVierGewinntException_whenReceiverIsMissingOnMessage() {
         // arrange
-        final var sender = this.sender();
+        final var sender = this.sender(2);
         final var principal = this.principal(sender);
 
         final var inboundMessageDto = mock(InboundMessageDto.class);
@@ -94,13 +96,9 @@ class ChatControllerTest {
                 .hasMessageContaining("Message receiver for message with id " + storedMessage.getId() + " not found");
     }
 
-    User sender() {
-        final var sender = User.builder()
-                .id(1)
-                .firstName("foo")
-                .lastName("bar")
-                .email("foo@bar.com").build();
-        when(this.userService.getUserByEmail("foo@bar.com")).thenReturn(sender);
+    User sender(final int userId) {
+        final var sender = user(userId);
+        when(this.userService.getUserByEmail(sender.getEmail())).thenReturn(sender);
 
         return sender;
     }
