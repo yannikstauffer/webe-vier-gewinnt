@@ -111,9 +111,13 @@ public class GameServiceImpl implements GameService {
 
         GameBoard gameBoard = new GameBoard();
         gameBoard.setBoard(game.getBoard());
-        gameBoard.updateBoardColumn(column, currentUser.getId());
+        boolean isUpdated = gameBoard.updateBoardColumn(column, currentUser.getId());
 
-        boolean hasWon = false; //todo
+        if (!isUpdated) {
+            throw VierGewinntException.of(ErrorCode.INVALID_MOVE, "Ungültiger Zug, Spalte ist voll!");
+        }
+
+        boolean hasWon = gameBoard.checkWinner(currentUser.getId());
 
         if (hasWon) {
             game.setGameBoardState(GameBoardState.PLAYER_HAS_WON);

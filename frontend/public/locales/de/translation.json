@@ -34,8 +34,7 @@
       "wait": "Das Spiel hat noch nicht gestartet"
     },
     "button": {
-      "newGame": "Neues Spiel starten",
-      "break": "Spiel pausieren"
+      "newGame": "Neues Spiel starten"
     }
   },
   "error": {

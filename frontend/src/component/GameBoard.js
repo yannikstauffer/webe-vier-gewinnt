@@ -72,7 +72,6 @@ const GameBoard = ({gameId, userId}) => {
             case 'READY_TO_START':
                 return t('game.button.newGame');
             case 'MOVE_EXPECTED':
-                return t('game.button.break');
             case 'NOT_STARTED':
             default:
                 return t('game.button.newGame');
