@@ -1,10 +1,12 @@
 package ch.ffhs.webe.hs2023.viergewinnt.game;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.ArrayList;
 
-@Data
+@Getter
+@Setter
 public class GameBoard {
     private static final int CONNECT = 4;
     private ArrayList<ArrayList<Integer>> board = initializeBoard();
