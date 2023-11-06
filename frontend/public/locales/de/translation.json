@@ -51,7 +51,12 @@
       "unknown": "Unbekannter Fehler"
     },
     "game": {
-      "notFound": "Spiel nicht gefunden"
+      "notFound": "Spiel nicht gefunden",
+      "isFull": "Das Spiel ist bereits voll",
+      "cannotRead": "Spielbrett konnte nicht gefunden werden",
+      "cannotWrite": "Spielbrett konnte nicht gespeichert werden",
+      "notReady": "Warten auf andere Spieler",
+      "invalidMove": "Ungültiger Spielzug"
     }
   },
   "system": {

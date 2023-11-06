@@ -51,7 +51,12 @@
       "unknown": "Unknown error"
     },
     "game": {
-      "notFound": "Game not found"
+      "notFound": "Game not found",
+      "isFull": "The game is already full",
+      "cannotRead": "Game board could not be found",
+      "cannotWrite": "Game board could not be saved",
+      "notReady": "Waiting for other players",
+      "invalidMove": "Invalid move"
     }
   },
   "system": {
