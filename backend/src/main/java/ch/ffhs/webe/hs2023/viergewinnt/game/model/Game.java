@@ -57,6 +57,8 @@ public class Game {
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdDate = LocalDateTime.now();
 
+    @Getter(AccessLevel.PRIVATE)
+    @Setter(AccessLevel.PRIVATE)
     @Column(columnDefinition = "TEXT")
     private String boardJson;
 
