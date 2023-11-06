@@ -24,6 +24,17 @@
     "label": {
       "name": "Spiel",
       "creator": "Ersteller"
+    },
+    "state": {
+      "win": "Du hast gewonnen!",
+      "lose": "Du hast verloren.",
+      "draw": "Das Spiel endet unentschieden.",
+      "yourTurn": "Du bist am Zug.",
+      "notYourTurn": "Du bist nicht am Zug.",
+      "wait": "Das Spiel hat noch nicht gestartet"
+    },
+    "button": {
+      "newGame": "Neues Spiel starten"
     }
   },
   "error": {
@@ -40,7 +51,12 @@
       "unknown": "Unbekannter Fehler"
     },
     "game": {
-      "notFound": "Spiel nicht gefunden"
+      "notFound": "Spiel nicht gefunden",
+      "isFull": "Das Spiel ist bereits voll",
+      "cannotRead": "Spielbrett konnte nicht gefunden werden",
+      "cannotWrite": "Spielbrett konnte nicht gespeichert werden",
+      "notReady": "Warten auf andere Spieler",
+      "invalidMove": "Ungültiger Spielzug"
     }
   },
   "system": {

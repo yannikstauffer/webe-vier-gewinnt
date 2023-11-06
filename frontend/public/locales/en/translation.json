@@ -24,6 +24,17 @@
     "label": {
       "name": "Game",
       "creator": "Creator"
+    },
+    "state": {
+      "win": "You have won!",
+      "lose": "You have lost.",
+      "draw": "The game is a draw.",
+      "yourTurn": "It's your turn.",
+      "notYourTurn": "It's not your turn.",
+      "wait": "The game has not started yet"
+    },
+    "button": {
+      "newGame": "Start New Game"
     }
   },
   "error": {
@@ -40,7 +51,12 @@
       "unknown": "Unknown error"
     },
     "game": {
-      "notFound": "Game not found"
+      "notFound": "Game not found",
+      "isFull": "The game is already full",
+      "cannotRead": "Game board could not be found",
+      "cannotWrite": "Game board could not be saved",
+      "notReady": "Waiting for other players",
+      "invalidMove": "Invalid move"
     }
   },
   "system": {

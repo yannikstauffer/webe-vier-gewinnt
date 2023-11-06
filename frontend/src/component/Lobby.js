@@ -8,13 +8,14 @@ const Lobby = ({userId}) => {
     const navigate = useNavigate();
     const location = useLocation();
 
-    useSubscription("/topic/lobby/games/create", (message) => {
-        const newGame = JSON.parse(message.body);
-        console.log("Received payload newGame:", newGame);
-        setGames((oldGames) => [...oldGames, newGame]);
+    useSubscription("/topic/lobby/games", (message) => {
+        const Game = JSON.parse(message.body);
+        setGames((oldGames) => [...oldGames, Game]);
 
-        if (newGame.userOne?.id === userId) {
-            navigate(`/game/${newGame.id}`, {state: {prevPath: location.pathname}});
+        if (Game.userOne?.id === userId) {
+            navigate(`/game/${Game.id}`, {state: {prevPath: location.pathname}});
+        } else if (Game.userTwo?.id === userId){
+            navigate(`/game/${Game.id}`, {state: {prevPath: location.pathname}});
         }
     });
 
@@ -22,14 +23,6 @@ const Lobby = ({userId}) => {
         const allGames = JSON.parse(message.body);
         console.log("Received payload allGames:", allGames);
         setGames(allGames);
-    });
-
-    useSubscription("/topic/lobby/games/joined", (message) => {
-        const joinedGame = JSON.parse(message.body);
-
-        if (joinedGame.userTwo?.id === userId) {
-            navigate(`/game/${joinedGame.id}`, {state: {prevPath: location.pathname}});
-        }
     });
 
     useEffect(() => {

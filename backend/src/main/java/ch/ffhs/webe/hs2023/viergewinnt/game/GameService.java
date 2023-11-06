@@ -1,6 +1,5 @@
 package ch.ffhs.webe.hs2023.viergewinnt.game;
 
-import ch.ffhs.webe.hs2023.viergewinnt.game.dto.GameRequestDto;
 import ch.ffhs.webe.hs2023.viergewinnt.game.model.Game;
 import ch.ffhs.webe.hs2023.viergewinnt.user.model.User;
 
@@ -11,9 +10,16 @@ public interface GameService {
 
     List<Game> getAllGames();
 
-    Game joinGame(GameRequestDto request, final User currentUser);
+    Game getGameById(final int gameId);
 
-    void leftGame(GameRequestDto request, final User currentUser);
+    Game joinGame(final int gameId, final User currentUser);
+
+    void leftGame(final int gameId, final User currentUser);
+
+    Game updateGameBoard(final int gameId, final int column, final User currentUser);
 
     void deleteAllGames();
+
+    void startGame(Game game);
+
 }

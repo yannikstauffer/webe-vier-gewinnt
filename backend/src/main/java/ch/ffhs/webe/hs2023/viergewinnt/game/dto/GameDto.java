@@ -1,6 +1,7 @@
 package ch.ffhs.webe.hs2023.viergewinnt.game.dto;
 
 import ch.ffhs.webe.hs2023.viergewinnt.game.model.Game;
+import ch.ffhs.webe.hs2023.viergewinnt.game.values.GameState;
 import ch.ffhs.webe.hs2023.viergewinnt.user.dto.UserDto;
 import lombok.Builder;
 import lombok.Data;
@@ -14,12 +15,14 @@ public class GameDto {
     private int id;
     private UserDto userOne;
     private UserDto userTwo;
+    private GameState gameState;
 
     public static GameDto of(final Game game) {
         final var builder =
                 GameDto.builder()
                         .id(game.getId())
-                        .userOne(UserDto.of(game.getUserOne()));
+                        .userOne(UserDto.of(game.getUserOne()))
+                        .gameState(game.getGameState());
         if (game.getUserTwo() != null) {
             builder.userTwo(UserDto.of(game.getUserTwo()));
         }
