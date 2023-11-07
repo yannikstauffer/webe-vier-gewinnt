@@ -108,13 +108,7 @@ public class GameServiceImpl implements GameService {
         final Game game = this.gameRepository.findById(gameId)
                 .orElseThrow(() -> VierGewinntException.of(ErrorCode.GAME_NOT_FOUND, "Spiel nicht gefunden!"));
 
-        if (game.getUserOne() == null || game.getUserTwo() == null) {
-            throw VierGewinntException.of(ErrorCode.GAME_NOT_READY, "Warten auf Spieler!");
-        }
-
-        if (game.getGameState() == GameState.WAITING_FOR_PLAYERS) {
-            game.setGameState(GameState.IN_PROGRESS);
-        }
+        validateGameInProgress(game, currentUser);
 
         GameBoard gameBoard = new GameBoard();
         gameBoard.setBoard(game.getBoard());
@@ -148,4 +142,28 @@ public class GameServiceImpl implements GameService {
 
         return this.gameRepository.save(game);
     }
+
+    @Override
+    public void validatePlayer(Game game, User currentUser) {
+        if (currentUser == null) {
+            throw VierGewinntException.of(ErrorCode.NULL_PLAYER, "Player was not set.");
+        }
+
+        if (game.getUserOne().getId() != currentUser.getId() && game.getUserTwo().getId() != currentUser.getId()) {
+            throw VierGewinntException.of(ErrorCode.INVALID_PLAYER, "The current user is not part of this game.");
+        }
+    }
+
+    @Override
+    public void validateGameInProgress(Game game, User currentUser) {
+        validatePlayer(game, currentUser);
+        if (game.getGameState() != GameState.IN_PROGRESS) {
+            throw VierGewinntException.of(ErrorCode.INVALID_GAME_STATE, "The game state should be IN_PROGRESS");
+        }
+
+        if (game.getUserOne() == null || game.getUserTwo() == null) {
+            throw VierGewinntException.of(ErrorCode.GAME_NOT_READY, "Warten auf Spieler!");
+        }
+    }
+
 }

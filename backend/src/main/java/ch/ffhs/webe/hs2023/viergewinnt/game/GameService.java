@@ -22,4 +22,8 @@ public interface GameService {
 
     void startGame(Game game);
 
+    void validatePlayer(Game game, User currentUser);
+
+    void validateGameInProgress(Game game, User currentUser);
+
 }
