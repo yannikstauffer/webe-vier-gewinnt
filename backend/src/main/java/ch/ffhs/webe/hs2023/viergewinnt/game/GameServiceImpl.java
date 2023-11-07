@@ -68,20 +68,28 @@ public class GameServiceImpl implements GameService {
     }
 
     @Override
-    public void startGame(Game game) {
-        if (game.getGameState() == GameState.FINISHED) {
-            GameBoard gameBoard = new GameBoard();
-            gameBoard.resetBoard();
-            game.setBoard(gameBoard.getBoard());
-        }
+    public Game startGame(Game game) {
+        game.setGameState(GameState.IN_PROGRESS);
+        game.setGameBoardState(GameBoardState.MOVE_EXPECTED);
+        game.setNextMove(new Random().nextBoolean() ? game.getUserOne().getId() : game.getUserTwo().getId());
 
-        if (game.getGameState() == GameState.WAITING_FOR_PLAYERS || game.getGameState() == GameState.FINISHED) {
-            game.setGameState(GameState.IN_PROGRESS);
-            game.setGameBoardState(GameBoardState.MOVE_EXPECTED);
-            game.setNextMove(new Random().nextBoolean() ? game.getUserOne().getId() : game.getUserTwo().getId());
-            this.gameRepository.save(game);
-        }
+        return gameRepository.save(game);
+    }
 
+    @Override
+    public Game restartGame(Game game) {
+        Game newGame = new Game();
+        newGame.setUserOne(game.getUserOne());
+        newGame.setUserTwo(game.getUserTwo());
+        GameBoard gameBoard = new GameBoard();
+        gameBoard.resetBoard();
+        newGame.setBoard(gameBoard.getBoard());
+
+        newGame.setGameState(GameState.IN_PROGRESS);
+        newGame.setGameBoardState(GameBoardState.MOVE_EXPECTED);
+        newGame.setNextMove(new Random().nextBoolean() ? game.getUserOne().getId() : game.getUserTwo().getId());
+
+        return gameRepository.save(newGame);
     }
 
     @Override

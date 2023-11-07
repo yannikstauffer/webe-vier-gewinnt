@@ -11,7 +11,8 @@ const createEmptyBoard = () => {
     return Array(ROWS).fill(null).map(() => Array(COLUMNS).fill(EMPTY));
 };
 
-const GameBoard = ({gameId, userId}) => {
+const GameBoard = ({initialGameId, userId}) => {
+    const [gameId, setGameId] = useState(initialGameId);
     const [board, setBoard] = useState(createEmptyBoard());
     const [nextMove, setNextMove] = useState(null);
     const [gameBoardState, setGameBoardState] = useState('NOT_STARTED');
@@ -22,7 +23,12 @@ const GameBoard = ({gameId, userId}) => {
     const [playerOneId, setPlayerOneId] = useState(null);
     const [playerTwoId, setPlayerTwoId] = useState(null);
 
+
     const updateGame = (updatedGame) => {
+        if (gameId != updatedGame.gameId) {
+            setGameId(updatedGame.gameId);
+        }
+
         setBoard(updatedGame.board);
         setNextMove(updatedGame.nextMove);
         setGameBoardState(updatedGame.gameBoardState);
@@ -37,7 +43,7 @@ const GameBoard = ({gameId, userId}) => {
         if (updatedGame.gameBoardState === 'READY_TO_START' || updatedGame.gameBoardState === 'NOT_STARTED') {
             setButtonState('start');
         } else if (updatedGame.gameBoardState === 'PLAYER_HAS_WON' || updatedGame.gameBoardState === 'DRAW') {
-            setButtonState('newGame');
+            setButtonState('restart');
         }
     };
 

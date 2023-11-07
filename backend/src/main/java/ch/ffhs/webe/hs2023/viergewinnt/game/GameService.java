@@ -20,7 +20,9 @@ public interface GameService {
 
     void deleteAllGames();
 
-    void startGame(Game game);
+    Game startGame(Game game);
+
+    Game restartGame(Game game);
 
     void validatePlayer(Game game, User currentUser);
 

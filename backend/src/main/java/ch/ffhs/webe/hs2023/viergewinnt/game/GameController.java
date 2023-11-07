@@ -4,6 +4,7 @@ import ch.ffhs.webe.hs2023.viergewinnt.game.dto.GameActionDto;
 import ch.ffhs.webe.hs2023.viergewinnt.game.dto.GameDto;
 import ch.ffhs.webe.hs2023.viergewinnt.game.dto.GameRequestDto;
 import ch.ffhs.webe.hs2023.viergewinnt.game.dto.GameStateDto;
+import ch.ffhs.webe.hs2023.viergewinnt.game.model.Game;
 import ch.ffhs.webe.hs2023.viergewinnt.user.UserService;
 import ch.ffhs.webe.hs2023.viergewinnt.websocket.StompMessageService;
 import ch.ffhs.webe.hs2023.viergewinnt.websocket.values.MessageSources;
@@ -75,15 +76,21 @@ public class GameController {
     @MessageMapping(MessageSources.GAMES + "/control")
     public void gameAction(@Payload final GameRequestDto request, Principal user) {
         final var game = gameService.getGameById(request.getGameId());
+        final var sender = this.userService.getUserByEmail(user.getName());
 
-        if (game.getUserOne() != null && game.getUserTwo() != null) {
-            this.gameService.startGame(game);
+        gameService.validatePlayer(game, sender);
+        Game updatedGame = game;
+
+        if ("start".equals(request.getMessage())) {
+            updatedGame = this.gameService.startGame(game);
+        } else if ("restart".equals(request.getMessage())) {
+            updatedGame = this.gameService.restartGame(game);
         }
 
-        this.messageService.sendToUser(Queues.GAME, this.userService.getUserById(game.getUserOne().getId()), GameStateDto.of(game));
+        this.messageService.sendToUser(Queues.GAME, this.userService.getUserById(game.getUserOne().getId()), GameStateDto.of(updatedGame));
 
         if (game.getUserTwo() != null) {
-            this.messageService.sendToUser(Queues.GAME, this.userService.getUserById(game.getUserTwo().getId()), GameStateDto.of(game));
+            this.messageService.sendToUser(Queues.GAME, this.userService.getUserById(game.getUserTwo().getId()), GameStateDto.of(updatedGame));
         }
     }
 
