@@ -1,7 +1,9 @@
 import React, {useState} from 'react';
 import {useStompClient, useSubscription} from "react-stomp-hooks";
 import {useTranslation} from 'react-i18next';
+import {useNavigate} from 'react-router-dom';
 import './GameBoard.css';
+import ConfirmDialog from './ConfirmDialog';
 
 const ROWS = 6;
 const COLUMNS = 7;
@@ -22,6 +24,8 @@ const GameBoard = ({initialGameId, userId}) => {
     const [buttonState, setButtonState] = useState('start');
     const [playerOneId, setPlayerOneId] = useState(null);
     const [playerTwoId, setPlayerTwoId] = useState(null);
+    const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+    const navigate = useNavigate();
 
 
     const updateGame = (updatedGame) => {
@@ -44,6 +48,8 @@ const GameBoard = ({initialGameId, userId}) => {
             setButtonState('start');
         } else if (updatedGame.gameBoardState === 'PLAYER_HAS_WON' || updatedGame.gameBoardState === 'DRAW') {
             setButtonState('restart');
+        } else if (updatedGame.gameBoardState === 'PAUSED') {
+            setButtonState('paused')
         }
     };
 
@@ -61,16 +67,20 @@ const GameBoard = ({initialGameId, userId}) => {
                 return t('game.state.draw');
             case 'MOVE_EXPECTED':
                 return nextMove === userId ? t('game.state.yourTurn') : t('game.state.notYourTurn');
+            case 'PAUSED':
+                return t('game.state.paused');
             default:
                 return t('game.state.wait');
         }
     };
 
-    const getButtonText = () => {
+    const getHandleButtonText = () => {
         switch (buttonState) {
             case 'start':
                 return t('game.button.newGame');
-            case 'newGame':
+            case 'restart':
+                return t('game.button.newGame');
+            case 'paused':
                 return t('game.button.newGame');
             default:
                 return t('game.button.newGame');
@@ -92,6 +102,27 @@ const GameBoard = ({initialGameId, userId}) => {
                 }),
             });
         }
+    };
+
+    const leaveButtonClick = () => {
+        setShowConfirmDialog(true);
+    };
+
+    const confirmLeave = () => {
+        setShowConfirmDialog(false);
+        setBoard(createEmptyBoard());
+
+        if (stompClient && stompClient.connected) {
+            stompClient.publish({
+                destination: `/4gewinnt/games/control`,
+                body: JSON.stringify({
+                    gameId: gameId,
+                    message: 'leave'
+                }),
+            });
+        }
+
+        navigate('/lobby');
     };
 
     const dropDisc = (column) => {
@@ -138,7 +169,14 @@ const GameBoard = ({initialGameId, userId}) => {
                 </tbody>
             </table>
             <p>{statusMessage}</p>
-            <button onClick={handleButtonClick} disabled={isGameActive()}>{getButtonText()}</button>
+            <button onClick={handleButtonClick} disabled={isGameActive()}>{getHandleButtonText()}</button>
+            <button onClick={leaveButtonClick}>{t('game.button.leaveGame')}</button>
+
+            <ConfirmDialog
+                open={showConfirmDialog}
+                onClose={() => setShowConfirmDialog(false)}
+                onConfirm={confirmLeave}
+            />
         </div>
     );
 };

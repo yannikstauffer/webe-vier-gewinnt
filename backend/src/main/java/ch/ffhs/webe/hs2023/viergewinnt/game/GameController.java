@@ -4,6 +4,7 @@ import ch.ffhs.webe.hs2023.viergewinnt.game.dto.GameActionDto;
 import ch.ffhs.webe.hs2023.viergewinnt.game.dto.GameDto;
 import ch.ffhs.webe.hs2023.viergewinnt.game.dto.GameRequestDto;
 import ch.ffhs.webe.hs2023.viergewinnt.game.dto.GameStateDto;
+import ch.ffhs.webe.hs2023.viergewinnt.game.model.Game;
 import ch.ffhs.webe.hs2023.viergewinnt.user.UserService;
 import ch.ffhs.webe.hs2023.viergewinnt.websocket.StompMessageService;
 import ch.ffhs.webe.hs2023.viergewinnt.websocket.values.MessageSources;
@@ -64,21 +65,12 @@ public class GameController {
         return GameDto.of(game);
     }
 
-    @MessageMapping(MessageSources.GAMES + "/left")
-    @SendTo(Topics.LOBBY_GAMES + "/all")
-    public List<GameDto> leftGame(@Payload final GameRequestDto request, final Principal user) {
-        final var sender = this.userService.getUserByEmail(user.getName());
-        this.gameService.leftGame(request.getGameId(), sender);
-        return this.allGames();
-    }
-
     @MessageMapping(MessageSources.GAMES + "/control")
-    public void gameAction(@Payload final GameRequestDto request, Principal user) {
+    public void gameControl(@Payload final GameRequestDto request, Principal user) {
         final var sender = this.userService.getUserByEmail(user.getName());
         final var game = gameService.controlGame(request, sender);
 
-        this.messageService.sendToUser(Queues.GAME, this.userService.getUserById(game.getUserOne().getId()), GameStateDto.of(game));
-        this.messageService.sendToUser(Queues.GAME, this.userService.getUserById(game.getUserTwo().getId()), GameStateDto.of(game));
+        notifyPlayers(game);
     }
 
     @MessageMapping(MessageSources.GAMES + "/action")
@@ -86,13 +78,25 @@ public class GameController {
         final var sender = userService.getUserByEmail(user.getName());
         final var game = gameService.updateGameBoard(request.getGameId(), request.getColumn(), sender);
 
-        this.messageService.sendToUser(Queues.GAME, this.userService.getUserById(game.getUserOne().getId()), GameStateDto.of(game));
-        this.messageService.sendToUser(Queues.GAME, this.userService.getUserById(game.getUserTwo().getId()), GameStateDto.of(game));
+        notifyPlayers(game);
     }
 
 
     private List<GameDto> allGames() {
         final var games = this.gameService.getAllGames();
         return GameDto.of(games);
+    }
+
+    private void notifyPlayers(Game game) {
+        if (game == null) {
+            return;
+        }
+
+        if (game.getUserOne() != null) {
+            this.messageService.sendToUser(Queues.GAME, this.userService.getUserById(game.getUserOne().getId()), GameStateDto.of(game));
+        }
+        if (game.getUserTwo() != null) {
+            this.messageService.sendToUser(Queues.GAME, this.userService.getUserById(game.getUserTwo().getId()), GameStateDto.of(game));
+        }
     }
 }

@@ -31,10 +31,18 @@
       "draw": "The game is a draw.",
       "yourTurn": "It's your turn.",
       "notYourTurn": "It's not your turn.",
-      "wait": "The game has not started yet"
+      "wait": "The game has not started yet",
+      "paused": "The game has been paused."
     },
     "button": {
-      "newGame": "Start New Game"
+      "newGame": "Start New Game",
+      "leaveGame": "Leave Game",
+      "continue": "Continue game"
+    },
+    "confirm": {
+      "leave": "Do you really want to leave the game?",
+      "yes": "Ja",
+      "no": "Nein"
     }
   },
   "error": {

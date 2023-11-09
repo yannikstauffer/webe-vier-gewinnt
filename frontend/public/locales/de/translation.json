@@ -31,10 +31,18 @@
       "draw": "Das Spiel endet unentschieden.",
       "yourTurn": "Du bist am Zug.",
       "notYourTurn": "Du bist nicht am Zug.",
-      "wait": "Das Spiel hat noch nicht gestartet"
+      "wait": "Das Spiel hat noch nicht gestartet.",
+      "paused": "Das Spiel wurde pausiert."
     },
     "button": {
-      "newGame": "Neues Spiel starten"
+      "newGame": "Neues Spiel starten",
+      "leaveGame": "Spiel verlassen",
+      "continue": "Spiel weiter spielen"
+    },
+    "confirm": {
+      "leave": "Möchten Sie das Spiel wirklich verlassen?",
+      "yes": "Ja",
+      "no": "Nein"
     }
   },
   "error": {

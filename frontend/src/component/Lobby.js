@@ -33,25 +33,6 @@ const Lobby = ({userId}) => {
         }
     }, [stompClient]);
 
-    useEffect(() => {
-        const prevPath = sessionStorage.getItem('prevPath');
-        console.log("Fetched prevPath from sessionStorage:", prevPath);
-        if (prevPath && prevPath.startsWith('/game/')) {
-            console.log("Spiel wurde verlassen.");
-
-            const gameId = +prevPath.split("/")[2];
-
-            if (stompClient && stompClient.connected) {
-                stompClient.publish({
-                    destination: "/4gewinnt/games/left",
-                    body: JSON.stringify({
-                        gameId: gameId,
-                    }),
-                });
-            }
-        }
-    }, [location, stompClient]);
-
     const createGame = () => {
         if (stompClient) {
             const gameRequest = {
@@ -94,7 +75,7 @@ const Lobby = ({userId}) => {
             <ul>
                 {games.map((gameData) => (
                     <li key={gameData.id} onClick={() => joinGame(gameData.id)}>
-                        Spiel ID: {gameData.id} - Ersteller: {gameData.userOne?.firstName}
+                        Spiel ID: {gameData.id} - Ersteller: {gameData.userOne?.firstName} - State: {gameData.gameState}
                     </li>
                 ))}
             </ul>

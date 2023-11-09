@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 
 @Slf4j
@@ -54,8 +55,7 @@ public class GameServiceImpl implements GameService {
 
     @Override
     public Game joinGame(final int gameId, final User currentUser) {
-        final Game game = this.gameRepository.findById(gameId)
-                .orElseThrow(() -> VierGewinntException.of(ErrorCode.GAME_NOT_FOUND, "Spiel nicht gefunden!"));
+        final Game game = findGameOrThrow(gameId);
 
         if (game.isFull()) {
             throw VierGewinntException.of(ErrorCode.GAME_FULL, "Das Spiel ist bereits voll!");
@@ -70,17 +70,34 @@ public class GameServiceImpl implements GameService {
 
     @Override
     public Game controlGame(GameRequestDto request, final User currentUser) {
-        final Game game = this.gameRepository.findById(request.getGameId())
-                .orElseThrow(() -> VierGewinntException.of(ErrorCode.GAME_NOT_FOUND, "Spiel nicht gefunden!"));
+        final Game game = findGameOrThrow(request.getGameId());
 
         validatePlayer(game, currentUser);
         Game updatedGame = game;
 
-        if ("start".equals(request.getMessage())) {
-            updatedGame = startGame(game);
-        } else if ("restart".equals(request.getMessage())) {
-            updatedGame = restartGame(game);
+        switch (request.getMessage()) {
+            case "start":
+                updatedGame = startGame(game);
+                break;
+            case "restart":
+                updatedGame = restartGame(game);
+                break;
+            case "leave":
+                updatedGame = removePlayerFromGame(game, currentUser);
+
+                if (updatedGame.getGameState() == GameState.IN_PROGRESS) {
+                    updatedGame.setGameState(GameState.FINISHED);
+                    updatedGame.setGameBoardState(GameBoardState.NO_WINNER);
+                }
+                break;
         }
+
+        if (bothUsersLeft(updatedGame)) {
+            this.gameRepository.delete(updatedGame);
+            return null;
+        }
+
+        this.gameRepository.save(updatedGame);
 
         return updatedGame;
 
@@ -97,14 +114,17 @@ public class GameServiceImpl implements GameService {
         game.setGameBoardState(GameBoardState.MOVE_EXPECTED);
         game.setNextMove(new Random().nextBoolean() ? game.getUserOne().getId() : game.getUserTwo().getId());
 
-        return gameRepository.save(game);
+        return this.gameRepository.save(game);
     }
 
     private Game startGame(Game game) {
+        validateTwoPlayers(game);
         return initializeGame(game, false);
     }
 
     private Game restartGame(Game game) {
+        validateTwoPlayers(game);
+
         Game newGame = new Game();
         newGame.setUserOne(game.getUserOne());
         newGame.setUserTwo(game.getUserTwo());
@@ -112,18 +132,16 @@ public class GameServiceImpl implements GameService {
         return initializeGame(newGame, true);
     }
 
-    @Override
-    public void leftGame(final int gameId, final User currentUser) {
-        final Game game = this.gameRepository.findById(gameId)
-                .orElseThrow(() -> VierGewinntException.of(ErrorCode.GAME_NOT_FOUND, "Spiel nicht gefunden!"));
+    private Game removePlayerFromGame(Game game, User currentUser) {
+        validatePlayer(game, currentUser);
 
         if (game.getUserOne().getId() == currentUser.getId()) {
-            this.gameRepository.delete(game);
+            game.setUserOne(null);
         } else if (game.getUserTwo().getId() == currentUser.getId()) {
             game.setUserTwo(null);
-            game.setGameState(GameState.WAITING_FOR_PLAYERS);
-            this.gameRepository.save(game);
         }
+
+        return this.gameRepository.save(game);
     }
 
     @Override
@@ -133,8 +151,7 @@ public class GameServiceImpl implements GameService {
 
     @Override
     public Game updateGameBoard(int gameId, int column, final User currentUser) {
-        final Game game = this.gameRepository.findById(gameId)
-                .orElseThrow(() -> VierGewinntException.of(ErrorCode.GAME_NOT_FOUND, "Spiel nicht gefunden!"));
+        final Game game = findGameOrThrow(gameId);
 
         validateGameInProgress(game, currentUser);
 
@@ -160,13 +177,12 @@ public class GameServiceImpl implements GameService {
         }
 
         game.setBoard(gameBoard.getBoard());
-        return gameRepository.save(game);
+        return this.gameRepository.save(game);
     }
 
     @Override
     public Game getGameById(final int gameId) {
-        final Game game = this.gameRepository.findById(gameId)
-                .orElseThrow(() -> VierGewinntException.of(ErrorCode.GAME_NOT_FOUND, "Spiel nicht gefunden!"));
+        final Game game = findGameOrThrow(gameId);
 
         return this.gameRepository.save(game);
     }
@@ -186,10 +202,21 @@ public class GameServiceImpl implements GameService {
         if (game.getGameState() != GameState.IN_PROGRESS) {
             throw VierGewinntException.of(ErrorCode.INVALID_GAME_STATE, "The game state should be IN_PROGRESS");
         }
+    }
 
+    private void validateTwoPlayers(Game game) {
         if (game.getUserOne() == null || game.getUserTwo() == null) {
             throw VierGewinntException.of(ErrorCode.GAME_NOT_READY, "Warten auf Spieler!");
         }
+    }
+
+    private Game findGameOrThrow(final int gameId) {
+        return this.gameRepository.findById(gameId)
+                .orElseThrow(() -> VierGewinntException.of(ErrorCode.GAME_NOT_FOUND, "Spiel nicht gefunden!"));
+    }
+
+    private boolean bothUsersLeft(final Game game) {
+        return game.getUserOne() == null && game.getUserTwo() == null;
     }
 
 }

@@ -15,8 +15,6 @@ public interface GameService {
 
     Game joinGame(final int gameId, final User currentUser);
 
-    void leftGame(final int gameId, final User currentUser);
-
     Game updateGameBoard(final int gameId, final int column, final User currentUser);
 
     void deleteAllGames();
