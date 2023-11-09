@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Random;
 
 @Slf4j
@@ -81,6 +80,10 @@ public class GameServiceImpl implements GameService {
                 break;
             case "restart":
                 updatedGame = restartGame(game);
+                break;
+            case "left":
+                updatedGame = removePlayerFromGame(game, currentUser);
+                updatedGame.setGameState(GameState.PAUSED);
                 break;
             case "leave":
                 updatedGame = removePlayerFromGame(game, currentUser);

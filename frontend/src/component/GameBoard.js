@@ -1,7 +1,7 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {useStompClient, useSubscription} from "react-stomp-hooks";
 import {useTranslation} from 'react-i18next';
-import {useNavigate} from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import './GameBoard.css';
 import ConfirmDialog from './ConfirmDialog';
 
@@ -26,7 +26,7 @@ const GameBoard = ({initialGameId, userId}) => {
     const [playerTwoId, setPlayerTwoId] = useState(null);
     const [showConfirmDialog, setShowConfirmDialog] = useState(false);
     const navigate = useNavigate();
-
+    const location = useLocation();
 
     const updateGame = (updatedGame) => {
         if (gameId != updatedGame.gameId) {
@@ -103,6 +103,20 @@ const GameBoard = ({initialGameId, userId}) => {
             });
         }
     };
+
+    useEffect(() => { // Falls die Seite ohne Button verlassen wird
+        return () => {
+            if (stompClient && stompClient.connected) {
+                stompClient.publish({
+                    destination: `/4gewinnt/games/control`,
+                    body: JSON.stringify({
+                        gameId: gameId,
+                        message: 'left'
+                    }),
+                });
+            }
+        };
+    }, []);
 
     const leaveButtonClick = () => {
         setShowConfirmDialog(true);
