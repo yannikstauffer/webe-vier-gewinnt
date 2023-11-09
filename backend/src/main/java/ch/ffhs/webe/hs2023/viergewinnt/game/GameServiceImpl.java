@@ -2,6 +2,7 @@ package ch.ffhs.webe.hs2023.viergewinnt.game;
 
 import ch.ffhs.webe.hs2023.viergewinnt.base.ErrorCode;
 import ch.ffhs.webe.hs2023.viergewinnt.base.VierGewinntException;
+import ch.ffhs.webe.hs2023.viergewinnt.game.dto.GameRequestDto;
 import ch.ffhs.webe.hs2023.viergewinnt.game.model.Game;
 import ch.ffhs.webe.hs2023.viergewinnt.game.repository.GameRepository;
 import ch.ffhs.webe.hs2023.viergewinnt.game.values.GameBoardState;
@@ -68,7 +69,30 @@ public class GameServiceImpl implements GameService {
     }
 
     @Override
-    public Game startGame(Game game) {
+    public Game controlGame(GameRequestDto request, final User currentUser) {
+        final Game game = this.gameRepository.findById(request.getGameId())
+                .orElseThrow(() -> VierGewinntException.of(ErrorCode.GAME_NOT_FOUND, "Spiel nicht gefunden!"));
+
+        validatePlayer(game, currentUser);
+        Game updatedGame = game;
+
+        if ("start".equals(request.getMessage())) {
+            updatedGame = startGame(game);
+        } else if ("restart".equals(request.getMessage())) {
+            updatedGame = restartGame(game);
+        }
+
+        return updatedGame;
+
+    }
+
+    private Game initializeGame(Game game, boolean isNewGame) {
+        if (isNewGame) {
+            GameBoard gameBoard = new GameBoard();
+            gameBoard.resetBoard();
+            game.setBoard(gameBoard.getBoard());
+        }
+
         game.setGameState(GameState.IN_PROGRESS);
         game.setGameBoardState(GameBoardState.MOVE_EXPECTED);
         game.setNextMove(new Random().nextBoolean() ? game.getUserOne().getId() : game.getUserTwo().getId());
@@ -76,20 +100,16 @@ public class GameServiceImpl implements GameService {
         return gameRepository.save(game);
     }
 
-    @Override
-    public Game restartGame(Game game) {
+    private Game startGame(Game game) {
+        return initializeGame(game, false);
+    }
+
+    private Game restartGame(Game game) {
         Game newGame = new Game();
         newGame.setUserOne(game.getUserOne());
         newGame.setUserTwo(game.getUserTwo());
-        GameBoard gameBoard = new GameBoard();
-        gameBoard.resetBoard();
-        newGame.setBoard(gameBoard.getBoard());
 
-        newGame.setGameState(GameState.IN_PROGRESS);
-        newGame.setGameBoardState(GameBoardState.MOVE_EXPECTED);
-        newGame.setNextMove(new Random().nextBoolean() ? game.getUserOne().getId() : game.getUserTwo().getId());
-
-        return gameRepository.save(newGame);
+        return initializeGame(newGame, true);
     }
 
     @Override
@@ -151,8 +171,7 @@ public class GameServiceImpl implements GameService {
         return this.gameRepository.save(game);
     }
 
-    @Override
-    public void validatePlayer(Game game, User currentUser) {
+    private void validatePlayer(Game game, User currentUser) {
         if (currentUser == null) {
             throw VierGewinntException.of(ErrorCode.NULL_PLAYER, "Player was not set.");
         }
@@ -162,8 +181,7 @@ public class GameServiceImpl implements GameService {
         }
     }
 
-    @Override
-    public void validateGameInProgress(Game game, User currentUser) {
+    private void validateGameInProgress(Game game, User currentUser) {
         validatePlayer(game, currentUser);
         if (game.getGameState() != GameState.IN_PROGRESS) {
             throw VierGewinntException.of(ErrorCode.INVALID_GAME_STATE, "The game state should be IN_PROGRESS");
