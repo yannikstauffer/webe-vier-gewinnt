@@ -23,8 +23,7 @@ const Game = ({userId}) => {
 
     return (
         <div>
-            <h2>Spiel ID: {gameId}</h2>
-            <GameBoard gameId={gameId} userId={userId}/>
+            <GameBoard initialGameId={gameId} userId={userId}/>
         </div>
     );
 };

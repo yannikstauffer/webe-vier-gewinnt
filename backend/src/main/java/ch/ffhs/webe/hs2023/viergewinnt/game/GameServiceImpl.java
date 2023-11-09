@@ -2,6 +2,7 @@ package ch.ffhs.webe.hs2023.viergewinnt.game;
 
 import ch.ffhs.webe.hs2023.viergewinnt.base.ErrorCode;
 import ch.ffhs.webe.hs2023.viergewinnt.base.VierGewinntException;
+import ch.ffhs.webe.hs2023.viergewinnt.game.dto.GameRequestDto;
 import ch.ffhs.webe.hs2023.viergewinnt.game.model.Game;
 import ch.ffhs.webe.hs2023.viergewinnt.game.repository.GameRepository;
 import ch.ffhs.webe.hs2023.viergewinnt.game.values.GameBoardState;
@@ -68,20 +69,47 @@ public class GameServiceImpl implements GameService {
     }
 
     @Override
-    public void startGame(Game game) {
-        if (game.getGameState() == GameState.FINISHED) {
+    public Game controlGame(GameRequestDto request, final User currentUser) {
+        final Game game = this.gameRepository.findById(request.getGameId())
+                .orElseThrow(() -> VierGewinntException.of(ErrorCode.GAME_NOT_FOUND, "Spiel nicht gefunden!"));
+
+        validatePlayer(game, currentUser);
+        Game updatedGame = game;
+
+        if ("start".equals(request.getMessage())) {
+            updatedGame = startGame(game);
+        } else if ("restart".equals(request.getMessage())) {
+            updatedGame = restartGame(game);
+        }
+
+        return updatedGame;
+
+    }
+
+    private Game initializeGame(Game game, boolean isNewGame) {
+        if (isNewGame) {
             GameBoard gameBoard = new GameBoard();
             gameBoard.resetBoard();
             game.setBoard(gameBoard.getBoard());
         }
 
-        if (game.getGameState() == GameState.WAITING_FOR_PLAYERS || game.getGameState() == GameState.FINISHED) {
-            game.setGameState(GameState.IN_PROGRESS);
-            game.setGameBoardState(GameBoardState.MOVE_EXPECTED);
-            game.setNextMove(new Random().nextBoolean() ? game.getUserOne().getId() : game.getUserTwo().getId());
-            this.gameRepository.save(game);
-        }
+        game.setGameState(GameState.IN_PROGRESS);
+        game.setGameBoardState(GameBoardState.MOVE_EXPECTED);
+        game.setNextMove(new Random().nextBoolean() ? game.getUserOne().getId() : game.getUserTwo().getId());
 
+        return gameRepository.save(game);
+    }
+
+    private Game startGame(Game game) {
+        return initializeGame(game, false);
+    }
+
+    private Game restartGame(Game game) {
+        Game newGame = new Game();
+        newGame.setUserOne(game.getUserOne());
+        newGame.setUserTwo(game.getUserTwo());
+
+        return initializeGame(newGame, true);
     }
 
     @Override
@@ -108,13 +136,7 @@ public class GameServiceImpl implements GameService {
         final Game game = this.gameRepository.findById(gameId)
                 .orElseThrow(() -> VierGewinntException.of(ErrorCode.GAME_NOT_FOUND, "Spiel nicht gefunden!"));
 
-        if (game.getUserOne() == null || game.getUserTwo() == null) {
-            throw VierGewinntException.of(ErrorCode.GAME_NOT_READY, "Warten auf Spieler!");
-        }
-
-        if (game.getGameState() == GameState.WAITING_FOR_PLAYERS) {
-            game.setGameState(GameState.IN_PROGRESS);
-        }
+        validateGameInProgress(game, currentUser);
 
         GameBoard gameBoard = new GameBoard();
         gameBoard.setBoard(game.getBoard());
@@ -148,4 +170,26 @@ public class GameServiceImpl implements GameService {
 
         return this.gameRepository.save(game);
     }
+
+    private void validatePlayer(Game game, User currentUser) {
+        if (currentUser == null) {
+            throw VierGewinntException.of(ErrorCode.NULL_PLAYER, "Player was not set.");
+        }
+
+        if (game.getUserOne().getId() != currentUser.getId() && game.getUserTwo().getId() != currentUser.getId()) {
+            throw VierGewinntException.of(ErrorCode.INVALID_PLAYER, "The current user is not part of this game.");
+        }
+    }
+
+    private void validateGameInProgress(Game game, User currentUser) {
+        validatePlayer(game, currentUser);
+        if (game.getGameState() != GameState.IN_PROGRESS) {
+            throw VierGewinntException.of(ErrorCode.INVALID_GAME_STATE, "The game state should be IN_PROGRESS");
+        }
+
+        if (game.getUserOne() == null || game.getUserTwo() == null) {
+            throw VierGewinntException.of(ErrorCode.GAME_NOT_READY, "Warten auf Spieler!");
+        }
+    }
+
 }

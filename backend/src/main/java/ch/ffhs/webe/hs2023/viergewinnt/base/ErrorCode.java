@@ -20,6 +20,9 @@ public enum ErrorCode {
     GAMEBOARD_WRITE_ERROR("error.game.cannotWrite"),
     GAME_NOT_READY("error.game.notReady"),
     INVALID_MOVE("error.game.invalidMove"),
+    NULL_PLAYER("error.game.nullPlayer"),
+    INVALID_PLAYER("error.game.invalidPlayer"),
+    INVALID_GAME_STATE("error.game.invalidGameState"),
     UNKNOWN("error.unknown");
 
     private final String internationalizedMessageKey;

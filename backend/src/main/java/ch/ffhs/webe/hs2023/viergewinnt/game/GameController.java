@@ -74,17 +74,11 @@ public class GameController {
 
     @MessageMapping(MessageSources.GAMES + "/control")
     public void gameAction(@Payload final GameRequestDto request, Principal user) {
-        final var game = gameService.getGameById(request.getGameId());
-
-        if (game.getUserOne() != null && game.getUserTwo() != null) {
-            this.gameService.startGame(game);
-        }
+        final var sender = this.userService.getUserByEmail(user.getName());
+        final var game = gameService.controlGame(request, sender);
 
         this.messageService.sendToUser(Queues.GAME, this.userService.getUserById(game.getUserOne().getId()), GameStateDto.of(game));
-
-        if (game.getUserTwo() != null) {
-            this.messageService.sendToUser(Queues.GAME, this.userService.getUserById(game.getUserTwo().getId()), GameStateDto.of(game));
-        }
+        this.messageService.sendToUser(Queues.GAME, this.userService.getUserById(game.getUserTwo().getId()), GameStateDto.of(game));
     }
 
     @MessageMapping(MessageSources.GAMES + "/action")

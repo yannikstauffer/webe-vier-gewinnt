@@ -56,7 +56,10 @@
       "cannotRead": "Spielbrett konnte nicht gefunden werden",
       "cannotWrite": "Spielbrett konnte nicht gespeichert werden",
       "notReady": "Warten auf andere Spieler",
-      "invalidMove": "Ungültiger Spielzug"
+      "invalidMove": "Ungültiger Spielzug",
+      "nullPlayer": "Spieler wurde nicht festgelegt.",
+      "invalidPlayer": "Der aktuelle Benutzer ist kein Teil dieses Spiels.",
+      "invalidGameState": "Der Spielstatus sollte IN_PROGRESS sein."
     }
   },
   "system": {
