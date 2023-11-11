@@ -190,6 +190,18 @@ public class GameServiceImpl implements GameService {
         return this.gameRepository.save(game);
     }
 
+    @Override
+    public List<Game> getGamesForUser(final User user) {
+        List<Game> gamesForUser = new ArrayList<>();
+        this.gameRepository.findAll().forEach(game -> {
+            if (game.getUserOne() != null && game.getUserOne().getId() == user.getId() ||
+                    game.getUserTwo() != null && game.getUserTwo().getId() == user.getId()) {
+                gamesForUser.add(game);
+            }
+        });
+        return gamesForUser;
+    }
+
     private void validatePlayer(Game game, User currentUser) {
         if (currentUser == null) {
             throw VierGewinntException.of(ErrorCode.NULL_PLAYER, "Player was not set.");

@@ -2,6 +2,9 @@ package ch.ffhs.webe.hs2023.viergewinnt.websocket;
 
 import ch.ffhs.webe.hs2023.viergewinnt.chat.ChatService;
 import ch.ffhs.webe.hs2023.viergewinnt.chat.dto.ChatsDto;
+import ch.ffhs.webe.hs2023.viergewinnt.game.GameService;
+import ch.ffhs.webe.hs2023.viergewinnt.game.dto.GameDto;
+import ch.ffhs.webe.hs2023.viergewinnt.game.model.Game;
 import ch.ffhs.webe.hs2023.viergewinnt.user.UserService;
 import ch.ffhs.webe.hs2023.viergewinnt.user.dto.UserDto;
 import ch.ffhs.webe.hs2023.viergewinnt.user.dto.UserUpdateDto;
@@ -14,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Slf4j
 @Component
@@ -21,12 +25,14 @@ public class StompSessionMessagesProxy {
     private final UserService userService;
     private final ChatService chatService;
     private final StompMessageService stompMessageService;
+    private final GameService gameService;
 
     @Autowired
-    public StompSessionMessagesProxy(final StompMessageService messageService, final UserService userService, final ChatService chatService) {
+    public StompSessionMessagesProxy(final StompMessageService messageService, final UserService userService, final ChatService chatService, GameService gameService) {
         this.stompMessageService = messageService;
         this.userService = userService;
         this.chatService = chatService;
+        this.gameService = gameService;
     }
 
     void publishAllChatsTo(final User recipient) {
@@ -41,8 +47,21 @@ public class StompSessionMessagesProxy {
         this.stompMessageService.sendToUser(Queues.USERS, recipient, UserDto.of(users));
     }
 
+
+    void publishAllGamesTo(final User recipient) {
+        final var games = this.gameService.getAllGames();
+        this.stompMessageService.sendToUser(Queues.GAMES, recipient, GameDto.of(games));
+    }
+
     void publishUserUpdate(final User user, final UserUpdateType userUpdateType) {
         this.stompMessageService.send(Topics.USERS, UserUpdateDto.of(user, userUpdateType));
+    }
+
+    void publishUserLeftGames(final User recipient, List<Game> games) {
+        games.forEach(game -> {
+            this.stompMessageService.sendToUser(Queues.GAME, recipient, GameDto.of(game));
+            this.stompMessageService.send(Topics.LOBBY_GAMES, GameDto.of(game));
+        });
     }
 
 }

@@ -14,11 +14,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
-import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.stereotype.Controller;
 
 import java.security.Principal;
-import java.util.List;
 
 @Slf4j
 @Controller
@@ -36,33 +34,19 @@ public class GameController {
     }
 
     @MessageMapping(MessageSources.GAMES + "/create")
-    @SendTo(Topics.LOBBY_GAMES)
-    public GameDto createGame(final Principal user) {
+    public void createGame(final Principal user) {
         final var sender = this.userService.getUserByEmail(user.getName());
         final var game = this.gameService.createGame(sender);
-        return GameDto.of(game);
-    }
 
-    @MessageMapping(MessageSources.GAMES + "/all")
-    @SendTo(Topics.LOBBY_GAMES + "/all")
-    public List<GameDto> getAllGames() {
-        return this.allGames();
-    }
-
-    @MessageMapping(MessageSources.GAMES + "/deleteAll")
-    @SendTo(Topics.LOBBY_GAMES + "/all")
-    public List<GameDto> deleteAllGames() {
-        this.gameService.deleteAllGames();
-        return this.allGames();
+        this.messageService.send(Topics.LOBBY_GAMES, GameDto.of(game));
     }
 
     @MessageMapping(MessageSources.GAMES + "/join")
-    @SendTo(Topics.LOBBY_GAMES)
-    public GameDto joinGame(@Payload final GameRequestDto request, final Principal user) {
+    public void joinGame(@Payload final GameRequestDto request, final Principal user) {
         final var sender = this.userService.getUserByEmail(user.getName());
         final var game = this.gameService.joinGame(request.getGameId(), sender);
 
-        return GameDto.of(game);
+        this.messageService.send(Topics.LOBBY_GAMES, GameDto.of(game));
     }
 
     @MessageMapping(MessageSources.GAMES + "/control")
@@ -81,12 +65,6 @@ public class GameController {
         notifyPlayers(game);
     }
 
-
-    private List<GameDto> allGames() {
-        final var games = this.gameService.getAllGames();
-        return GameDto.of(games);
-    }
-
     private void notifyPlayers(Game game) {
         if (game == null) {
             return;
@@ -98,5 +76,6 @@ public class GameController {
         if (game.getUserTwo() != null) {
             this.messageService.sendToUser(Queues.GAME, this.userService.getUserById(game.getUserTwo().getId()), GameStateDto.of(game));
         }
+
     }
 }

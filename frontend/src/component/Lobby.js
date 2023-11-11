@@ -8,62 +8,49 @@ const Lobby = ({userId}) => {
     const navigate = useNavigate();
     const location = useLocation();
 
-    useSubscription("/topic/lobby/games", (message) => {
-        const Game = JSON.parse(message.body);
-        setGames((oldGames) => [...oldGames, Game]);
+    const onGamesReceived = (message) => {
+        const updatedGames = JSON.parse(message.body);
+        setGames(updatedGames);
+    };
 
-        if (Game.userOne?.id === userId) {
-            navigate(`/game/${Game.id}`, {state: {prevPath: location.pathname}});
-        } else if (Game.userTwo?.id === userId){
-            navigate(`/game/${Game.id}`, {state: {prevPath: location.pathname}});
+    const onLobbyGameReceived = (message) => {
+        const newGame = JSON.parse(message.body);
+        setGames((oldGames) => [...oldGames, newGame]);
+
+        if (newGame.userOne?.id === userId || newGame.userTwo?.id === userId) {
+            navigate(`/game/${newGame.id}`, {state: {prevPath: location.pathname}});
         }
-    });
+    };
 
-    useSubscription("/topic/lobby/games/all", (message) => {
-        const allGames = JSON.parse(message.body);
-        console.log("Received payload allGames:", allGames);
-        setGames(allGames);
-    });
+    useSubscription("/user/queue/games", onGamesReceived);
+    useSubscription("/topic/lobby/games", onLobbyGameReceived);
 
+    // todo: fällt wegg
     useEffect(() => {
         if (stompClient && stompClient.connected) {
-            stompClient.publish({
-                destination: "/4gewinnt/games/all",
-            });
+            stompClient.publish({destination: "/4gewinnt/games/all"});
         }
     }, [stompClient]);
 
     const createGame = () => {
         if (stompClient) {
-            const gameRequest = {
-                action: 'create',
-            };
-            console.log("Requesting to create a new game");
-            stompClient.publish({
-                destination: "/4gewinnt/games/create",
-            });
+            stompClient.publish({destination: "/4gewinnt/games/create"});
         }
     };
 
     const joinGame = (gameId) => {
         if (stompClient) {
-            const joinRequest = {
-                gameId: gameId,
-            };
-            console.log("Requesting to join game with ID:", gameId);
             stompClient.publish({
                 destination: "/4gewinnt/games/join",
-                body: JSON.stringify(joinRequest),
+                body: JSON.stringify({gameId}),
             });
         }
     };
 
+    // todo: deleteAll soll nicht mehr verwendet werden
     const deleteAllGames = () => {
         if (stompClient) {
-            console.log("Requesting to delete all games");
-            stompClient.publish({
-                destination: "/4gewinnt/games/deleteAll",
-            });
+            stompClient.publish({destination: "/4gewinnt/games/deleteAll"});
         }
     };
 
@@ -73,9 +60,9 @@ const Lobby = ({userId}) => {
             <button onClick={createGame}>Neues Spiel erstellen</button>
             <button onClick={deleteAllGames}>Liste löschen</button>
             <ul>
-                {games.map((gameData) => (
-                    <li key={gameData.id} onClick={() => joinGame(gameData.id)}>
-                        Spiel ID: {gameData.id} - Ersteller: {gameData.userOne?.firstName} - State: {gameData.gameState}
+                {games.map((game) => (
+                    <li key={game.id} onClick={() => joinGame(game.id)}>
+                        Spiel ID: {game.id} - Ersteller: {game.userOne?.firstName} - State: {game.gameState}
                     </li>
                 ))}
             </ul>

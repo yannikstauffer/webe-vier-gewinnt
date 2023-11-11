@@ -21,4 +21,6 @@ public interface GameService {
 
     Game controlGame(GameRequestDto request, final User currentUser);
 
+    List<Game> getGamesForUser(final User user);
+
 }
