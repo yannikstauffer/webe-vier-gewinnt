@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useState} from 'react';
 import {useStompClient, useSubscription} from "react-stomp-hooks";
 import {useLocation, useNavigate} from 'react-router-dom';
 
@@ -25,13 +25,6 @@ const Lobby = ({userId}) => {
     useSubscription("/user/queue/games", onGamesReceived);
     useSubscription("/topic/lobby/games", onLobbyGameReceived);
 
-    // todo: fällt wegg
-    useEffect(() => {
-        if (stompClient && stompClient.connected) {
-            stompClient.publish({destination: "/4gewinnt/games/all"});
-        }
-    }, [stompClient]);
-
     const createGame = () => {
         if (stompClient) {
             stompClient.publish({destination: "/4gewinnt/games/create"});
@@ -47,18 +40,10 @@ const Lobby = ({userId}) => {
         }
     };
 
-    // todo: deleteAll soll nicht mehr verwendet werden
-    const deleteAllGames = () => {
-        if (stompClient) {
-            stompClient.publish({destination: "/4gewinnt/games/deleteAll"});
-        }
-    };
-
     return (
         <div>
             <h2>Lobby</h2>
             <button onClick={createGame}>Neues Spiel erstellen</button>
-            <button onClick={deleteAllGames}>Liste löschen</button>
             <ul>
                 {games.map((game) => (
                     <li key={game.id} onClick={() => joinGame(game.id)}>
