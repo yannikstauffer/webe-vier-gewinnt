@@ -19,6 +19,7 @@ const GameBoard = ({ initialGameId, userId }) => {
     const [nextMove, setNextMove] = useState(null);
     const [gameBoardState, setGameBoardState] = useState('NOT_STARTED');
     const [statusMessage, setStatusMessage] = useState('');
+    const [buttonState, setButtonState] = useState('start');
     const [playerOneId, setPlayerOneId] = useState(null);
     const [playerTwoId, setPlayerTwoId] = useState(null);
     const { t } = useTranslation();
@@ -28,6 +29,7 @@ const GameBoard = ({ initialGameId, userId }) => {
 
     const onGameUpdateReceived = (message) => {
         const updatedGame = JSON.parse(message.body);
+        console.log("update:", updatedGame);
         updateGame(updatedGame);
     };
 
@@ -41,6 +43,14 @@ const GameBoard = ({ initialGameId, userId }) => {
         setStatusMessage(getGameStatusMessage(updatedGame.gameBoardState, updatedGame.nextMove));
         setPlayerOneId(updatedGame.userOne?.id);
         setPlayerTwoId(updatedGame.userTwo?.id);
+
+        if (updatedGame.gameBoardState === 'READY_TO_START' || updatedGame.gameBoardState === 'NOT_STARTED') {
+            setButtonState('start');
+        } else if (updatedGame.gameBoardState === 'PLAYER_HAS_WON' || updatedGame.gameBoardState === 'DRAW') {
+            setButtonState('restart');
+        } else if (updatedGame.gameBoardState === 'PAUSED') {
+            setButtonState('paused')
+        }
     };
 
     const getGameStatusMessage = (gameBoardState, nextMove) => {
@@ -71,6 +81,19 @@ const GameBoard = ({ initialGameId, userId }) => {
                     message: message
                 }),
             });
+        }
+    };
+
+    const getHandleButtonText = () => {
+        switch (buttonState) {
+            case 'start':
+                return t('game.button.newGame');
+            case 'restart':
+                return t('game.button.newGame');
+            case 'paused':
+                return t('game.button.newGame');
+            default:
+                return t('game.button.newGame');
         }
     };
 
@@ -151,7 +174,7 @@ const GameBoard = ({ initialGameId, userId }) => {
                 </tbody>
             </table>
             <p>{statusMessage}</p>
-            <button onClick={handleButtonClick} disabled={isGameActive()}>{t('game.button.control')}</button>
+            <button onClick={handleButtonClick} disabled={isGameActive()}>{getHandleButtonText()}</button>
             <button onClick={leaveButtonClick}>{t('game.button.leaveGame')}</button>
 
             <ConfirmDialog
