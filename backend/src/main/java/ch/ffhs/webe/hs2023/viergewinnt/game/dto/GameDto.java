@@ -21,11 +21,16 @@ public class GameDto {
         final var builder =
                 GameDto.builder()
                         .id(game.getId())
-                        .userOne(UserDto.of(game.getUserOne()))
                         .gameState(game.getGameState());
+
+        if (game.getUserOne() != null) {
+            builder.userOne(UserDto.of(game.getUserOne()));
+        }
+
         if (game.getUserTwo() != null) {
             builder.userTwo(UserDto.of(game.getUserTwo()));
         }
+
         return builder.build();
     }
 

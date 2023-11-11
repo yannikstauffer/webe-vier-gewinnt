@@ -60,7 +60,9 @@ public class GameServiceImpl implements GameService {
             throw VierGewinntException.of(ErrorCode.GAME_FULL, "Das Spiel ist bereits voll!");
         }
 
-        if (game.getUserOne() != null && game.getUserTwo() == null) {
+        if (game.getUserOne() == null) {
+            game.setUserOne(currentUser);
+        } else if (game.getUserTwo() == null) {
             game.setUserTwo(currentUser);
         }
 
@@ -87,6 +89,9 @@ public class GameServiceImpl implements GameService {
                 if (updatedGame.getGameState() == GameState.IN_PROGRESS) {
                     updatedGame.setGameState(GameState.FINISHED);
                     updatedGame.setGameBoardState(GameBoardState.NO_WINNER);
+                } else {
+                    updatedGame.setGameState(GameState.WAITING_FOR_PLAYERS);
+                    updatedGame.setGameBoardState(GameBoardState.PLAYER_HAS_LEFT);
                 }
                 break;
         }

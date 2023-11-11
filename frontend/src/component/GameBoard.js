@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
-import { useStompClient, useSubscription } from "react-stomp-hooks";
-import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
+import React, {useEffect, useState} from 'react';
+import {useStompClient, useSubscription} from "react-stomp-hooks";
+import {useTranslation} from 'react-i18next';
+import {useNavigate} from 'react-router-dom';
 import './GameBoard.css';
 import ConfirmDialog from './ConfirmDialog';
 
@@ -13,7 +13,7 @@ const createEmptyBoard = () => {
     return Array(ROWS).fill(null).map(() => Array(COLUMNS).fill(EMPTY));
 };
 
-const GameBoard = ({ initialGameId, userId }) => {
+const GameBoard = ({initialGameId, userId}) => {
     const [gameId, setGameId] = useState(initialGameId);
     const [board, setBoard] = useState(createEmptyBoard());
     const [nextMove, setNextMove] = useState(null);
@@ -22,10 +22,14 @@ const GameBoard = ({ initialGameId, userId }) => {
     const [buttonState, setButtonState] = useState('start');
     const [playerOneId, setPlayerOneId] = useState(null);
     const [playerTwoId, setPlayerTwoId] = useState(null);
-    const { t } = useTranslation();
+    const {t} = useTranslation();
     const stompClient = useStompClient();
     const navigate = useNavigate();
     const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+
+    useEffect(() => {
+        setStatusMessage(t('game.state.welcome'));
+    }, [t]);
 
     const onGameUpdateReceived = (message) => {
         const updatedGame = JSON.parse(message.body);
@@ -61,8 +65,12 @@ const GameBoard = ({ initialGameId, userId }) => {
                 return t('game.state.draw');
             case 'MOVE_EXPECTED':
                 return nextMove === userId ? t('game.state.yourTurn') : t('game.state.notYourTurn');
-            default:
-                return t('game.state.wait');
+            case 'PLAYER_HAS_LEFT':
+                return t('game.state.left');
+            case 'READY_TO_START':
+                return t('game.state.ready');
+            case 'PAUSED':
+                return t('game.state.paused');
         }
     };
 
@@ -149,7 +157,8 @@ const GameBoard = ({ initialGameId, userId }) => {
                                 }
                             }
                             return (
-                                <td key={colIndex} onClick={() => isGameActive() && nextMove === userId && dropDisc(colIndex)}>
+                                <td key={colIndex}
+                                    onClick={() => isGameActive() && nextMove === userId && dropDisc(colIndex)}>
                                     <div className={`cell ${cellClass}`}></div>
                                 </td>
                             );

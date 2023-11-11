@@ -22,16 +22,20 @@
   "game": {
     "title": "Game",
     "label": {
-      "name": "Game",
+      "playerOne": "Player 1:",
+      "playerTwo": "Player 2:",
       "creator": "Creator"
     },
     "state": {
+      "welcome": "Waiting for more players.",
+      "ready": "A new game can be started.",
       "win": "You have won!",
       "lose": "You have lost.",
       "draw": "The game is a draw.",
       "yourTurn": "It's your turn.",
       "notYourTurn": "It's not your turn.",
       "wait": "The game has not started yet",
+      "left": "A player has left the game.",
       "paused": "The game has been paused."
     },
     "button": {

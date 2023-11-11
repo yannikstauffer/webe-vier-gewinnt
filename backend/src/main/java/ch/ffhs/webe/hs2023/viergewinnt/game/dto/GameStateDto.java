@@ -26,8 +26,11 @@ public class GameStateDto {
                         .board(game.getBoard())
                         .nextMove(game.getNextMove())
                         .gameBoardState(game.getGameBoardState())
-                        .message(game.getStatusMessage())
-                        .userOne(UserDto.of(game.getUserOne()));
+                        .message(game.getStatusMessage());
+
+        if (game.getUserOne() != null) {
+            builder.userOne(UserDto.of(game.getUserOne()));
+        }
 
         if (game.getUserTwo() != null) {
             builder.userTwo(UserDto.of(game.getUserTwo()));
