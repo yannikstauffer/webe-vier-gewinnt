@@ -97,21 +97,6 @@ const GameBoard = ({ initialGameId, userId }) => {
         }
     };
 
-    useEffect(() => {
-        // Clean-up beim Verlassen der Komponente
-        return () => {
-            if (stompClient && stompClient.connected) {
-                stompClient.publish({
-                    destination: `/4gewinnt/games/control`,
-                    body: JSON.stringify({
-                        gameId: gameId,
-                        message: 'left'
-                    }),
-                });
-            }
-        };
-    }, [stompClient, gameId]);
-
     const leaveButtonClick = () => {
         setShowConfirmDialog(true);
     };

@@ -81,10 +81,6 @@ public class GameServiceImpl implements GameService {
             case "restart":
                 updatedGame = restartGame(game);
                 break;
-            case "left":
-                updatedGame = removePlayerFromGame(game, currentUser);
-                updatedGame.setGameState(GameState.PAUSED);
-                break;
             case "leave":
                 updatedGame = removePlayerFromGame(game, currentUser);
 
