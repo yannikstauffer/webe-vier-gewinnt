@@ -31,6 +31,7 @@ public class GameServiceImpl implements GameService {
     public Game createGame(final User currentUser) {
         final Game newGame = new Game();
         newGame.setGameState(GameState.WAITING_FOR_PLAYERS);
+        newGame.setGameBoardState(GameBoardState.WAITING_FOR_PLAYERS);
         newGame.setUserOne(currentUser);
 
         GameBoard gameBoard = new GameBoard();
@@ -64,6 +65,10 @@ public class GameServiceImpl implements GameService {
             game.setUserOne(currentUser);
         } else if (game.getUserTwo() == null) {
             game.setUserTwo(currentUser);
+        }
+
+        if (game.isFull()) {
+            game.setGameBoardState(GameBoardState.READY_TO_START);
         }
 
         return this.gameRepository.save(game);

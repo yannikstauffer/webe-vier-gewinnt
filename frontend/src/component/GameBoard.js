@@ -27,10 +27,6 @@ const GameBoard = ({initialGameId, userId}) => {
     const navigate = useNavigate();
     const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
-    useEffect(() => {
-        setStatusMessage(t('game.state.welcome'));
-    }, [t]);
-
     const onGameUpdateReceived = (message) => {
         const updatedGame = JSON.parse(message.body);
         console.log("update:", updatedGame);
@@ -71,6 +67,8 @@ const GameBoard = ({initialGameId, userId}) => {
                 return t('game.state.ready');
             case 'PAUSED':
                 return t('game.state.paused');
+            case 'WAITING_FOR_PLAYERS':
+                return t('game.state.wait');
         }
     };
 

@@ -27,7 +27,7 @@
       "creator": "Ersteller"
     },
     "state": {
-      "welcome": "Warte auf weitere Spieler.",
+      "wait": "Warte auf weitere Spieler.",
       "ready": "Ein neues Spiel kann gestartet werden.",
       "win": "Du hast gewonnen!",
       "lose": "Du hast verloren.",

@@ -41,6 +41,7 @@ public class GameController {
         final var game = this.gameService.createGame(sender);
 
         this.messageService.send(Topics.LOBBY_GAMES, GameDto.of(game));
+        notifyPlayers(game);
     }
 
     @MessageMapping(MessageSources.GAMES + "/join")
@@ -49,6 +50,7 @@ public class GameController {
         final var game = this.gameService.joinGame(request.getGameId(), sender);
 
         this.messageService.send(Topics.LOBBY_GAMES, GameDto.of(game));
+        notifyPlayers(game);
     }
 
     @MessageMapping(MessageSources.GAMES + "/control")

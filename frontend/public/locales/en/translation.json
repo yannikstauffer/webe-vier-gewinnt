@@ -27,7 +27,7 @@
       "creator": "Creator"
     },
     "state": {
-      "welcome": "Waiting for more players.",
+      "wait": "Waiting for more players.",
       "ready": "A new game can be started.",
       "win": "You have won!",
       "lose": "You have lost.",
