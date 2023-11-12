@@ -85,8 +85,6 @@ public class StompSessionHandler implements ApplicationListener<SessionConnectEv
         } else if (Topics.LOBBY_GAMES.equals(subscription)) {
             this.stompSessionMessagesProxy.publishAllGamesTo(currentUser);
         }
-
-
     }
 
     private User getUser(final AbstractSubProtocolEvent event) {

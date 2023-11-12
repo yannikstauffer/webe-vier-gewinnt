@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useState} from 'react';
 import {useStompClient, useSubscription} from "react-stomp-hooks";
 import {useTranslation} from 'react-i18next';
 import {useNavigate} from 'react-router-dom';
@@ -29,7 +29,7 @@ const GameBoard = ({initialGameId, userId}) => {
 
     const onGameUpdateReceived = (message) => {
         const updatedGame = JSON.parse(message.body);
-        console.log("update:", updatedGame);
+        console.log("update game:", updatedGame);
         updateGame(updatedGame);
     };
 
@@ -41,8 +41,14 @@ const GameBoard = ({initialGameId, userId}) => {
         setNextMove(updatedGame.nextMove);
         setGameBoardState(updatedGame.gameBoardState);
         setStatusMessage(getGameStatusMessage(updatedGame.gameBoardState, updatedGame.nextMove));
-        setPlayerOneId(updatedGame.userOne?.id);
-        setPlayerTwoId(updatedGame.userTwo?.id);
+
+        if (updatedGame.userOne != null) {
+            setPlayerOneId(updatedGame.userOne?.id);
+        }
+
+        if (updatedGame.userTwo != null) {
+            setPlayerTwoId(updatedGame.userTwo?.id);
+        }
 
         if (updatedGame.gameBoardState === 'READY_TO_START' || updatedGame.gameBoardState === 'NOT_STARTED') {
             setButtonState('start');
@@ -97,7 +103,7 @@ const GameBoard = ({initialGameId, userId}) => {
             case 'restart':
                 return t('game.button.newGame');
             case 'paused':
-                return t('game.button.newGame');
+                return t('game.button.continue');
             default:
                 return t('game.button.newGame');
         }
@@ -118,8 +124,9 @@ const GameBoard = ({initialGameId, userId}) => {
                     message: 'leave'
                 }),
             });
+
+            navigate('/lobby');
         }
-        navigate('/lobby');
     };
 
     const dropDisc = (column) => {

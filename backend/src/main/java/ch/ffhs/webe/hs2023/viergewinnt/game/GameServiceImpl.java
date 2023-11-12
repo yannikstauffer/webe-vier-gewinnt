@@ -34,6 +34,7 @@ public class GameServiceImpl implements GameService {
         newGame.setGameBoardState(GameBoardState.WAITING_FOR_PLAYERS);
         newGame.setUserOne(currentUser);
 
+
         GameBoard gameBoard = new GameBoard();
         newGame.setBoard(gameBoard.getBoard());
 
@@ -91,13 +92,9 @@ public class GameServiceImpl implements GameService {
             case "leave":
                 updatedGame = removePlayerFromGame(game, currentUser);
 
-                if (updatedGame.getGameState() == GameState.IN_PROGRESS) {
-                    updatedGame.setGameState(GameState.FINISHED);
-                    updatedGame.setGameBoardState(GameBoardState.NO_WINNER);
-                } else {
-                    updatedGame.setGameState(GameState.WAITING_FOR_PLAYERS);
-                    updatedGame.setGameBoardState(GameBoardState.PLAYER_HAS_LEFT);
-                }
+                updatedGame.setGameState(GameState.WAITING_FOR_PLAYERS);
+                updatedGame.setGameBoardState(GameBoardState.PLAYER_HAS_LEFT);
+
                 break;
         }
 
@@ -128,7 +125,7 @@ public class GameServiceImpl implements GameService {
 
     private Game startGame(Game game) {
         validateTwoPlayers(game);
-        return initializeGame(game, false);
+        return initializeGame(game, true);
     }
 
     private Game restartGame(Game game) {

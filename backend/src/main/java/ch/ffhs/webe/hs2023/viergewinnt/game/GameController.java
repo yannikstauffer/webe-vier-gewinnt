@@ -14,11 +14,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
-import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.stereotype.Controller;
 
 import java.security.Principal;
-import java.util.List;
 
 @Slf4j
 @Controller
@@ -57,6 +55,10 @@ public class GameController {
     public void gameControl(@Payload final GameRequestDto request, Principal user) {
         final var sender = this.userService.getUserByEmail(user.getName());
         final var game = gameService.controlGame(request, sender);
+
+        //if("leave".equals(request.getMessage())){
+        //    this.messageService.sendToUser(Queues.GAME, sender, GameControlDto.of(ControlState.LEFT_CONFIRM));
+        //}
 
         notifyPlayers(game);
     }

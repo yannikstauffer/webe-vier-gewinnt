@@ -10,12 +10,17 @@ const Lobby = ({userId}) => {
 
     const onGamesReceived = (message) => {
         const updatedGames = JSON.parse(message.body);
+
+        console.log("update in lobby:" + updatedGames);
+
         setGames(updatedGames);
     };
 
     const onLobbyGameReceived = (message) => {
         const newGame = JSON.parse(message.body);
         setGames((oldGames) => [...oldGames, newGame]);
+
+        console.log("update received:" + message);
 
         if (newGame.userOne?.id === userId || newGame.userTwo?.id === userId) {
             navigate(`/game/${newGame.id}`, {state: {prevPath: location.pathname}});
