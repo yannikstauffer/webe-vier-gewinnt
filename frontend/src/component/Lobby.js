@@ -17,13 +17,18 @@ const Lobby = ({userId}) => {
     };
 
     const onLobbyGameReceived = (message) => {
-        const newGame = JSON.parse(message.body);
-        setGames((oldGames) => [...oldGames, newGame]);
+        const data = JSON.parse(message.body);
+        if (Array.isArray(data)) {
+            setGames(data);
+        } else {
+            setGames((oldGames) => {
+                const otherGames = oldGames.filter(g => g.id !== data.id);
+                return [...otherGames, data];
+            });
 
-        console.log("update received:" + message);
-
-        if (newGame.userOne?.id === userId || newGame.userTwo?.id === userId) {
-            navigate(`/game/${newGame.id}`, {state: {prevPath: location.pathname}});
+            if (data.userOne?.id === userId || data.userTwo?.id === userId) {
+                navigate(`/game/${data.id}`, {state: {prevPath: location.pathname}});
+            }
         }
     };
 

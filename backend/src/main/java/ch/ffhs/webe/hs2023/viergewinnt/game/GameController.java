@@ -17,6 +17,7 @@ import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Controller;
 
 import java.security.Principal;
+import java.util.List;
 
 @Slf4j
 @Controller
@@ -56,9 +57,12 @@ public class GameController {
         final var sender = this.userService.getUserByEmail(user.getName());
         final var game = gameService.controlGame(request, sender);
 
-        //if("leave".equals(request.getMessage())){
-        //    this.messageService.sendToUser(Queues.GAME, sender, GameControlDto.of(ControlState.LEFT_CONFIRM));
-        //}
+        if (game == null) {
+            List<Game> allGames = gameService.getAllGames();
+            this.messageService.send(Topics.LOBBY_GAMES, GameDto.of(allGames));
+        } else {
+            notifyPlayers(game);
+        }
 
         notifyPlayers(game);
     }
@@ -82,6 +86,5 @@ public class GameController {
         if (game.getUserTwo() != null) {
             this.messageService.sendToUser(Queues.GAME, this.userService.getUserById(game.getUserTwo().getId()), GameStateDto.of(game));
         }
-
     }
 }
