@@ -57,14 +57,11 @@ public class GameController {
         final var sender = this.userService.getUserByEmail(user.getName());
         final var game = gameService.controlGame(request, sender);
 
-        if (game == null) {
-            List<Game> allGames = gameService.getAllGames();
-            this.messageService.send(Topics.LOBBY_GAMES, GameDto.of(allGames));
+        if ("leave".equals(request.getMessage())) {
+            this.messageService.send(Topics.LOBBY_GAMES, GameDto.of(game));
         } else {
             notifyPlayers(game);
         }
-
-        notifyPlayers(game);
     }
 
     @MessageMapping(MessageSources.GAMES + "/action")
@@ -76,10 +73,6 @@ public class GameController {
     }
 
     private void notifyPlayers(Game game) {
-        if (game == null) {
-            return;
-        }
-
         if (game.getUserOne() != null) {
             this.messageService.sendToUser(Queues.GAME, this.userService.getUserById(game.getUserOne().getId()), GameStateDto.of(game));
         }

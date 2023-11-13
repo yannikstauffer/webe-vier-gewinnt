@@ -5,5 +5,7 @@ public enum GameState {
     WAITING_FOR_PLAYERS,
     IN_PROGRESS,
     PAUSED,
+    NEVER_STARTED,
+    NOT_FINISHED,
     FINISHED
 }

@@ -8,27 +8,39 @@ const Lobby = ({userId}) => {
     const navigate = useNavigate();
     const location = useLocation();
 
+    const filterGamesByState = (games) => {
+        return games.filter(game =>
+            game.gameState === 'IN_PROGRESS' ||
+            game.gameState === 'PAUSED' ||
+            game.gameState === 'WAITING_FOR_PLAYERS'
+        );
+    };
+
     const onGamesReceived = (message) => {
-        const updatedGames = JSON.parse(message.body);
-
-        console.log("update in lobby:" + updatedGames);
-
+        const updatedGames = filterGamesByState(JSON.parse(message.body));
+        console.log("update /user/queue/games:", updatedGames);
         setGames(updatedGames);
     };
 
     const onLobbyGameReceived = (message) => {
-        const data = JSON.parse(message.body);
-        if (Array.isArray(data)) {
-            setGames(data);
-        } else {
-            setGames((oldGames) => {
-                const otherGames = oldGames.filter(g => g.id !== data.id);
-                return [...otherGames, data];
-            });
+        const updatedGame = JSON.parse(message.body);
 
-            if (data.userOne?.id === userId || data.userTwo?.id === userId) {
-                navigate(`/game/${data.id}`, {state: {prevPath: location.pathname}});
+        console.log("update /topic/lobby/games:", updatedGame);
+
+        setGames((oldGames) => {
+            const existingGameIndex = oldGames.findIndex(game => game.id === updatedGame.id);
+
+            if (existingGameIndex !== -1) {
+                const newGames = [...oldGames];
+                newGames[existingGameIndex] = updatedGame;
+                return filterGamesByState(newGames);
+            } else {
+                return filterGamesByState([...oldGames, updatedGame]);
             }
+        });
+
+        if (updatedGame.userOne?.id === userId || updatedGame.userTwo?.id === userId) {
+            navigate(`/game/${updatedGame.id}`, {state: {prevPath: location.pathname}});
         }
     };
 

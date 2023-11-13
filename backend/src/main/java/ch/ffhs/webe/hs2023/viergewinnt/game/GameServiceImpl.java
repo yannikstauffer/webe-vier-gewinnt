@@ -87,14 +87,15 @@ public class GameServiceImpl implements GameService {
             case "restart" -> updatedGame = restartGame(game);
             case "leave" -> {
                 updatedGame = removePlayerFromGame(game, currentUser);
-                updatedGame.setGameState(GameState.WAITING_FOR_PLAYERS);
-                updatedGame.setGameBoardState(GameBoardState.PLAYER_QUIT);
-            }
-        }
 
-        if (bothUsersLeft(updatedGame)) {
-            this.gameRepository.delete(updatedGame);
-            return null;
+                if (bothUsersLeft(updatedGame)) {
+                    if (updatedGame.getGameState() == GameState.IN_PROGRESS) {
+                        updatedGame.setGameState(GameState.NOT_FINISHED);
+                    } else if(updatedGame.getGameState() == GameState.WAITING_FOR_PLAYERS){
+                        updatedGame.setGameState(GameState.NEVER_STARTED);
+                    }
+                }
+            }
         }
 
         this.gameRepository.save(updatedGame);
