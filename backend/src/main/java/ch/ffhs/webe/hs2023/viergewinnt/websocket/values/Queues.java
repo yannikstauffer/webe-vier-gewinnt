@@ -12,4 +12,5 @@ public final class Queues {
     public static final String CHATS = "/queue/chats";
     public static final String ERROR = "/queue/error";
     public static final String GAME = "/queue/game";
+    public static final String GAMES = "/queue/games";
 }

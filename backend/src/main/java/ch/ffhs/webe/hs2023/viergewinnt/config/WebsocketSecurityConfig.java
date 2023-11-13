@@ -14,7 +14,6 @@ public class WebsocketSecurityConfig {
     @Bean
     public AuthorizationManager<Message<?>> messageAuthorizationManager(final MessageMatcherDelegatingAuthorizationManager.Builder messages) {
         messages.nullDestMatcher().authenticated()
-                .simpDestMatchers("/4gewinnt" + MessageSources.GAMES + "/deleteAll").hasRole("ADMIN")
                 .simpDestMatchers("/4gewinnt/**").authenticated()
                 .simpSubscribeDestMatchers("/topic/system",
                         "/user/queue/**", "/topic/lobby/**", "/topic/users/**").authenticated()

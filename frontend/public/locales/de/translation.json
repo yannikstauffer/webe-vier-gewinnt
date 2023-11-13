@@ -22,19 +22,30 @@
   "game": {
     "title": "Spiel",
     "label": {
-      "name": "Spiel",
+      "playerOne": "Spieler 1:",
+      "playerTwo": "Spieler 2:",
       "creator": "Ersteller"
     },
     "state": {
+      "wait": "Warte auf weitere Spieler.",
+      "ready": "Ein neues Spiel kann gestartet werden.",
       "win": "Du hast gewonnen!",
       "lose": "Du hast verloren.",
       "draw": "Das Spiel endet unentschieden.",
       "yourTurn": "Du bist am Zug.",
       "notYourTurn": "Du bist nicht am Zug.",
-      "wait": "Das Spiel hat noch nicht gestartet"
+      "quit": "Ein Spieler hat das Spiel verlassen.",
+      "paused": "Das Spiel wurde pausiert."
     },
     "button": {
-      "newGame": "Neues Spiel starten"
+      "newGame": "Neues Spiel starten",
+      "quitGame": "Spiel verlassen",
+      "continue": "Spiel weiter spielen"
+    },
+    "confirm": {
+      "quit": "Möchten Sie das Spiel wirklich verlassen?",
+      "yes": "Ja",
+      "no": "Nein"
     }
   },
   "error": {

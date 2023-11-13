@@ -1,7 +1,9 @@
 import React, {useState} from 'react';
 import {useStompClient, useSubscription} from "react-stomp-hooks";
 import {useTranslation} from 'react-i18next';
+import {useNavigate} from 'react-router-dom';
 import './GameBoard.css';
+import ConfirmDialog from './ConfirmDialog';
 
 const ROWS = 6;
 const COLUMNS = 7;
@@ -16,42 +18,46 @@ const GameBoard = ({initialGameId, userId}) => {
     const [board, setBoard] = useState(createEmptyBoard());
     const [nextMove, setNextMove] = useState(null);
     const [gameBoardState, setGameBoardState] = useState('NOT_STARTED');
-    const {t} = useTranslation();
-    const stompClient = useStompClient();
-    const [statusMessage, setStatusMessage] = useState(t('game.state.wait'));
+    const [statusMessage, setStatusMessage] = useState('');
     const [buttonState, setButtonState] = useState('start');
     const [playerOneId, setPlayerOneId] = useState(null);
     const [playerTwoId, setPlayerTwoId] = useState(null);
+    const {t} = useTranslation();
+    const stompClient = useStompClient();
+    const navigate = useNavigate();
+    const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
+    const onGameUpdateReceived = (message) => {
+        const updatedGame = JSON.parse(message.body);
+        console.log("update game:", updatedGame);
+        updateGame(updatedGame);
+    };
+
+    useSubscription("/user/queue/game", onGameUpdateReceived);
 
     const updateGame = (updatedGame) => {
-        if (gameId != updatedGame.gameId) {
-            setGameId(updatedGame.gameId);
-        }
-
+        setGameId(updatedGame.gameId);
         setBoard(updatedGame.board);
         setNextMove(updatedGame.nextMove);
         setGameBoardState(updatedGame.gameBoardState);
+        setStatusMessage(getGameStatusMessage(updatedGame.gameBoardState, updatedGame.nextMove));
 
-        if (!playerOneId || !playerTwoId) {
+        if (updatedGame.userOne != null) {
             setPlayerOneId(updatedGame.userOne?.id);
-            setPlayerTwoId(updatedGame.userTwo?.id);
         }
 
-        setStatusMessage(getGameStatusMessage(updatedGame.gameBoardState, updatedGame.nextMove));
+        if (updatedGame.userTwo != null) {
+            setPlayerTwoId(updatedGame.userTwo?.id);
+        }
 
         if (updatedGame.gameBoardState === 'READY_TO_START' || updatedGame.gameBoardState === 'NOT_STARTED') {
             setButtonState('start');
         } else if (updatedGame.gameBoardState === 'PLAYER_HAS_WON' || updatedGame.gameBoardState === 'DRAW') {
             setButtonState('restart');
+        } else if (updatedGame.gameBoardState === 'PAUSED') {
+            setButtonState('paused')
         }
     };
-
-    useSubscription("/user/queue/game", (message) => {
-        const updatedGame = JSON.parse(message.body);
-        console.log("update:", updatedGame);
-        updateGame(updatedGame);
-    });
 
     const getGameStatusMessage = (gameBoardState, nextMove) => {
         switch (gameBoardState) {
@@ -61,36 +67,65 @@ const GameBoard = ({initialGameId, userId}) => {
                 return t('game.state.draw');
             case 'MOVE_EXPECTED':
                 return nextMove === userId ? t('game.state.yourTurn') : t('game.state.notYourTurn');
-            default:
+            case 'PLAYER_QUIT':
+                return t('game.state.quit');
+            case 'READY_TO_START':
+                return t('game.state.ready');
+            case 'PAUSED':
+                return t('game.state.paused');
+            case 'WAITING_FOR_PLAYERS':
                 return t('game.state.wait');
         }
     };
 
-    const getButtonText = () => {
+    const handleButtonClick = () => {
+        if (stompClient && stompClient.connected) {
+            let message;
+            if (gameBoardState === 'READY_TO_START' || gameBoardState === 'NOT_STARTED') {
+                message = 'start';
+            } else {
+                message = 'restart';
+            }
+            stompClient.publish({
+                destination: `/4gewinnt/games/control`,
+                body: JSON.stringify({
+                    gameId: gameId,
+                    message: message
+                }),
+            });
+        }
+    };
+
+    const getHandleButtonText = () => {
         switch (buttonState) {
             case 'start':
                 return t('game.button.newGame');
-            case 'newGame':
+            case 'restart':
                 return t('game.button.newGame');
+            case 'paused':
+                return t('game.button.continue');
             default:
                 return t('game.button.newGame');
         }
     };
 
-    const handleButtonClick = () => {
-        if (gameBoardState === 'READY_TO_START' || gameBoardState === 'PLAYER_HAS_WON' || gameBoardState === 'DRAW') {
-            setBoard(createEmptyBoard());
-            setGameBoardState('NOT_STARTED');
-        }
+    const leaveButtonClick = () => {
+        setShowConfirmDialog(true);
+    };
 
+    const confirmLeave = () => {
+        setShowConfirmDialog(false);
+        setBoard(createEmptyBoard());
         if (stompClient && stompClient.connected) {
             stompClient.publish({
                 destination: `/4gewinnt/games/control`,
                 body: JSON.stringify({
                     gameId: gameId,
-                    message: buttonState
+                    message: 'leave'
                 }),
             });
+
+            navigate('/lobby');
         }
     };
 
@@ -126,9 +161,9 @@ const GameBoard = ({initialGameId, userId}) => {
                                     cellClass = 'player-two';
                                 }
                             }
-
                             return (
-                                <td key={colIndex} onClick={() => nextMove === userId && dropDisc(colIndex)}>
+                                <td key={colIndex}
+                                    onClick={() => isGameActive() && nextMove === userId && dropDisc(colIndex)}>
                                     <div className={`cell ${cellClass}`}></div>
                                 </td>
                             );
@@ -138,7 +173,14 @@ const GameBoard = ({initialGameId, userId}) => {
                 </tbody>
             </table>
             <p>{statusMessage}</p>
-            <button onClick={handleButtonClick} disabled={isGameActive()}>{getButtonText()}</button>
+            <button onClick={handleButtonClick} disabled={isGameActive()}>{getHandleButtonText()}</button>
+            <button onClick={leaveButtonClick}>{t('game.button.quitGame')}</button>
+
+            <ConfirmDialog
+                open={showConfirmDialog}
+                onClose={() => setShowConfirmDialog(false)}
+                onConfirm={confirmLeave}
+            />
         </div>
     );
 };

@@ -6,8 +6,10 @@ import ch.ffhs.webe.hs2023.viergewinnt.user.dto.UserDto;
 import lombok.Builder;
 import lombok.Data;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Data
 @Builder
@@ -18,18 +20,28 @@ public class GameDto {
     private GameState gameState;
 
     public static GameDto of(final Game game) {
-        final var builder =
-                GameDto.builder()
-                        .id(game.getId())
-                        .userOne(UserDto.of(game.getUserOne()))
-                        .gameState(game.getGameState());
+        final var builder = GameDto.builder()
+                .id(game.getId())
+                .gameState(game.getGameState());
+
+        if (game.getUserOne() != null) {
+            builder.userOne(UserDto.of(game.getUserOne()));
+        }
+
         if (game.getUserTwo() != null) {
             builder.userTwo(UserDto.of(game.getUserTwo()));
         }
+
         return builder.build();
     }
 
     public static List<GameDto> of(final Collection<Game> games) {
-        return games.stream().map(GameDto::of).toList();
+        if (games == null || games.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        return games.stream()
+                .map(GameDto::of)
+                .collect(Collectors.toList());
     }
 }

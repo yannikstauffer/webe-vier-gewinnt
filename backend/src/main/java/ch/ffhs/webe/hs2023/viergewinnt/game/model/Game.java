@@ -42,6 +42,7 @@ public class Game {
     @Enumerated(EnumType.STRING)
     private GameState gameState;
 
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private GameBoardState gameBoardState;
 

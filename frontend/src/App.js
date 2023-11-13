@@ -213,6 +213,7 @@ function App() {
             <Routes>
               <Route path="/" element={<Lobby userId={userId} />} />
               <Route path="/game/:gameId" element={<Game userId={userId} />} />
+              <Route path="/lobby" element={<Lobby userId={userId} />} />
             </Routes>
             <Chat userId={userId} />
           </div>

@@ -1,5 +1,9 @@
 package ch.ffhs.webe.hs2023.viergewinnt.websocket;
 
+import ch.ffhs.webe.hs2023.viergewinnt.game.GameService;
+import ch.ffhs.webe.hs2023.viergewinnt.game.model.Game;
+import ch.ffhs.webe.hs2023.viergewinnt.game.values.GameBoardState;
+import ch.ffhs.webe.hs2023.viergewinnt.game.values.GameState;
 import ch.ffhs.webe.hs2023.viergewinnt.user.SessionService;
 import ch.ffhs.webe.hs2023.viergewinnt.user.UserService;
 import ch.ffhs.webe.hs2023.viergewinnt.user.model.User;
@@ -11,12 +15,9 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.EventListener;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Component;
-import org.springframework.web.socket.messaging.AbstractSubProtocolEvent;
-import org.springframework.web.socket.messaging.SessionConnectEvent;
-import org.springframework.web.socket.messaging.SessionConnectedEvent;
-import org.springframework.web.socket.messaging.SessionDisconnectEvent;
-import org.springframework.web.socket.messaging.SessionSubscribeEvent;
+import org.springframework.web.socket.messaging.*;
 
+import java.util.List;
 import java.util.Objects;
 
 @Slf4j
@@ -25,12 +26,14 @@ public class StompSessionHandler implements ApplicationListener<SessionConnectEv
 
     private final UserService userService;
     private final SessionService sessionService;
+    private final GameService gameService;
     private final StompSessionMessagesProxy stompSessionMessagesProxy;
 
     @Autowired
-    public StompSessionHandler(final UserService userService, final SessionService sessionService, final StompSessionMessagesProxy stompSessionMessagesProxy) {
+    public StompSessionHandler(final UserService userService, final SessionService sessionService, final GameService gameService, final StompSessionMessagesProxy stompSessionMessagesProxy) {
         this.userService = userService;
         this.sessionService = sessionService;
+        this.gameService = gameService;
         this.stompSessionMessagesProxy = stompSessionMessagesProxy;
     }
 
@@ -66,6 +69,9 @@ public class StompSessionHandler implements ApplicationListener<SessionConnectEv
         if (currentUser.getSessions().isEmpty()) {
             log.debug("User {} no longer online. Sending update to all subscribers.", currentUser.getEmail());
             this.stompSessionMessagesProxy.publishUserUpdate(currentUser, UserUpdateType.OFFLINE);
+
+            List<Game> gamesUserWasIn = this.gameService.setAndGetGamesForUser(currentUser, GameState.PAUSED, GameBoardState.PLAYER_DISCONNECTED);
+            this.stompSessionMessagesProxy.publishUserLeftGames(currentUser, gamesUserWasIn);
         }
     }
 
@@ -78,6 +84,8 @@ public class StompSessionHandler implements ApplicationListener<SessionConnectEv
             this.stompSessionMessagesProxy.publishAllChatsTo(currentUser);
         } else if (Topics.USERS.equals(subscription)) {
             this.stompSessionMessagesProxy.publishAllUsersTo(currentUser);
+        } else if (Topics.LOBBY_GAMES.equals(subscription)) {
+            this.stompSessionMessagesProxy.publishAllGamesTo(currentUser);
         }
     }
 
