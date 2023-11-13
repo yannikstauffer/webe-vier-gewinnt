@@ -7,6 +7,7 @@ public enum GameBoardState {
     DRAW,
     MOVE_EXPECTED,
     READY_TO_START,
-    PLAYER_HAS_LEFT,
+    PLAYER_QUIT,
+    PLAYER_DISCONNECTED,
     NOT_STARTED
 }

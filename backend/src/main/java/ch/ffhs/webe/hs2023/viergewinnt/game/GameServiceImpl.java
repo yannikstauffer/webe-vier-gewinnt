@@ -93,7 +93,7 @@ public class GameServiceImpl implements GameService {
                 updatedGame = removePlayerFromGame(game, currentUser);
 
                 updatedGame.setGameState(GameState.WAITING_FOR_PLAYERS);
-                updatedGame.setGameBoardState(GameBoardState.PLAYER_HAS_LEFT);
+                updatedGame.setGameBoardState(GameBoardState.PLAYER_QUIT);
 
                 break;
         }

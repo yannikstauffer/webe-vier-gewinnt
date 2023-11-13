@@ -9,7 +9,7 @@ const ConfirmDialog = ({ open, onClose, onConfirm }) => {
     return (
         <div className="confirm-dialog-backdrop">
             <div className="confirm-dialog">
-                <p>{t('game.confirm.leave')}</p>
+                <p>{t('game.confirm.quit')}</p>
                 <button onClick={onConfirm}>{t('game.confirm.yes')}</button>
                 <button onClick={onClose}>{t('game.confirm.no')}</button>
             </div>

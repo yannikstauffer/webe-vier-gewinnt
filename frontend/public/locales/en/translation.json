@@ -35,16 +35,16 @@
       "yourTurn": "It's your turn.",
       "notYourTurn": "It's not your turn.",
       "wait": "The game has not started yet",
-      "left": "A player has left the game.",
+      "quit": "A player has quit the game.",
       "paused": "The game has been paused."
     },
     "button": {
       "newGame": "Start New Game",
-      "leaveGame": "Leave Game",
+      "quitGame": "Leave Game",
       "continue": "Continue game"
     },
     "confirm": {
-      "leave": "Do you really want to leave the game?",
+      "quit": "Do you really want to leave the game?",
       "yes": "Ja",
       "no": "Nein"
     }

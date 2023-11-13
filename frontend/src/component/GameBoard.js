@@ -67,8 +67,8 @@ const GameBoard = ({initialGameId, userId}) => {
                 return t('game.state.draw');
             case 'MOVE_EXPECTED':
                 return nextMove === userId ? t('game.state.yourTurn') : t('game.state.notYourTurn');
-            case 'PLAYER_HAS_LEFT':
-                return t('game.state.left');
+            case 'PLAYER_QUIT':
+                return t('game.state.quit');
             case 'READY_TO_START':
                 return t('game.state.ready');
             case 'PAUSED':
@@ -174,7 +174,7 @@ const GameBoard = ({initialGameId, userId}) => {
             </table>
             <p>{statusMessage}</p>
             <button onClick={handleButtonClick} disabled={isGameActive()}>{getHandleButtonText()}</button>
-            <button onClick={leaveButtonClick}>{t('game.button.leaveGame')}</button>
+            <button onClick={leaveButtonClick}>{t('game.button.quitGame')}</button>
 
             <ConfirmDialog
                 open={showConfirmDialog}
