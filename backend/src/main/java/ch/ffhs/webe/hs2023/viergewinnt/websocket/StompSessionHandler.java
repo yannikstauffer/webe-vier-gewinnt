@@ -2,6 +2,8 @@ package ch.ffhs.webe.hs2023.viergewinnt.websocket;
 
 import ch.ffhs.webe.hs2023.viergewinnt.game.GameService;
 import ch.ffhs.webe.hs2023.viergewinnt.game.model.Game;
+import ch.ffhs.webe.hs2023.viergewinnt.game.values.GameBoardState;
+import ch.ffhs.webe.hs2023.viergewinnt.game.values.GameState;
 import ch.ffhs.webe.hs2023.viergewinnt.user.SessionService;
 import ch.ffhs.webe.hs2023.viergewinnt.user.UserService;
 import ch.ffhs.webe.hs2023.viergewinnt.user.model.User;
@@ -68,7 +70,7 @@ public class StompSessionHandler implements ApplicationListener<SessionConnectEv
             log.debug("User {} no longer online. Sending update to all subscribers.", currentUser.getEmail());
             this.stompSessionMessagesProxy.publishUserUpdate(currentUser, UserUpdateType.OFFLINE);
 
-            List<Game> gamesUserWasIn = this.gameService.getGamesForUser(currentUser);
+            List<Game> gamesUserWasIn = this.gameService.setAndGetGamesForUser(currentUser, GameState.PAUSED, GameBoardState.PLAYER_DISCONNECTED);
             this.stompSessionMessagesProxy.publishUserLeftGames(currentUser, gamesUserWasIn);
         }
     }

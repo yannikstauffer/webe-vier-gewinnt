@@ -83,19 +83,13 @@ public class GameServiceImpl implements GameService {
         Game updatedGame = game;
 
         switch (request.getMessage()) {
-            case "start":
-                updatedGame = startGame(game);
-                break;
-            case "restart":
-                updatedGame = restartGame(game);
-                break;
-            case "leave":
+            case "start" -> updatedGame = startGame(game);
+            case "restart" -> updatedGame = restartGame(game);
+            case "leave" -> {
                 updatedGame = removePlayerFromGame(game, currentUser);
-
                 updatedGame.setGameState(GameState.WAITING_FOR_PLAYERS);
                 updatedGame.setGameBoardState(GameBoardState.PLAYER_QUIT);
-
-                break;
+            }
         }
 
         if (bothUsersLeft(updatedGame)) {
@@ -194,11 +188,16 @@ public class GameServiceImpl implements GameService {
     }
 
     @Override
-    public List<Game> getGamesForUser(final User user) {
+    public List<Game> setAndGetGamesForUser(final User user, final GameState gameState, final GameBoardState gameBoardState) {
         List<Game> gamesForUser = new ArrayList<>();
         this.gameRepository.findAll().forEach(game -> {
             if (game.getUserOne() != null && game.getUserOne().getId() == user.getId() ||
                     game.getUserTwo() != null && game.getUserTwo().getId() == user.getId()) {
+
+                game.setGameState(gameState);
+                game.setGameBoardState(gameBoardState);
+                this.gameRepository.save(game);
+
                 gamesForUser.add(game);
             }
         });

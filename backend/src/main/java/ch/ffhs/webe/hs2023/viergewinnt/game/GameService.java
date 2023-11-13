@@ -2,6 +2,8 @@ package ch.ffhs.webe.hs2023.viergewinnt.game;
 
 import ch.ffhs.webe.hs2023.viergewinnt.game.dto.GameRequestDto;
 import ch.ffhs.webe.hs2023.viergewinnt.game.model.Game;
+import ch.ffhs.webe.hs2023.viergewinnt.game.values.GameBoardState;
+import ch.ffhs.webe.hs2023.viergewinnt.game.values.GameState;
 import ch.ffhs.webe.hs2023.viergewinnt.user.model.User;
 
 import java.util.List;
@@ -21,6 +23,6 @@ public interface GameService {
 
     Game controlGame(GameRequestDto request, final User currentUser);
 
-    List<Game> getGamesForUser(final User user);
+    List<Game> setAndGetGamesForUser(final User user, final GameState gameState, final GameBoardState gameBoardState);
 
 }
