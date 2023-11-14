@@ -91,7 +91,7 @@ public class GameServiceImpl implements GameService {
                 if (bothUsersLeft(updatedGame)) {
                     if (updatedGame.getGameState() == GameState.IN_PROGRESS) {
                         updatedGame.setGameState(GameState.NOT_FINISHED);
-                    } else if(updatedGame.getGameState() == GameState.WAITING_FOR_PLAYERS){
+                    } else if (updatedGame.getGameState() == GameState.WAITING_FOR_PLAYERS) {
                         updatedGame.setGameState(GameState.NEVER_STARTED);
                     }
                 }
