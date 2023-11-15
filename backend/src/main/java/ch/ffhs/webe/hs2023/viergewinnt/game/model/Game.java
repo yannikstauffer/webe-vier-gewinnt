@@ -86,4 +86,14 @@ public class Game {
     public boolean isFull() {
         return userOne != null && userTwo != null;
     }
+
+    public boolean isPlayerInBoard(int playerId) {
+        ArrayList<ArrayList<Integer>> board = getBoard();
+        for (ArrayList<Integer> row : board) {
+            if (row.contains(playerId)) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

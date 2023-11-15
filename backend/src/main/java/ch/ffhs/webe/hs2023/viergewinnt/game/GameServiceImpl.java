@@ -68,7 +68,9 @@ public class GameServiceImpl implements GameService {
             game.setUserTwo(currentUser);
         }
 
-        if (game.isFull()) {
+        if (game.isFull() && game.isPlayerInBoard(currentUser.getId())) {
+            game.setGameBoardState(GameBoardState.READY_TO_CONTINUE);
+        } else if (game.isFull()) {
             game.setGameBoardState(GameBoardState.READY_TO_START);
         }
 
@@ -85,6 +87,7 @@ public class GameServiceImpl implements GameService {
         switch (request.getMessage()) {
             case "start" -> updatedGame = startGame(game);
             case "restart" -> updatedGame = restartGame(game);
+            case "continue" -> updatedGame = continueGame(game);
             case "leave" -> {
                 updatedGame = removePlayerFromGame(game, currentUser);
 
@@ -94,6 +97,9 @@ public class GameServiceImpl implements GameService {
                     } else if (updatedGame.getGameState() == GameState.WAITING_FOR_PLAYERS) {
                         updatedGame.setGameState(GameState.NEVER_STARTED);
                     }
+                } else {
+                    updatedGame.setGameState(GameState.WAITING_FOR_PLAYERS);
+                    updatedGame.setGameBoardState(GameBoardState.PLAYER_QUIT);
                 }
             }
         }
@@ -131,6 +137,15 @@ public class GameServiceImpl implements GameService {
         newGame.setUserTwo(game.getUserTwo());
 
         return initializeGame(newGame, true);
+    }
+
+    private Game continueGame(Game game) {
+        validateTwoPlayers(game);
+
+        game.setGameState(GameState.IN_PROGRESS);
+        game.setGameBoardState(GameBoardState.MOVE_EXPECTED);
+
+        return game;
     }
 
     private Game removePlayerFromGame(Game game, User currentUser) {

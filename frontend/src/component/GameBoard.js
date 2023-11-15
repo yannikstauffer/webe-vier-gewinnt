@@ -54,27 +54,30 @@ const GameBoard = ({initialGameId, userId}) => {
             setButtonState('start');
         } else if (updatedGame.gameBoardState === 'PLAYER_HAS_WON' || updatedGame.gameBoardState === 'DRAW') {
             setButtonState('restart');
-        } else if (updatedGame.gameBoardState === 'PAUSED') {
-            setButtonState('paused')
+        } else if (updatedGame.gameBoardState === 'READY_TO_CONTINUE') {
+            setButtonState('continue')
         }
     };
 
     const getGameStatusMessage = (gameBoardState, nextMove) => {
         switch (gameBoardState) {
+            case 'WAITING_FOR_PLAYERS':
+                return t('game.state.wait');
             case 'PLAYER_HAS_WON':
                 return nextMove === userId ? t('game.state.win') : t('game.state.lose');
             case 'DRAW':
                 return t('game.state.draw');
             case 'MOVE_EXPECTED':
                 return nextMove === userId ? t('game.state.yourTurn') : t('game.state.notYourTurn');
-            case 'PLAYER_QUIT':
-                return t('game.state.quit');
             case 'READY_TO_START':
                 return t('game.state.ready');
-            case 'PAUSED':
-                return t('game.state.paused');
-            case 'WAITING_FOR_PLAYERS':
-                return t('game.state.wait');
+            case 'PLAYER_QUIT':
+                return t('game.state.quit');
+            case 'PLAYER_DISCONNECTED':
+                return t('game.state.disconnected');
+            case 'READY_TO_CONTINUE':
+                return t('game.state.continue');
+
         }
     };
 
@@ -83,8 +86,10 @@ const GameBoard = ({initialGameId, userId}) => {
             let message;
             if (gameBoardState === 'READY_TO_START' || gameBoardState === 'NOT_STARTED') {
                 message = 'start';
+            } else if (gameBoardState === 'READY_TO_CONTINUE') {
+                message = 'continue';
             } else {
-                message = 'restart';
+                message = 'restart'
             }
             stompClient.publish({
                 destination: `/4gewinnt/games/control`,
@@ -102,7 +107,7 @@ const GameBoard = ({initialGameId, userId}) => {
                 return t('game.button.newGame');
             case 'restart':
                 return t('game.button.newGame');
-            case 'paused':
+            case 'continue':
                 return t('game.button.continue');
             default:
                 return t('game.button.newGame');

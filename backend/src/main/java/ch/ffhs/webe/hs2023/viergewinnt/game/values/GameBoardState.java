@@ -9,5 +9,5 @@ public enum GameBoardState {
     READY_TO_START,          // Das Spiel ist bereit zum spielen
     PLAYER_QUIT,             // Ein Spieler hat das Spiel verlassen
     PLAYER_DISCONNECTED,     // Ein Spieler hat die Verbindung verloren
-    NOT_STARTED              // Das Spiel wurde noch nicht gestartet
+    READY_TO_CONTINUE,       // Das Spiel kann weitergespielt werden
 }

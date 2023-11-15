@@ -35,7 +35,8 @@
       "yourTurn": "Du bist am Zug.",
       "notYourTurn": "Du bist nicht am Zug.",
       "quit": "Ein Spieler hat das Spiel verlassen.",
-      "paused": "Das Spiel wurde pausiert."
+      "disconnected": "Ein Spieler hat die Verbindung verloren",
+      "continue": "Es kann weitergespielt werden."
     },
     "button": {
       "newGame": "Neues Spiel starten",
