@@ -44,8 +44,8 @@ const Lobby = ({userId}) => {
         }
     };
 
-    useSubscription("/topic/lobby/games", onLobbyGameReceived);
     useSubscription("/user/queue/games", onGamesReceived);
+    useSubscription("/topic/lobby/games", onLobbyGameReceived);
 
     const createGame = () => {
         if (stompClient) {
