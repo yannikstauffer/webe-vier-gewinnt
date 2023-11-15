@@ -62,9 +62,9 @@ public class GameServiceImpl implements GameService {
             throw VierGewinntException.of(ErrorCode.GAME_FULL, "Das Spiel ist bereits voll!");
         }
 
-        if (game.getUserOne() == null) {
+        if (game.getUserOne() == null && game.getUserTwo().getId() != currentUser.getId()) {
             game.setUserOne(currentUser);
-        } else if (game.getUserTwo() == null) {
+        } else if (game.getUserTwo() == null && game.getUserOne().getId() != currentUser.getId()) {
             game.setUserTwo(currentUser);
         }
 
@@ -189,19 +189,18 @@ public class GameServiceImpl implements GameService {
     }
 
     @Override
-    public List<Game> setAndGetGamesForUser(final User user, final GameState gameState, final GameBoardState gameBoardState) {
-        List<Game> gamesForUser = new ArrayList<>();
-        this.gameRepository.findAll().forEach(game -> {
-            if (game.getUserOne() != null && game.getUserOne().getId() == user.getId() ||
-                    game.getUserTwo() != null && game.getUserTwo().getId() == user.getId()) {
+    public List<Game> setAndGetGamesForUser(final User user, final GameBoardState gameBoardState) {
+        List<Game> gamesForUser = this.gameRepository.findGamesByUserId(user.getId());
 
-                game.setGameState(gameState);
-                game.setGameBoardState(gameBoardState);
-                this.gameRepository.save(game);
-
-                gamesForUser.add(game);
+        for (Game game : gamesForUser) {
+            if (game.getGameState() != GameState.NEVER_STARTED) {
+                game.setGameState(GameState.PAUSED);
             }
-        });
+            game.setGameBoardState(gameBoardState);
+        }
+
+        this.gameRepository.saveAll(gamesForUser);
+
         return gamesForUser;
     }
 

@@ -23,6 +23,6 @@ public interface GameService {
 
     Game controlGame(GameRequestDto request, final User currentUser);
 
-    List<Game> setAndGetGamesForUser(final User user, final GameState gameState, final GameBoardState gameBoardState);
+    List<Game> setAndGetGamesForUser(final User user, final GameBoardState gameBoardState);
 
 }
