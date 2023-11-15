@@ -58,13 +58,13 @@ public class GameServiceImpl implements GameService {
     public Game joinGame(final int gameId, final User currentUser) {
         final Game game = findGameOrThrow(gameId);
 
-        if (game.isFull()) {
+        if (game.isFull() && !isUserOneCurrentUser(game, currentUser) && !isUserTwoCurrentUser(game, currentUser)) {
             throw VierGewinntException.of(ErrorCode.GAME_FULL, "Das Spiel ist bereits voll!");
         }
 
-        if (game.getUserOne() == null && game.getUserTwo().getId() != currentUser.getId()) {
+        if (game.getUserOne() == null && !isUserTwoCurrentUser(game, currentUser)) {
             game.setUserOne(currentUser);
-        } else if (game.getUserTwo() == null && game.getUserOne().getId() != currentUser.getId()) {
+        } else if (game.getUserTwo() == null && !isUserOneCurrentUser(game, currentUser)) {
             game.setUserTwo(currentUser);
         }
 
@@ -234,6 +234,14 @@ public class GameServiceImpl implements GameService {
 
     private boolean bothUsersLeft(final Game game) {
         return game.getUserOne() == null && game.getUserTwo() == null;
+    }
+
+    private boolean isUserOneCurrentUser(final Game game, User currentUser) {
+        return game.getUserOne().getId() == currentUser.getId();
+    }
+
+    private boolean isUserTwoCurrentUser(final Game game, User currentUser) {
+        return game.getUserTwo().getId() == currentUser.getId();
     }
 
 }

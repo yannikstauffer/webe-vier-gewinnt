@@ -7,6 +7,9 @@ const Lobby = ({userId}) => {
     const stompClient = useStompClient();
     const navigate = useNavigate();
     const location = useLocation();
+    let attemptingToJoinGameId = null;
+    let isCreatingGame = false;
+
 
     const filterGamesByState = (games) => {
         return games.filter(game =>
@@ -14,6 +17,11 @@ const Lobby = ({userId}) => {
             game.gameState === 'PAUSED' ||
             game.gameState === 'WAITING_FOR_PLAYERS'
         );
+    };
+
+    const onGameClick = (gameId) => {
+        attemptingToJoinGameId = gameId;
+        joinGame(gameId);
     };
 
     const onGamesReceived = (message) => {
@@ -27,6 +35,10 @@ const Lobby = ({userId}) => {
 
         console.log("update /topic/lobby/games:", updatedGame);
 
+        if (isCreatingGame && !attemptingToJoinGameId) {
+            onGameCreated(updatedGame.id);
+        }
+
         setGames((oldGames) => {
             const existingGameIndex = oldGames.findIndex(game => game.id === updatedGame.id);
 
@@ -39,8 +51,10 @@ const Lobby = ({userId}) => {
             }
         });
 
-        if (updatedGame.userOne?.id === userId || updatedGame.userTwo?.id === userId) {
+        if ((updatedGame.userOne?.id === userId || updatedGame.userTwo?.id === userId) &&
+            updatedGame.id === attemptingToJoinGameId) {
             navigate(`/game/${updatedGame.id}`, {state: {prevPath: location.pathname}});
+            attemptingToJoinGameId = null;
         }
     };
 
@@ -48,8 +62,17 @@ const Lobby = ({userId}) => {
     useSubscription("/topic/lobby/games", onLobbyGameReceived);
 
     const createGame = () => {
+        isCreatingGame = true;
         if (stompClient) {
             stompClient.publish({destination: "/4gewinnt/games/create"});
+        }
+    };
+
+    const onGameCreated = (gameId) => {
+        if (isCreatingGame) {
+            attemptingToJoinGameId = gameId;
+            isCreatingGame = false;
+            joinGame(gameId);
         }
     };
 
@@ -68,7 +91,7 @@ const Lobby = ({userId}) => {
             <button onClick={createGame}>Neues Spiel erstellen</button>
             <ul>
                 {games.map((game) => (
-                    <li key={game.id} onClick={() => joinGame(game.id)}>
+                    <li key={game.id} onClick={() => onGameClick(game.id)}>
                         Spiel ID: {game.id} - Ersteller: {game.userOne?.firstName} - State: {game.gameState}
                     </li>
                 ))}
