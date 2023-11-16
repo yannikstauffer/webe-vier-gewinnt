@@ -31,7 +31,7 @@ public class Game {
     private int id;
 
     @ManyToOne
-    @JoinColumn(name = COL_USER_ONE_ID, nullable = false, updatable = false)
+    @JoinColumn(name = COL_USER_ONE_ID)
     private User userOne;
 
     @ManyToOne

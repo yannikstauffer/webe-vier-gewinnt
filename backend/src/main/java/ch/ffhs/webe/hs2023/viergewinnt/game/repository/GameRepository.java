@@ -9,9 +9,6 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 public interface GameRepository extends CrudRepository<Game, Integer> {
-    @Query("SELECT g FROM games g WHERE g.userOne = :user OR g.userTwo = :user")
-    List<Game> findByPlayer(@Param("user") User user);
-
     @Query("SELECT g FROM games g WHERE g.userOne.id = :userId OR g.userTwo.id = :userId")
     List<Game> findGamesByUserId(@Param("userId") int userId);
 }

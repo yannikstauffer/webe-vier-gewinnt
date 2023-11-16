@@ -160,9 +160,9 @@ const GameBoard = ({initialGameId, userId}) => {
                         {row.map((cell, colIndex) => {
                             let cellClass = 'empty';
                             if (cell !== EMPTY) {
-                                if (cell === playerOneId) {
+                                if (cell === playerOneId && playerTwoId !== null) {
                                     cellClass = 'player-one';
-                                } else if (cell === playerTwoId) {
+                                } else if (cell === playerTwoId && playerOneId !== null) {
                                     cellClass = 'player-two';
                                 }
                             }
