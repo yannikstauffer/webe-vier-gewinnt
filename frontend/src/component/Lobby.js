@@ -1,9 +1,11 @@
-import React, {useState} from 'react';
+import React, {useState, useRef} from 'react';
 import {useStompClient, useSubscription} from "react-stomp-hooks";
 import {useLocation, useNavigate} from 'react-router-dom';
 
 const Lobby = ({userId}) => {
     const [games, setGames] = useState([]);
+    const [isLoading, setIsLoading] = useState(false);
+    const lobbyGameTimeoutRef = useRef(null);
     const stompClient = useStompClient();
     const navigate = useNavigate();
     const location = useLocation();
@@ -31,30 +33,37 @@ const Lobby = ({userId}) => {
     };
 
     const onLobbyGameReceived = (message) => {
-        const updatedGame = JSON.parse(message.body);
+        if (!lobbyGameTimeoutRef.current) {
+            lobbyGameTimeoutRef.current = setTimeout(() => {
+                const updatedGame = JSON.parse(message.body);
+                console.log("update /topic/lobby/games:", updatedGame);
 
-        console.log("update /topic/lobby/games:", updatedGame);
+                if (isCreatingGame && !attemptingToJoinGameId) {
+                    onGameCreated(updatedGame.id);
+                }
 
-        if (isCreatingGame && !attemptingToJoinGameId) {
-            onGameCreated(updatedGame.id);
-        }
+                setGames((oldGames) => {
+                    const existingGameIndex = oldGames.findIndex(game => game.id === updatedGame.id);
 
-        setGames((oldGames) => {
-            const existingGameIndex = oldGames.findIndex(game => game.id === updatedGame.id);
+                    if (existingGameIndex !== -1) {
+                        const newGames = [...oldGames];
+                        newGames[existingGameIndex] = updatedGame;
+                        return filterGamesByState(newGames);
+                    } else {
+                        return filterGamesByState([...oldGames, updatedGame]);
+                    }
+                });
 
-            if (existingGameIndex !== -1) {
-                const newGames = [...oldGames];
-                newGames[existingGameIndex] = updatedGame;
-                return filterGamesByState(newGames);
-            } else {
-                return filterGamesByState([...oldGames, updatedGame]);
-            }
-        });
+                if ((updatedGame.userOne?.id === userId || updatedGame.userTwo?.id === userId) &&
+                    updatedGame.id === attemptingToJoinGameId) {
+                    navigate(`/game/${updatedGame.id}`, {state: {prevPath: location.pathname}});
+                    attemptingToJoinGameId = null;
+                }
 
-        if ((updatedGame.userOne?.id === userId || updatedGame.userTwo?.id === userId) &&
-            updatedGame.id === attemptingToJoinGameId) {
-            navigate(`/game/${updatedGame.id}`, {state: {prevPath: location.pathname}});
-            attemptingToJoinGameId = null;
+                lobbyGameTimeoutRef.current = null;
+            }, 20);
+
+
         }
     };
 
@@ -73,6 +82,7 @@ const Lobby = ({userId}) => {
             attemptingToJoinGameId = gameId;
             isCreatingGame = false;
             joinGame(gameId);
+            navigate(`/game/${gameId}`, {state: {prevPath: location.pathname}});
         }
     };
 

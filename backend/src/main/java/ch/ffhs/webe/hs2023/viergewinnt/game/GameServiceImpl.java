@@ -208,7 +208,7 @@ public class GameServiceImpl implements GameService {
         List<Game> gamesForUser = this.gameRepository.findGamesByUserId(user.getId());
 
         for (Game game : gamesForUser) {
-            if (game.getGameState() != GameState.NEVER_STARTED) {
+            if (game.getGameState() == GameState.IN_PROGRESS) {
                 game.setGameState(GameState.PAUSED);
             }
             game.setGameBoardState(gameBoardState);
@@ -252,11 +252,19 @@ public class GameServiceImpl implements GameService {
     }
 
     private boolean isUserOneCurrentUser(final Game game, User currentUser) {
-        return game.getUserOne().getId() == currentUser.getId();
+        if(game.getUserOne() != null){
+            return game.getUserOne().getId() == currentUser.getId();
+        } else {
+            return false;
+        }
     }
 
     private boolean isUserTwoCurrentUser(final Game game, User currentUser) {
-        return game.getUserTwo().getId() == currentUser.getId();
+        if(game.getUserTwo() != null){
+            return game.getUserTwo().getId() == currentUser.getId();
+        } else {
+            return false;
+        }
     }
 
 }
