@@ -109,8 +109,8 @@ public class GameServiceImpl implements GameService {
                     updatedGame.setGameBoardState(GameBoardState.PLAYER_QUIT);
                 }
             }
-            case "LEVEL1" -> updatedGame = setLevel1(game);
-            case "LEVEL2" -> updatedGame = setLevel2(game);
+            case "LEVEL1" -> updatedGame.setGameLevel(GameLevel.LEVEL1);
+            case "LEVEL2" -> updatedGame.setGameLevel(GameLevel.LEVEL2);
         }
 
         return this.gameRepository.save(updatedGame);
@@ -152,16 +152,6 @@ public class GameServiceImpl implements GameService {
         game.setGameState(GameState.IN_PROGRESS);
         game.setGameBoardState(GameBoardState.MOVE_EXPECTED);
 
-        return game;
-    }
-
-    private Game setLevel1(Game game) {
-        game.setGameLevel(GameLevel.LEVEL1);
-        return game;
-    }
-
-    private Game setLevel2(Game game) {
-        game.setGameLevel(GameLevel.LEVEL2);
         return game;
     }
 
