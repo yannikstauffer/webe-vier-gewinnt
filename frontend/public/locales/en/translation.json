@@ -49,6 +49,10 @@
       "quit": "Do you really want to leave the game?",
       "yes": "Ja",
       "no": "Nein"
+    },
+    "level": {
+      "countdown": "Time until the next move: ",
+      "activated": "Activated level: "
     }
   },
   "error": {

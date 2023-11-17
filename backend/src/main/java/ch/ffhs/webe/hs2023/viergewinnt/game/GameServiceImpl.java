@@ -6,6 +6,7 @@ import ch.ffhs.webe.hs2023.viergewinnt.game.dto.GameRequestDto;
 import ch.ffhs.webe.hs2023.viergewinnt.game.model.Game;
 import ch.ffhs.webe.hs2023.viergewinnt.game.repository.GameRepository;
 import ch.ffhs.webe.hs2023.viergewinnt.game.values.GameBoardState;
+import ch.ffhs.webe.hs2023.viergewinnt.game.values.GameLevel;
 import ch.ffhs.webe.hs2023.viergewinnt.game.values.GameState;
 import ch.ffhs.webe.hs2023.viergewinnt.user.UserService;
 import ch.ffhs.webe.hs2023.viergewinnt.user.model.User;
@@ -35,6 +36,7 @@ public class GameServiceImpl implements GameService {
         final Game newGame = new Game();
         newGame.setGameState(GameState.WAITING_FOR_PLAYERS);
         newGame.setGameBoardState(GameBoardState.WAITING_FOR_PLAYERS);
+        newGame.setGameLevel(GameLevel.LEVEL1);
         newGame.setUserOne(currentUser);
 
 
@@ -107,12 +109,11 @@ public class GameServiceImpl implements GameService {
                     updatedGame.setGameBoardState(GameBoardState.PLAYER_QUIT);
                 }
             }
+            case "LEVEL1" -> updatedGame = setLevel1(game);
+            case "LEVEL2" -> updatedGame = setLevel2(game);
         }
 
-        this.gameRepository.save(updatedGame);
-
-        return updatedGame;
-
+        return this.gameRepository.save(updatedGame);
     }
 
     private Game initializeGame(Game game, boolean isNewGame) {
@@ -138,6 +139,7 @@ public class GameServiceImpl implements GameService {
         validateTwoPlayers(game);
 
         Game newGame = new Game();
+        newGame.setGameLevel(game.getGameLevel());
         newGame.setUserOne(game.getUserOne());
         newGame.setUserTwo(game.getUserTwo());
 
@@ -153,13 +155,29 @@ public class GameServiceImpl implements GameService {
         return game;
     }
 
+    private Game setLevel1(Game game) {
+        game.setGameLevel(GameLevel.LEVEL1);
+        return game;
+    }
+
+    private Game setLevel2(Game game) {
+        game.setGameLevel(GameLevel.LEVEL2);
+        return game;
+    }
+
     private Game removePlayerFromGame(Game game, User currentUser) {
         validatePlayer(game, currentUser);
 
-        if (game.getUserOne().getId() == currentUser.getId()) {
-            game.setUserOne(null);
-        } else if (game.getUserTwo().getId() == currentUser.getId()) {
-            game.setUserTwo(null);
+        if (game.getUserOne() != null) {
+            if (game.getUserOne().getId() == currentUser.getId()) {
+                game.setUserOne(null);
+            }
+        }
+
+        if (game.getUserTwo() != null) {
+            if (game.getUserTwo().getId() == currentUser.getId()) {
+                game.setUserTwo(null);
+            }
         }
 
         return this.gameRepository.save(game);
@@ -232,7 +250,7 @@ public class GameServiceImpl implements GameService {
             throw VierGewinntException.of(ErrorCode.NULL_PLAYER, "Player was not set.");
         }
 
-        if(game.getUserOne() != null && game.getUserTwo() != null){
+        if (game.getUserOne() != null && game.getUserTwo() != null) {
             if (game.getUserOne().getId() != currentUser.getId() && game.getUserTwo().getId() != currentUser.getId()) {
                 throw VierGewinntException.of(ErrorCode.INVALID_PLAYER, "The current user is not part of this game.");
             }
@@ -262,7 +280,7 @@ public class GameServiceImpl implements GameService {
     }
 
     private boolean isUserOneCurrentUser(final Game game, User currentUser) {
-        if(game.getUserOne() != null){
+        if (game.getUserOne() != null) {
             return game.getUserOne().getId() == currentUser.getId();
         } else {
             return false;
@@ -270,7 +288,7 @@ public class GameServiceImpl implements GameService {
     }
 
     private boolean isUserTwoCurrentUser(final Game game, User currentUser) {
-        if(game.getUserTwo() != null){
+        if (game.getUserTwo() != null) {
             return game.getUserTwo().getId() == currentUser.getId();
         } else {
             return false;

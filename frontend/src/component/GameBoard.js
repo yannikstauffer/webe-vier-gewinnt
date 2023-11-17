@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {useStompClient, useSubscription} from "react-stomp-hooks";
 import {useTranslation} from 'react-i18next';
 import {useNavigate} from 'react-router-dom';
@@ -11,6 +11,11 @@ const EMPTY = 'E';
 
 const createEmptyBoard = () => {
     return Array(ROWS).fill(null).map(() => Array(COLUMNS).fill(EMPTY));
+};
+
+const GameLevel = {
+    LEVEL1: "LEVEL1",
+    LEVEL2: "LEVEL2"
 };
 
 const GameBoard = ({initialGameId, userId}) => {
@@ -26,6 +31,8 @@ const GameBoard = ({initialGameId, userId}) => {
     const stompClient = useStompClient();
     const navigate = useNavigate();
     const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+    const [gameLevel, setGameLevel] = useState(GameLevel.LEVEL1);
+    const [countdown, setCountdown] = useState(null);
 
     const onGameUpdateReceived = (message) => {
         const updatedGame = JSON.parse(message.body);
@@ -35,12 +42,47 @@ const GameBoard = ({initialGameId, userId}) => {
 
     useSubscription("/user/queue/game", onGameUpdateReceived);
 
+    useEffect(() => {
+        let timer;
+        if (gameLevel === GameLevel.LEVEL2 && nextMove === userId && gameBoardState === 'MOVE_EXPECTED') {
+            setCountdown(5);
+            timer = setInterval(() => {
+                setCountdown(prevCountdown => {
+                    if (prevCountdown === 1) {
+                        clearInterval(timer);
+                        dropDisc(calculateNextMoveColumn());
+                    }
+                    return prevCountdown - 1;
+                });
+            }, 1000);
+        }
+        return () => clearInterval(timer);
+    }, [gameLevel, nextMove, userId, board]);
+
+    const calculateNextMoveColumn = () => {
+        const availableColumns = [];
+
+        for (let col = 0; col < COLUMNS; col++) {
+            if (board[ROWS - 1][col] === 0) {
+                availableColumns.push(col);
+            }
+        }
+
+        if (availableColumns.length > 0) {
+            const randomIndex = Math.floor(Math.random() * availableColumns.length);
+            return availableColumns[randomIndex];
+        } else {
+            return -1;
+        }
+    };
+
     const updateGame = (updatedGame) => {
         setGameId(updatedGame.gameId);
         setBoard(updatedGame.board);
         setNextMove(updatedGame.nextMove);
         setGameBoardState(updatedGame.gameBoardState);
         setStatusMessage(getGameStatusMessage(updatedGame.gameBoardState, updatedGame.nextMove));
+        setGameLevel(updatedGame.gameLevel)
 
         if (updatedGame.userOne != null) {
             setPlayerOneId(updatedGame.userOne?.id);
@@ -80,6 +122,19 @@ const GameBoard = ({initialGameId, userId}) => {
 
         }
     };
+
+    const handleLevelClick = (level) => {
+        if (stompClient && stompClient.connected) {
+            stompClient.publish({
+                destination: `/4gewinnt/games/control`,
+                body: JSON.stringify({
+                    gameId: gameId,
+                    message: level
+                }),
+            });
+        }
+    };
+
 
     const handleButtonClick = () => {
         if (stompClient && stompClient.connected) {
@@ -153,6 +208,7 @@ const GameBoard = ({initialGameId, userId}) => {
 
     return (
         <div>
+            <p>{t('game.level.activated')} {gameLevel}</p>
             <table>
                 <tbody>
                 {board.map((row, rowIndex) => (
@@ -178,9 +234,17 @@ const GameBoard = ({initialGameId, userId}) => {
                 </tbody>
             </table>
             <p>{statusMessage}</p>
-            <button onClick={handleButtonClick} disabled={isGameActive()}>{getHandleButtonText()}</button>
-            <button onClick={leaveButtonClick}>{t('game.button.quitGame')}</button>
-
+            {countdown && <p>{t('game.level.countdown')} {countdown}</p>}
+            <div className="button-container">
+                <div className="button-group">
+                    <button onClick={() => handleLevelClick(GameLevel.LEVEL1)}>Level 1</button>
+                    <button onClick={() => handleLevelClick(GameLevel.LEVEL2)}>Level 2</button>
+                </div>
+                <div className="button-group">
+                    <button onClick={handleButtonClick} disabled={isGameActive()}>{getHandleButtonText()}</button>
+                    <button onClick={leaveButtonClick}>{t('game.button.quitGame')}</button>
+                </div>
+            </div>
             <ConfirmDialog
                 open={showConfirmDialog}
                 onClose={() => setShowConfirmDialog(false)}

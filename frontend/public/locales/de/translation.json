@@ -47,6 +47,10 @@
       "quit": "Möchten Sie das Spiel wirklich verlassen?",
       "yes": "Ja",
       "no": "Nein"
+    },
+    "level": {
+      "countdown": "Zeit bis zum nächsten Spielzug: ",
+      "activated": "Aktiviertes Level: "
     }
   },
   "error": {
