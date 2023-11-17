@@ -111,6 +111,7 @@ public class GameServiceImpl implements GameService {
             }
             case "LEVEL1" -> updatedGame.setGameLevel(GameLevel.LEVEL1);
             case "LEVEL2" -> updatedGame.setGameLevel(GameLevel.LEVEL2);
+            case "LEVEL3" -> updatedGame.setGameLevel(GameLevel.LEVEL3);
         }
 
         return this.gameRepository.save(updatedGame);
@@ -179,14 +180,20 @@ public class GameServiceImpl implements GameService {
     }
 
     @Override
-    public Game updateGameBoard(int gameId, int column, final User currentUser) {
+    public Game updateGameBoard(int gameId, int column, final User currentUser, final String message) {
         final Game game = findGameOrThrow(gameId);
 
         validateGameInProgress(game, currentUser);
 
         GameBoard gameBoard = new GameBoard();
         gameBoard.setBoard(game.getBoard());
-        boolean isUpdated = gameBoard.updateBoardColumn(column, currentUser.getId());
+        boolean isUpdated = true;
+
+        if(game.getGameLevel() == GameLevel.LEVEL3 && message.equals("specialDisc")){
+            gameBoard.updateBoardColumn(column, -5);
+        } else {
+            gameBoard.updateBoardColumn(column, currentUser.getId());
+        }
 
         if (!isUpdated) {
             throw VierGewinntException.of(ErrorCode.INVALID_MOVE, "Ungültiger Zug, Spalte ist voll!");

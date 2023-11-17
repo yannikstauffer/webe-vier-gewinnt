@@ -51,8 +51,9 @@
       "no": "Nein"
     },
     "level": {
-      "countdown": "Time until the next move: ",
-      "activated": "Activated level: "
+      "countdown": "Time until the next move:",
+      "activated": "Activated level:",
+      "rounds": "Rounds until automatic drop: "
     }
   },
   "error": {

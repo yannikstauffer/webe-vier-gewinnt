@@ -33,6 +33,7 @@ const GameBoard = ({initialGameId, userId}) => {
     const [showConfirmDialog, setShowConfirmDialog] = useState(false);
     const [gameLevel, setGameLevel] = useState(GameLevel.LEVEL1);
     const [countdown, setCountdown] = useState(null);
+    const [roundsUntilSpecialDisc, setRoundsUntilSpecialDisc] = useState(generateRandomRounds());
 
     const onGameUpdateReceived = (message) => {
         const updatedGame = JSON.parse(message.body);
@@ -41,6 +42,10 @@ const GameBoard = ({initialGameId, userId}) => {
     };
 
     useSubscription("/user/queue/game", onGameUpdateReceived);
+
+    function generateRandomRounds() {
+        return Math.floor(Math.random() * 7) + 3;
+    }
 
     useEffect(() => {
         let timer;
@@ -57,7 +62,12 @@ const GameBoard = ({initialGameId, userId}) => {
             }, 1000);
         }
         return () => clearInterval(timer);
-    }, [gameLevel, nextMove, userId, board]);
+
+        if (gameLevel === GameLevel.LEVEL3 && roundsUntilSpecialDisc <= 0) {
+            dropDisc(calculateNextMoveColumn(), true); // Automatischer Drop der special-disc
+            setRoundsUntilSpecialDisc(generateRandomRounds());
+        }
+    }, [gameLevel, nextMove, userId, board, roundsUntilSpecialDisc, gameBoardState]);
 
     const calculateNextMoveColumn = () => {
         const availableColumns = [];
@@ -189,16 +199,22 @@ const GameBoard = ({initialGameId, userId}) => {
         }
     };
 
-    const dropDisc = (column) => {
+    const dropDisc = (column, isSpecialDisc = false) => {
         if (nextMove === userId) {
+            const message = isSpecialDisc ? "specialDisc" : '';
             stompClient.publish({
                 destination: "/4gewinnt/games/action",
                 body: JSON.stringify({
                     gameId: gameId,
                     column: column,
                     playerId: userId,
+                    message: message
                 }),
             });
+
+            if (isSpecialDisc) {
+                setRoundsUntilSpecialDisc(generateRandomRounds());
+            }
         }
     };
 
