@@ -148,7 +148,7 @@ const GameBoard = ({initialGameId, userId}) => {
     };
 
     const isGameActive = () => {
-        return gameBoardState === 'MOVE_EXPECTED';
+        return gameBoardState === 'MOVE_EXPECTED' || gameBoardState === 'PLAYER_DISCONNECTED';
     };
 
     return (

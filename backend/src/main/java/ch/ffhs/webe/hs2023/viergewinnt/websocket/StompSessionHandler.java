@@ -72,7 +72,7 @@ public class StompSessionHandler implements ApplicationListener<SessionConnectEv
 
             this.gameService.setGameBoardStatesForUser(currentUser, GameBoardState.PLAYER_DISCONNECTED);
             List<Game> gamesUserWasIn = this.gameService.getGamesForUser(currentUser.getId());
-            this.stompSessionMessagesProxy.publishUserLeftGames(currentUser, gamesUserWasIn);
+            this.stompSessionMessagesProxy.publishUserLeftGames(gamesUserWasIn);
         }
     }
 
