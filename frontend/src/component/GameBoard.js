@@ -15,7 +15,8 @@ const createEmptyBoard = () => {
 
 const GameLevel = {
     LEVEL1: "LEVEL1",
-    LEVEL2: "LEVEL2"
+    LEVEL2: "LEVEL2",
+    LEVEL3: "LEVEL3"
 };
 
 const GameBoard = ({initialGameId, userId}) => {
@@ -33,6 +34,7 @@ const GameBoard = ({initialGameId, userId}) => {
     const [showConfirmDialog, setShowConfirmDialog] = useState(false);
     const [gameLevel, setGameLevel] = useState(GameLevel.LEVEL1);
     const [countdown, setCountdown] = useState(null);
+    const [currentRound, setCurrentRound] = useState(0);
     const [roundsUntilSpecialDisc, setRoundsUntilSpecialDisc] = useState(generateRandomRounds());
 
     const onGameUpdateReceived = (message) => {
@@ -48,32 +50,27 @@ const GameBoard = ({initialGameId, userId}) => {
     }
 
     useEffect(() => {
-        let timer;
         if (gameLevel === GameLevel.LEVEL2 && nextMove === userId && gameBoardState === 'MOVE_EXPECTED') {
             setCountdown(5);
-            timer = setInterval(() => {
+            const timer = setInterval(() => {
                 setCountdown(prevCountdown => {
                     if (prevCountdown === 1) {
                         clearInterval(timer);
                         dropDisc(calculateNextMoveColumn());
                     }
-                    return prevCountdown - 1;
+                    return Math.max(prevCountdown - 1, 0);
                 });
             }, 1000);
-        }
-        return () => clearInterval(timer);
 
-        if (gameLevel === GameLevel.LEVEL3 && roundsUntilSpecialDisc <= 0) {
-            dropDisc(calculateNextMoveColumn(), true); // Automatischer Drop der special-disc
-            setRoundsUntilSpecialDisc(generateRandomRounds());
+            return () => clearInterval(timer);
         }
-    }, [gameLevel, nextMove, userId, board, roundsUntilSpecialDisc, gameBoardState]);
+    }, [gameLevel, nextMove, userId, board, gameBoardState]);
 
     const calculateNextMoveColumn = () => {
         const availableColumns = [];
 
         for (let col = 0; col < COLUMNS; col++) {
-            if (board[ROWS - 1][col] === 0) {
+            if (board[0][col] === 0) {
                 availableColumns.push(col);
             }
         }
@@ -199,9 +196,20 @@ const GameBoard = ({initialGameId, userId}) => {
         }
     };
 
-    const dropDisc = (column, isSpecialDisc = false) => {
+    const dropDisc = (column) => {
+        let message = ''
         if (nextMove === userId) {
-            const message = isSpecialDisc ? "specialDisc" : '';
+            setCurrentRound(currentRound + 1);
+            console.log("current: " + currentRound + " until:" + roundsUntilSpecialDisc);
+
+            if (gameLevel === GameLevel.LEVEL3 && currentRound >= roundsUntilSpecialDisc) {
+                message = "specialDisc"
+                column = calculateNextMoveColumn();
+
+                setCurrentRound(0);
+                setRoundsUntilSpecialDisc(generateRandomRounds());
+            }
+
             stompClient.publish({
                 destination: "/4gewinnt/games/action",
                 body: JSON.stringify({
@@ -211,10 +219,6 @@ const GameBoard = ({initialGameId, userId}) => {
                     message: message
                 }),
             });
-
-            if (isSpecialDisc) {
-                setRoundsUntilSpecialDisc(generateRandomRounds());
-            }
         }
     };
 
@@ -236,6 +240,8 @@ const GameBoard = ({initialGameId, userId}) => {
                                     cellClass = 'player-one';
                                 } else if (cell === playerTwoId && playerOneId !== null) {
                                     cellClass = 'player-two';
+                                } else if (cell === -5) {
+                                    cellClass = 'special-disc'
                                 }
                             }
                             return (
@@ -255,6 +261,7 @@ const GameBoard = ({initialGameId, userId}) => {
                 <div className="button-group">
                     <button onClick={() => handleLevelClick(GameLevel.LEVEL1)}>Level 1</button>
                     <button onClick={() => handleLevelClick(GameLevel.LEVEL2)}>Level 2</button>
+                    <button onClick={() => handleLevelClick(GameLevel.LEVEL3)}>Level 3</button>
                 </div>
                 <div className="button-group">
                     <button onClick={handleButtonClick} disabled={isGameActive()}>{getHandleButtonText()}</button>
