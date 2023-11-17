@@ -7,6 +7,7 @@ import ch.ffhs.webe.hs2023.viergewinnt.game.model.Game;
 import ch.ffhs.webe.hs2023.viergewinnt.game.repository.GameRepository;
 import ch.ffhs.webe.hs2023.viergewinnt.game.values.GameBoardState;
 import ch.ffhs.webe.hs2023.viergewinnt.game.values.GameState;
+import ch.ffhs.webe.hs2023.viergewinnt.user.UserService;
 import ch.ffhs.webe.hs2023.viergewinnt.user.model.User;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,10 +22,12 @@ import java.util.Random;
 public class GameServiceImpl implements GameService {
 
     private final GameRepository gameRepository;
+    private final UserService userService;
 
     @Autowired
-    public GameServiceImpl(final GameRepository gameRepository) {
+    public GameServiceImpl(final GameRepository gameRepository, final UserService userService) {
         this.gameRepository = gameRepository;
+        this.userService = userService;
     }
 
     @Override
@@ -73,6 +76,8 @@ public class GameServiceImpl implements GameService {
         } else if (game.isFull()) {
             game.setGameBoardState(GameBoardState.READY_TO_START);
         }
+
+        this.userService.setCurrentGameId(currentUser.getId(), game.getId());
 
         return this.gameRepository.save(game);
     }
@@ -204,7 +209,7 @@ public class GameServiceImpl implements GameService {
     }
 
     @Override
-    public List<Game> setAndGetGamesForUser(final User user, final GameBoardState gameBoardState) {
+    public void setGameBoardStatesForUser(final User user, final GameBoardState gameBoardState) {
         List<Game> gamesForUser = this.gameRepository.findGamesByUserId(user.getId());
 
         for (Game game : gamesForUser) {
@@ -215,8 +220,11 @@ public class GameServiceImpl implements GameService {
         }
 
         this.gameRepository.saveAll(gamesForUser);
+    }
 
-        return gamesForUser;
+    @Override
+    public List<Game> getGamesForUser(final int userId) {
+        return this.gameRepository.findGamesByUserId(userId);
     }
 
     private void validatePlayer(Game game, User currentUser) {
@@ -224,8 +232,10 @@ public class GameServiceImpl implements GameService {
             throw VierGewinntException.of(ErrorCode.NULL_PLAYER, "Player was not set.");
         }
 
-        if (game.getUserOne().getId() != currentUser.getId() && game.getUserTwo().getId() != currentUser.getId()) {
-            throw VierGewinntException.of(ErrorCode.INVALID_PLAYER, "The current user is not part of this game.");
+        if(game.getUserOne() != null && game.getUserTwo() != null){
+            if (game.getUserOne().getId() != currentUser.getId() && game.getUserTwo().getId() != currentUser.getId()) {
+                throw VierGewinntException.of(ErrorCode.INVALID_PLAYER, "The current user is not part of this game.");
+            }
         }
     }
 

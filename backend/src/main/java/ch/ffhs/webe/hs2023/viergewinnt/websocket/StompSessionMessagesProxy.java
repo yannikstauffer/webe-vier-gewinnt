@@ -4,6 +4,7 @@ import ch.ffhs.webe.hs2023.viergewinnt.chat.ChatService;
 import ch.ffhs.webe.hs2023.viergewinnt.chat.dto.ChatsDto;
 import ch.ffhs.webe.hs2023.viergewinnt.game.GameService;
 import ch.ffhs.webe.hs2023.viergewinnt.game.dto.GameDto;
+import ch.ffhs.webe.hs2023.viergewinnt.game.dto.GameStateDto;
 import ch.ffhs.webe.hs2023.viergewinnt.game.model.Game;
 import ch.ffhs.webe.hs2023.viergewinnt.user.UserService;
 import ch.ffhs.webe.hs2023.viergewinnt.user.dto.UserDto;
@@ -62,6 +63,10 @@ public class StompSessionMessagesProxy {
             this.stompMessageService.sendToUser(Queues.GAME, recipient, GameDto.of(game));
             this.stompMessageService.send(Topics.LOBBY_GAMES, GameDto.of(game));
         });
+    }
+
+    void publishGameUpdate(final User recipient, Game game) {
+        this.stompMessageService.sendToUser(Queues.GAME, recipient, GameStateDto.of(game));
     }
 
 }

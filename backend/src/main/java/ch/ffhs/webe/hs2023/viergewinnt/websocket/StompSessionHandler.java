@@ -3,11 +3,11 @@ package ch.ffhs.webe.hs2023.viergewinnt.websocket;
 import ch.ffhs.webe.hs2023.viergewinnt.game.GameService;
 import ch.ffhs.webe.hs2023.viergewinnt.game.model.Game;
 import ch.ffhs.webe.hs2023.viergewinnt.game.values.GameBoardState;
-import ch.ffhs.webe.hs2023.viergewinnt.game.values.GameState;
 import ch.ffhs.webe.hs2023.viergewinnt.user.SessionService;
 import ch.ffhs.webe.hs2023.viergewinnt.user.UserService;
 import ch.ffhs.webe.hs2023.viergewinnt.user.model.User;
 import ch.ffhs.webe.hs2023.viergewinnt.user.values.UserUpdateType;
+import ch.ffhs.webe.hs2023.viergewinnt.websocket.values.Queues;
 import ch.ffhs.webe.hs2023.viergewinnt.websocket.values.Topics;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,7 +70,8 @@ public class StompSessionHandler implements ApplicationListener<SessionConnectEv
             log.debug("User {} no longer online. Sending update to all subscribers.", currentUser.getEmail());
             this.stompSessionMessagesProxy.publishUserUpdate(currentUser, UserUpdateType.OFFLINE);
 
-            List<Game> gamesUserWasIn = this.gameService.setAndGetGamesForUser(currentUser, GameBoardState.PLAYER_DISCONNECTED);
+            this.gameService.setGameBoardStatesForUser(currentUser, GameBoardState.PLAYER_DISCONNECTED);
+            List<Game> gamesUserWasIn = this.gameService.getGamesForUser(currentUser.getId());
             this.stompSessionMessagesProxy.publishUserLeftGames(currentUser, gamesUserWasIn);
         }
     }
@@ -86,6 +87,16 @@ public class StompSessionHandler implements ApplicationListener<SessionConnectEv
             this.stompSessionMessagesProxy.publishAllUsersTo(currentUser);
         } else if (Topics.LOBBY_GAMES.equals(subscription)) {
             this.stompSessionMessagesProxy.publishAllGamesTo(currentUser);
+        }
+    }
+
+    @EventListener
+    public void onQueuesSubscribe(final SessionSubscribeEvent event) {
+        final var subscription = event.getMessage().getHeaders().get("simpDestination");
+        final var currentUser = this.getUser(event);
+
+        if (("/user" + Queues.GAME).equals(subscription)) { // Sicherheit, dass das update auch kommt nach dem join
+            this.stompSessionMessagesProxy.publishGameUpdate(currentUser, this.gameService.getGameById(currentUser.getCurrentGameId()));
         }
     }
 
