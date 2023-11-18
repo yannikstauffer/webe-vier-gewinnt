@@ -3,6 +3,7 @@ package ch.ffhs.webe.hs2023.viergewinnt.game.model;
 import ch.ffhs.webe.hs2023.viergewinnt.base.ErrorCode;
 import ch.ffhs.webe.hs2023.viergewinnt.base.VierGewinntException;
 import ch.ffhs.webe.hs2023.viergewinnt.game.values.GameBoardState;
+import ch.ffhs.webe.hs2023.viergewinnt.game.values.GameLevel;
 import ch.ffhs.webe.hs2023.viergewinnt.game.values.GameState;
 import ch.ffhs.webe.hs2023.viergewinnt.user.model.User;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -45,6 +46,10 @@ public class Game {
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private GameBoardState gameBoardState;
+
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private GameLevel gameLevel;
 
     @Column(name = "status_message")
     private String statusMessage;

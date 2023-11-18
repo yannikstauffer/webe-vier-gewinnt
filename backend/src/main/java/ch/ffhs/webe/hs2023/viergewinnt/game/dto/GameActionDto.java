@@ -8,4 +8,5 @@ import lombok.Data;
 public class GameActionDto {
     private Integer gameId;
     private Integer column;
+    private String message;
 }
