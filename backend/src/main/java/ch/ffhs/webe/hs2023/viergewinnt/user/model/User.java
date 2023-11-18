@@ -51,6 +51,8 @@ public class User {
     @Builder.Default
     private List<Session> sessions = new ArrayList<>();
 
+    private int currentGameId;
+
     public void removeSession(final String sessionId) {
         this.sessions.removeIf(session -> session.getSessionId().equals(sessionId));
     }

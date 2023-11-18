@@ -15,4 +15,6 @@ public interface UserService {
 
     List<User> getAllWithSession();
 
+    void setCurrentGameId(final int userId, final int gameId);
+
 }

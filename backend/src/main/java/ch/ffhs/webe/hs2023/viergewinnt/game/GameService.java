@@ -17,12 +17,14 @@ public interface GameService {
 
     Game joinGame(final int gameId, final User currentUser);
 
-    Game updateGameBoard(final int gameId, final int column, final User currentUser);
+    Game updateGameBoard(final int gameId, final int column, final User currentUser, final String message);
 
     void deleteAllGames();
 
     Game controlGame(GameRequestDto request, final User currentUser);
 
-    List<Game> setAndGetGamesForUser(final User user, final GameState gameState, final GameBoardState gameBoardState);
+    void setGameBoardStatesForUser(final User user, final GameBoardState gameBoardState);
+
+    List<Game> getGamesForUser(final int userId);
 
 }

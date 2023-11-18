@@ -6,7 +6,9 @@ import ch.ffhs.webe.hs2023.viergewinnt.game.dto.GameRequestDto;
 import ch.ffhs.webe.hs2023.viergewinnt.game.model.Game;
 import ch.ffhs.webe.hs2023.viergewinnt.game.repository.GameRepository;
 import ch.ffhs.webe.hs2023.viergewinnt.game.values.GameBoardState;
+import ch.ffhs.webe.hs2023.viergewinnt.game.values.GameLevel;
 import ch.ffhs.webe.hs2023.viergewinnt.game.values.GameState;
+import ch.ffhs.webe.hs2023.viergewinnt.user.UserService;
 import ch.ffhs.webe.hs2023.viergewinnt.user.model.User;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,10 +23,12 @@ import java.util.Random;
 public class GameServiceImpl implements GameService {
 
     private final GameRepository gameRepository;
+    private final UserService userService;
 
     @Autowired
-    public GameServiceImpl(final GameRepository gameRepository) {
+    public GameServiceImpl(final GameRepository gameRepository, final UserService userService) {
         this.gameRepository = gameRepository;
+        this.userService = userService;
     }
 
     @Override
@@ -32,6 +36,7 @@ public class GameServiceImpl implements GameService {
         final Game newGame = new Game();
         newGame.setGameState(GameState.WAITING_FOR_PLAYERS);
         newGame.setGameBoardState(GameBoardState.WAITING_FOR_PLAYERS);
+        newGame.setGameLevel(GameLevel.LEVEL1);
         newGame.setUserOne(currentUser);
 
 
@@ -58,19 +63,23 @@ public class GameServiceImpl implements GameService {
     public Game joinGame(final int gameId, final User currentUser) {
         final Game game = findGameOrThrow(gameId);
 
-        if (game.isFull()) {
+        if (game.isFull() && !isUserOneCurrentUser(game, currentUser) && !isUserTwoCurrentUser(game, currentUser)) {
             throw VierGewinntException.of(ErrorCode.GAME_FULL, "Das Spiel ist bereits voll!");
         }
 
-        if (game.getUserOne() == null) {
+        if (game.getUserOne() == null && !isUserTwoCurrentUser(game, currentUser)) {
             game.setUserOne(currentUser);
-        } else if (game.getUserTwo() == null) {
+        } else if (game.getUserTwo() == null && !isUserOneCurrentUser(game, currentUser)) {
             game.setUserTwo(currentUser);
         }
 
-        if (game.isFull()) {
+        if (game.isFull() && game.isPlayerInBoard(currentUser.getId())) {
+            game.setGameBoardState(GameBoardState.READY_TO_CONTINUE);
+        } else if (game.isFull()) {
             game.setGameBoardState(GameBoardState.READY_TO_START);
         }
+
+        this.userService.setCurrentGameId(currentUser.getId(), game.getId());
 
         return this.gameRepository.save(game);
     }
@@ -85,22 +94,27 @@ public class GameServiceImpl implements GameService {
         switch (request.getMessage()) {
             case "start" -> updatedGame = startGame(game);
             case "restart" -> updatedGame = restartGame(game);
+            case "continue" -> updatedGame = continueGame(game);
             case "leave" -> {
                 updatedGame = removePlayerFromGame(game, currentUser);
-                updatedGame.setGameState(GameState.WAITING_FOR_PLAYERS);
-                updatedGame.setGameBoardState(GameBoardState.PLAYER_QUIT);
+
+                if (bothUsersLeft(updatedGame)) {
+                    if (updatedGame.getGameState() == GameState.IN_PROGRESS) {
+                        updatedGame.setGameState(GameState.NOT_FINISHED);
+                    } else if (updatedGame.getGameState() == GameState.WAITING_FOR_PLAYERS) {
+                        updatedGame.setGameState(GameState.NEVER_STARTED);
+                    }
+                } else {
+                    updatedGame.setGameState(GameState.WAITING_FOR_PLAYERS);
+                    updatedGame.setGameBoardState(GameBoardState.PLAYER_QUIT);
+                }
             }
+            case "LEVEL1" -> updatedGame.setGameLevel(GameLevel.LEVEL1);
+            case "LEVEL2" -> updatedGame.setGameLevel(GameLevel.LEVEL2);
+            case "LEVEL3" -> updatedGame.setGameLevel(GameLevel.LEVEL3);
         }
 
-        if (bothUsersLeft(updatedGame)) {
-            this.gameRepository.delete(updatedGame);
-            return null;
-        }
-
-        this.gameRepository.save(updatedGame);
-
-        return updatedGame;
-
+        return this.gameRepository.save(updatedGame);
     }
 
     private Game initializeGame(Game game, boolean isNewGame) {
@@ -126,19 +140,35 @@ public class GameServiceImpl implements GameService {
         validateTwoPlayers(game);
 
         Game newGame = new Game();
+        newGame.setGameLevel(game.getGameLevel());
         newGame.setUserOne(game.getUserOne());
         newGame.setUserTwo(game.getUserTwo());
 
         return initializeGame(newGame, true);
     }
 
+    private Game continueGame(Game game) {
+        validateTwoPlayers(game);
+
+        game.setGameState(GameState.IN_PROGRESS);
+        game.setGameBoardState(GameBoardState.MOVE_EXPECTED);
+
+        return game;
+    }
+
     private Game removePlayerFromGame(Game game, User currentUser) {
         validatePlayer(game, currentUser);
 
-        if (game.getUserOne().getId() == currentUser.getId()) {
-            game.setUserOne(null);
-        } else if (game.getUserTwo().getId() == currentUser.getId()) {
-            game.setUserTwo(null);
+        if (game.getUserOne() != null) {
+            if (game.getUserOne().getId() == currentUser.getId()) {
+                game.setUserOne(null);
+            }
+        }
+
+        if (game.getUserTwo() != null) {
+            if (game.getUserTwo().getId() == currentUser.getId()) {
+                game.setUserTwo(null);
+            }
         }
 
         return this.gameRepository.save(game);
@@ -150,14 +180,20 @@ public class GameServiceImpl implements GameService {
     }
 
     @Override
-    public Game updateGameBoard(int gameId, int column, final User currentUser) {
+    public Game updateGameBoard(int gameId, int column, final User currentUser, final String message) {
         final Game game = findGameOrThrow(gameId);
 
         validateGameInProgress(game, currentUser);
 
         GameBoard gameBoard = new GameBoard();
         gameBoard.setBoard(game.getBoard());
-        boolean isUpdated = gameBoard.updateBoardColumn(column, currentUser.getId());
+        boolean isUpdated = true;
+
+        if(game.getGameLevel() == GameLevel.LEVEL3 && message.equals("specialDisc")){
+            gameBoard.updateBoardColumn(column, -5);
+        } else {
+            gameBoard.updateBoardColumn(column, currentUser.getId());
+        }
 
         if (!isUpdated) {
             throw VierGewinntException.of(ErrorCode.INVALID_MOVE, "Ungültiger Zug, Spalte ist voll!");
@@ -188,20 +224,22 @@ public class GameServiceImpl implements GameService {
     }
 
     @Override
-    public List<Game> setAndGetGamesForUser(final User user, final GameState gameState, final GameBoardState gameBoardState) {
-        List<Game> gamesForUser = new ArrayList<>();
-        this.gameRepository.findAll().forEach(game -> {
-            if (game.getUserOne() != null && game.getUserOne().getId() == user.getId() ||
-                    game.getUserTwo() != null && game.getUserTwo().getId() == user.getId()) {
+    public void setGameBoardStatesForUser(final User user, final GameBoardState gameBoardState) {
+        List<Game> gamesForUser = this.gameRepository.findGamesByUserId(user.getId());
 
-                game.setGameState(gameState);
-                game.setGameBoardState(gameBoardState);
-                this.gameRepository.save(game);
-
-                gamesForUser.add(game);
+        for (Game game : gamesForUser) {
+            if (game.getGameState() == GameState.IN_PROGRESS) {
+                game.setGameState(GameState.PAUSED);
             }
-        });
-        return gamesForUser;
+            game.setGameBoardState(gameBoardState);
+        }
+
+        this.gameRepository.saveAll(gamesForUser);
+    }
+
+    @Override
+    public List<Game> getGamesForUser(final int userId) {
+        return this.gameRepository.findGamesByUserId(userId);
     }
 
     private void validatePlayer(Game game, User currentUser) {
@@ -209,8 +247,10 @@ public class GameServiceImpl implements GameService {
             throw VierGewinntException.of(ErrorCode.NULL_PLAYER, "Player was not set.");
         }
 
-        if (game.getUserOne().getId() != currentUser.getId() && game.getUserTwo().getId() != currentUser.getId()) {
-            throw VierGewinntException.of(ErrorCode.INVALID_PLAYER, "The current user is not part of this game.");
+        if (game.getUserOne() != null && game.getUserTwo() != null) {
+            if (game.getUserOne().getId() != currentUser.getId() && game.getUserTwo().getId() != currentUser.getId()) {
+                throw VierGewinntException.of(ErrorCode.INVALID_PLAYER, "The current user is not part of this game.");
+            }
         }
     }
 
@@ -234,6 +274,22 @@ public class GameServiceImpl implements GameService {
 
     private boolean bothUsersLeft(final Game game) {
         return game.getUserOne() == null && game.getUserTwo() == null;
+    }
+
+    private boolean isUserOneCurrentUser(final Game game, User currentUser) {
+        if (game.getUserOne() != null) {
+            return game.getUserOne().getId() == currentUser.getId();
+        } else {
+            return false;
+        }
+    }
+
+    private boolean isUserTwoCurrentUser(final Game game, User currentUser) {
+        if (game.getUserTwo() != null) {
+            return game.getUserTwo().getId() == currentUser.getId();
+        } else {
+            return false;
+        }
     }
 
 }

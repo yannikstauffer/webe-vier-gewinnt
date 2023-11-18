@@ -17,7 +17,6 @@ import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Controller;
 
 import java.security.Principal;
-import java.util.List;
 
 @Slf4j
 @Controller
@@ -57,29 +56,19 @@ public class GameController {
         final var sender = this.userService.getUserByEmail(user.getName());
         final var game = gameService.controlGame(request, sender);
 
-        if (game == null) {
-            List<Game> allGames = gameService.getAllGames();
-            this.messageService.send(Topics.LOBBY_GAMES, GameDto.of(allGames));
-        } else {
-            notifyPlayers(game);
-        }
-
+        this.messageService.send(Topics.LOBBY_GAMES, GameDto.of(game));
         notifyPlayers(game);
     }
 
     @MessageMapping(MessageSources.GAMES + "/action")
     public void gameAction(@Payload final GameActionDto request, Principal user) {
         final var sender = userService.getUserByEmail(user.getName());
-        final var game = gameService.updateGameBoard(request.getGameId(), request.getColumn(), sender);
+        final var game = gameService.updateGameBoard(request.getGameId(), request.getColumn(), sender, request.getMessage());
 
         notifyPlayers(game);
     }
 
     private void notifyPlayers(Game game) {
-        if (game == null) {
-            return;
-        }
-
         if (game.getUserOne() != null) {
             this.messageService.sendToUser(Queues.GAME, this.userService.getUserById(game.getUserOne().getId()), GameStateDto.of(game));
         }

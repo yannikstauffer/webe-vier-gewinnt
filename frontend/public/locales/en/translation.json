@@ -36,7 +36,9 @@
       "notYourTurn": "It's not your turn.",
       "wait": "The game has not started yet",
       "quit": "A player has quit the game.",
-      "paused": "The game has been paused."
+      "disconnected": "A player has lost the connection",
+      "paused": "The game has been paused.",
+      "continue": "The game can be continued."
     },
     "button": {
       "newGame": "Start New Game",
@@ -47,6 +49,11 @@
       "quit": "Do you really want to leave the game?",
       "yes": "Ja",
       "no": "Nein"
+    },
+    "level": {
+      "countdown": "Time until the next move:",
+      "activated": "Activated level:",
+      "rounds": "Rounds until automatic drop: "
     }
   },
   "error": {
