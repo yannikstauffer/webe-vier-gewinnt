@@ -112,6 +112,9 @@ public class GameServiceImpl implements GameService {
             case "LEVEL1" -> updatedGame.setGameLevel(GameLevel.LEVEL1);
             case "LEVEL2" -> updatedGame.setGameLevel(GameLevel.LEVEL2);
             case "LEVEL3" -> updatedGame.setGameLevel(GameLevel.LEVEL3);
+            default -> {
+                return updatedGame;
+            }
         }
 
         return this.gameRepository.save(updatedGame);
