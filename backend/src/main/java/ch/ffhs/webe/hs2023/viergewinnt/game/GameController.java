@@ -63,7 +63,7 @@ public class GameController {
     @MessageMapping(MessageSources.GAMES + "/action")
     public void gameAction(@Payload final GameActionDto request, Principal user) {
         final var sender = userService.getUserByEmail(user.getName());
-        final var game = gameService.updateGameBoard(request.getGameId(), request.getColumn(), sender);
+        final var game = gameService.updateGameBoard(request.getGameId(), request.getColumn(), sender, request.getMessage());
 
         notifyPlayers(game);
     }
