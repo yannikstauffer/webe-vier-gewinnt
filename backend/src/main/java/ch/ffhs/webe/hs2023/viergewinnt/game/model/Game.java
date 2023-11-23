@@ -104,4 +104,8 @@ public class Game {
     public boolean hasTwoUsers() {
         return this.userOne != null && this.userTwo != null;
     }
+
+    public boolean isMoveExpected() {
+        return this.getGameState() == GameState.IN_PROGRESS && this.getGameBoardState() == GameBoardState.MOVE_EXPECTED;
+    }
 }

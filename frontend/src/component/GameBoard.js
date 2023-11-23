@@ -19,6 +19,8 @@ const GameLevel = {
     LEVEL3: "LEVEL3"
 };
 
+const roundsUntilSpecialDisc = 5;
+
 const GameBoard = ({initialGameId, userId}) => {
     const [gameId, setGameId] = useState(initialGameId);
     const [board, setBoard] = useState(createEmptyBoard());
@@ -34,8 +36,6 @@ const GameBoard = ({initialGameId, userId}) => {
     const [showConfirmDialog, setShowConfirmDialog] = useState(false);
     const [gameLevel, setGameLevel] = useState(GameLevel.LEVEL1);
     const [countdown, setCountdown] = useState(null);
-    const [currentRound, setCurrentRound] = useState(0);
-    const [roundsUntilSpecialDisc, setRoundsUntilSpecialDisc] = useState(generateRandomRounds());
 
     const onGameUpdateReceived = (message) => {
         const updatedGame = JSON.parse(message.body);
@@ -45,10 +45,6 @@ const GameBoard = ({initialGameId, userId}) => {
 
     useSubscription("/user/queue/game", onGameUpdateReceived);
 
-    function generateRandomRounds() {
-        return Math.floor(Math.random() * 7) + 3;
-    }
-
     useEffect(() => {
         if (gameLevel === GameLevel.LEVEL2 && nextMove === userId && gameBoardState === 'MOVE_EXPECTED') {
             setCountdown(5);
@@ -57,7 +53,8 @@ const GameBoard = ({initialGameId, userId}) => {
                     if (prevCountdown === 1) {
                         clearInterval(timer);
                     }
-                    return Math.max(prevCountdown - 1, 0);
+                    const nextCountdown = Math.max(prevCountdown - 1, 0);
+                    return nextCountdown === 0 ? null : nextCountdown;
                 });
             }, 1000);
 
@@ -65,22 +62,6 @@ const GameBoard = ({initialGameId, userId}) => {
         }
     }, [gameLevel, nextMove, userId, board, gameBoardState]);
 
-    const calculateNextMoveColumn = () => {
-        const availableColumns = [];
-
-        for (let col = 0; col < COLUMNS; col++) {
-            if (board[0][col] === 0) {
-                availableColumns.push(col);
-            }
-        }
-
-        if (availableColumns.length > 0) {
-            const randomIndex = Math.floor(Math.random() * availableColumns.length);
-            return availableColumns[randomIndex];
-        } else {
-            return -1;
-        }
-    };
 
     const updateGame = (updatedGame) => {
         setGameId(updatedGame.gameId);
@@ -196,26 +177,14 @@ const GameBoard = ({initialGameId, userId}) => {
     };
 
     const dropDisc = (column) => {
-        let message = ''
         if (nextMove === userId) {
-            setCurrentRound(currentRound + 1);
-            console.log("current: " + currentRound + " until:" + roundsUntilSpecialDisc);
-
-            if (gameLevel === GameLevel.LEVEL3 && currentRound >= roundsUntilSpecialDisc) {
-                message = "specialDisc"
-                column = calculateNextMoveColumn();
-
-                setCurrentRound(0);
-                setRoundsUntilSpecialDisc(generateRandomRounds());
-            }
 
             stompClient.publish({
                 destination: "/4gewinnt/games/action",
                 body: JSON.stringify({
                     gameId: gameId,
                     column: column,
-                    playerId: userId,
-                    message: message
+                    playerId: userId
                 }),
             });
         }
@@ -224,6 +193,13 @@ const GameBoard = ({initialGameId, userId}) => {
     const isGameActive = () => {
         return gameBoardState === 'MOVE_EXPECTED' || gameBoardState === 'PLAYER_DISCONNECTED';
     };
+
+    const getLevel3RoundsCount = () => {
+        return roundsUntilSpecialDisc - (getPlayerDiscCount() % roundsUntilSpecialDisc);
+    }
+    const getPlayerDiscCount = () => {
+        return board.flat().filter(cell => (cell !== -5 && cell !== 0)).length;
+    }
 
     return (
         <div>
@@ -256,6 +232,7 @@ const GameBoard = ({initialGameId, userId}) => {
             </table>
             <p>{statusMessage}</p>
             {countdown && <p>{t('game.level.countdown')} {countdown}</p>}
+            {gameLevel === GameLevel.LEVEL3 && <p>{t('game.level.rounds')} {getLevel3RoundsCount()}</p>}
             <div className="button-container">
                 <div className="button-group">
                     <button onClick={() => handleLevelClick(GameLevel.LEVEL1)}>Level 1</button>

@@ -54,19 +54,23 @@ public class GameController {
         final var sender = this.userService.getUserByEmail(user.getName());
         final var game = this.gameService.controlGame(request, sender);
 
-        this.gameMessagesProxy.notifyAll(game);
+
+        final var modifiedGame = this.levelService.applyLevelModifications(game)
+                .orElse(game);
+
+        this.gameMessagesProxy.notifyAll(modifiedGame);
     }
 
     @MessageMapping(MessageSources.GAMES + "/action")
     public void gameAction(@Payload final GameActionDto request, final Principal user) {
         final var sender = this.userService.getUserByEmail(user.getName());
-        final var game = this.gameService.updateGameBoard(request.getGameId(), request.getColumn(), sender, request.getMessage());
+        final var game = this.gameService.dropDisc(request.getGameId(), request.getColumn(), sender);
 
-        this.levelService.clearLevelActions(game);
+        final var modifiedGame = this.levelService.applyLevelModifications(game)
+                .orElse(game);
 
-        this.gameMessagesProxy.notifyPlayers(game);
+        this.gameMessagesProxy.notifyPlayers(modifiedGame);
 
-        this.levelService.applyLevelActions(game);
     }
 
 

@@ -7,16 +7,17 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import static ch.ffhs.webe.hs2023.viergewinnt.game.values.GameLevel.LEVEL2;
 import static ch.ffhs.webe.hs2023.viergewinnt.game.values.GameLevel.LEVEL3;
-import static ch.ffhs.webe.hs2023.viergewinnt.game.values.GameState.IN_PROGRESS;
 
 @Slf4j
 @Component
 public class LevelService {
     private static final long LEVEL_TWO_DURATION_IN_SEC = 5;
+    private static final int LEVEL_THREE_ROUND_COUNT = 5;
 
     private final TimedActionScheduler timedActionScheduler;
     private final GameMessagesProxy gameMessagesProxy;
@@ -30,24 +31,32 @@ public class LevelService {
         this.gameService = gameService;
     }
 
-    public void clearLevelActions(final Game game) {
+    public Optional<Game> applyLevelModifications(final Game game) {
+        this.cancelScheduledLevel2Action(game);
+
+        if (game.getGameLevel() == LEVEL2 && game.isMoveExpected()) {
+            this.addLevel2TimedDiscDrop(game);
+        } else if (game.getGameLevel() == LEVEL3 && game.isMoveExpected()) {
+            return this.addLevel3AnyonymousDiscDrop(game);
+        }
+        return Optional.empty();
+
+    }
+
+    private void cancelScheduledLevel2Action(final Game game) {
         this.timedActionScheduler.cancel(game);
     }
 
-    public void applyLevelActions(final Game game) {
+    private Optional<Game> addLevel3AnyonymousDiscDrop(final Game game) {
 
-        if (game.getGameLevel() == LEVEL2 && game.getGameState() == IN_PROGRESS) {
-            this.addLevel2TimedDiscDrop(game);
-        } else if (game.getGameLevel() == LEVEL3 || game.getGameState() == IN_PROGRESS) {
-            this.level3Implementation(game);
+        final var discCount = game.getBoard().getPlayerDiscCount();
+        if (discCount % LEVEL_THREE_ROUND_COUNT == 0) {
+            log.debug("LEVEL3: Adding random disc drop");
+            return Optional.of(this.gameService.dropRandomAnonymousDisc(game.getId()));
+        } else {
+            log.trace("LEVEL3: No action for this round");
         }
-    }
-
-    private void level3Implementation(final Game game) {
-
-        //todo: implement level 3
-        log.info("LEVEL3: Not yet implemented");
-
+        return Optional.empty();
     }
 
     private void addLevel2TimedDiscDrop(final Game game) {
@@ -60,7 +69,7 @@ public class LevelService {
                 final var game = LevelService.this.gameService.dropRandomDisc(this.game.getId(), user);
                 LevelService.log.debug("LEVEL2: Dropped random disc for user {} in game {}", user.getId(), game.getId());
                 LevelService.this.gameMessagesProxy.notifyPlayers(game);
-                LevelService.this.applyLevelActions(game);
+                LevelService.this.applyLevelModifications(game);
             }
         };
 
