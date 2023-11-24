@@ -1,57 +1,16 @@
 import React, {useState} from "react";
 import {useSubscription} from "react-stomp-hooks";
 import {useTranslation} from "react-i18next";
-import {createUseStyles, useTheme} from "react-jss";
-
-const bannerBase = () => ({
-    display: "flex",
-    flexFlow: "row nowrap",
-    justifyContent: "space-between",
-    alignItems: "center",
-    gap: "10px",
-    padding: "10px",
-    borderRadius: "5px",
-    boxShadow: "2px 2px 5px 1px rgb(0 0 0 / 30%)",
-    "& > .clickable": {
-        cursor: "pointer",
-    }
-});
-
-const useStyles = createUseStyles(theme => ({
-    bannerContainer: {
-        display: "flex",
-        flexFlow: "column nowrap",
-        justifyContent: "flex-start",
-        alignItems: "center",
-        gap: "10px",
-
-        maxWidth: "80%",
-        position: "absolute",
-        left: "50%",
-        transform: "translate(-50%, 10px)",
-    },
-    errorBanner: {
-        extend: bannerBase(),
-        backgroundColor: theme.errorBackgroundColor,
-        color: theme.errorTextColor,
-    },
-    infoBanner: {
-        extend: bannerBase(),
-        backgroundColor: theme.infoBackgroundColor,
-        color: theme.infoTextColor,
-    },
-}));
+import './Banner.css';
 
 const Banner = () => {
-    const {t, i18n} = useTranslation();
-    const theme = useTheme();
-    const classes = useStyles(theme);
+    const {t} = useTranslation();
 
     const [errorState, setErrorState] = useState({
         code: "", messageKey: "",
         icon: "❗",
         labelKey: "error.label.anErrorOccurred",
-        className: classes.errorBanner,
+        className: "banner error-banner",
         closeCallback: () => resetErrorState(),
     });
 
@@ -59,7 +18,7 @@ const Banner = () => {
         code: "", messageKey: "",
         icon: "ℹ️ ",
         labelKey: "system.label.message",
-        className: classes.infoBanner,
+        className: "banner info-banner",
         closeCallback: () => resetSystemMessage(),
     });
 
@@ -101,7 +60,7 @@ const Banner = () => {
         </div>);
     }
 
-    return (<div className={classes.bannerContainer}>
+    return (<div className="banner-container">
         {bannerOf(errorState)}
         {bannerOf(systemMessage)}
     </div>);
