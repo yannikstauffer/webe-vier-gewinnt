@@ -182,6 +182,18 @@ const Chat = ({userId}) => {
                 </li>));
     }
 
+    const getMessageMetaData = (message) => {
+        const sentAt = new Date(message.sentAt);
+
+        const date = sentAt.toLocaleDateString();
+        const time = sentAt.toLocaleTimeString();
+
+        const dateTime = sentAt.getDate() !== new Date().getDate() ? date + " " + time : time;
+
+        if (message.sender.id === userId) return dateTime;
+        return message.sender.firstName + " " + dateTime;
+    }
+
     return (
         <div className="chat-layout">
             <h2>{t('chat.title')}</h2>
@@ -198,7 +210,8 @@ const Chat = ({userId}) => {
             <ul className="chat-history">
                 {getTabMessages().map((message, index) => (
                     <li key={index} className={getMessageStyles(message)}>
-                        {message.text}
+                        <div>{message.text}</div>
+                        <div className="chat-message-metadata">{getMessageMetaData(message)}</div>
                     </li>
                 ))}
             </ul>

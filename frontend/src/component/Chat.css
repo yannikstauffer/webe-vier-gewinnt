@@ -53,6 +53,7 @@
 }
 .chat-message {
     display: flex;
+    flex-flow: column nowrap;
     list-style-type: none;
     border: 1px solid #ccc;
     border-radius: 5px;
@@ -61,4 +62,11 @@
     &.self {
         align-self: flex-end
     }
+}
+
+.chat-message-metadata {
+    font-size: 0.8rem;
+    color: #777;
+    align-self: flex-end;
+    margin: 3px -5px -5px 3px;
 }
