@@ -1,88 +1,12 @@
 import React, {useState} from "react";
 import {useStompClient, useSubscription} from "react-stomp-hooks";
-import {createUseStyles, useTheme} from "react-jss";
 import {useTranslation} from 'react-i18next';
-
-const useStyles = createUseStyles(theme => ({
-    layout: {
-        display: "grid",
-        gridTemplateRows: "auto  auto 1fr auto",
-        gap: "5px",
-        margin: "0 auto",
-        height: "100%",
-        overflowY: "scroll",
-    },
-
-    history: {
-        display: "flex",
-        flexFlow: "column nowrap",
-        justifyContent: "flex-start",
-        gap: "10px",
-
-        margin: 0,
-        listStyle: "none",
-        border: "1px solid #ccc",
-        borderRadius: "5px",
-        padding: "10px",
-        overflowY: "scroll",
-        paddingInline: "10px",
-    },
-
-    tabs: {
-        display: "flex",
-        flexFlow: "row wrap",
-        justifyContent: "flex-start",
-        gap: "5px",
-        padding: 0,
-        maxHeight: "5.5em",
-
-        margin: 0,
-        listStyle: "none",
-        overflowY: "scroll",
-    },
-
-    tab: {
-        cursor: "pointer",
-        display: "flex",
-        flexGrow: 1,
-        flexShrink: 1,
-        flexBasis: "auto",
-        justifyContent: "center",
-        alignItems: "center",
-        listStyleType: "none",
-        border: "1px solid #ccc",
-        borderRadius: "5px",
-        padding: "5px",
-        minWidth: "6em",
-        height: "1.2em",
-
-        whiteSpace: "nowrap",
-        textOverflow: "ellipsis",
-        overflow: "hidden",
-        "&.selected": {
-            backgroundColor: theme.accentBackgroundColor,
-        },
-    },
-
-    message: {
-        display: "flex",
-        listStyleType: "none",
-        border: "1px solid #ccc",
-        borderRadius: "5px",
-        padding: "10px",
-        width: "80%",
-        "&.self": {
-            alignSelf: "flex-end",
-        },
-    },
-}));
+import './Chat.css';
 
 const LOBBY_TAB = "LOBBY";
 
 const Chat = ({userId}) => {
     const {t, i18n} = useTranslation();
-    const theme = useTheme();
-    const classes = useStyles(theme);
     const stompClient = useStompClient();
 
     const [privateChats, setPrivateChats] = useState(new Map());
@@ -213,8 +137,8 @@ const Chat = ({userId}) => {
     };
 
     const getMessageStyles = (message) => {
-        let baseStyles = classes.message;
-        if (message.sender.id === userId) return classes.message + " self";
+        let baseStyles = "chat-message";
+        if (message.sender.id === userId) return baseStyles + " self";
         return baseStyles;
     };
 
@@ -233,8 +157,8 @@ const Chat = ({userId}) => {
     };
 
     const getTabStyles = (tab) => {
-        const baseStyles = classes.tab;
-        if (chatState.tab === tab) return classes.tab + " selected";
+        const baseStyles = "chat-tab";
+        if (chatState.tab === tab) return baseStyles + " selected";
         return baseStyles;
     };
 
@@ -258,10 +182,22 @@ const Chat = ({userId}) => {
                 </li>));
     }
 
+    const getMessageMetaData = (message) => {
+        const sentAt = new Date(message.sentAt);
+
+        const date = sentAt.toLocaleDateString();
+        const time = sentAt.toLocaleTimeString();
+
+        const dateTime = sentAt.getDate() !== new Date().getDate() ? date + " " + time : time;
+
+        if (message.sender.id === userId) return dateTime;
+        return message.sender.firstName + " " + dateTime;
+    }
+
     return (
-        <div className={classes.layout}>
+        <div className="chat-layout">
             <h2>{t('chat.title')}</h2>
-            <ul className={classes.tabs}>
+            <ul className="chat-tabs">
                 <li
                     key={LOBBY_TAB}
                     className={getTabStyles(LOBBY_TAB)}
@@ -271,10 +207,11 @@ const Chat = ({userId}) => {
                 </li>
                 {getUserTabs()}
             </ul>
-            <ul className={classes.history}>
+            <ul className="chat-history">
                 {getTabMessages().map((message, index) => (
                     <li key={index} className={getMessageStyles(message)}>
-                        {message.text}
+                        <div>{message.text}</div>
+                        <div className="chat-message-metadata">{getMessageMetaData(message)}</div>
                     </li>
                 ))}
             </ul>

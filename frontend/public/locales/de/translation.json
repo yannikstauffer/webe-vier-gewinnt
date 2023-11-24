@@ -36,12 +36,16 @@
       "notYourTurn": "Du bist nicht am Zug.",
       "quit": "Ein Spieler hat das Spiel verlassen.",
       "disconnected": "Ein Spieler hat die Verbindung verloren",
-      "continue": "Es kann weitergespielt werden."
+      "continue": "Es kann weitergespielt werden.",
+      "paused": "Das Spiel ist pausiert.",
+      "inProgress": "Das Spiel läuft.",
+      "finished": "Das Spiel ist zu Ende."
     },
     "button": {
       "newGame": "Neues Spiel starten",
       "quitGame": "Spiel verlassen",
-      "continue": "Spiel weiter spielen"
+      "continue": "Spiel weiter spielen",
+      "joinGame": "Spiel beitreten"
     },
     "confirm": {
       "quit": "Möchten Sie das Spiel wirklich verlassen?",

@@ -7,13 +7,13 @@ import ch.ffhs.webe.hs2023.viergewinnt.user.dto.UserDto;
 import lombok.Builder;
 import lombok.Data;
 
-import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @Builder
 public class GameStateDto {
     private Integer gameId;
-    private ArrayList<ArrayList<Integer>> board;
+    private List<List<Integer>> board;
     private Integer nextMove;
     private GameBoardState gameBoardState;
     private GameLevel gameLevel;
@@ -25,7 +25,7 @@ public class GameStateDto {
         final var builder =
                 GameStateDto.builder()
                         .gameId(game.getId())
-                        .board(game.getBoard())
+                        .board(game.getBoard().asListObject())
                         .nextMove(game.getNextMove())
                         .gameBoardState(game.getGameBoardState())
                         .gameLevel(game.getGameLevel())

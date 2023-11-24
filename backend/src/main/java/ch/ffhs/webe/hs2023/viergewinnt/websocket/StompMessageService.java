@@ -25,7 +25,13 @@ public class StompMessageService {
         final var username = receiver.getEmail();
         log.debug("Sending message to user {} on destination {}: {}", username, destination, payload);
 
-        receiver.getSessions().forEach(session ->
+        final var sessions = receiver.getSessions();
+        if (sessions.isEmpty()) {
+            log.debug("No sessions found for user {}", username);
+            return;
+        }
+
+        sessions.forEach(session ->
                 this.simpMessagingTemplate.convertAndSendToUser(
                         session.getSessionId(),
                         destination,

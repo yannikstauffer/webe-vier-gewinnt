@@ -18,7 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.security.Principal;
 
-import static ch.ffhs.webe.hs2023.viergewinnt.user.UserTestUtils.user;
+import static ch.ffhs.webe.hs2023.viergewinnt.user.model.UserTest.user;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
