@@ -2,23 +2,28 @@ package ch.ffhs.webe.hs2023.viergewinnt.game.level;
 
 import ch.ffhs.webe.hs2023.viergewinnt.game.model.Game;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
 @Slf4j
 @Component
 public class TimedActionScheduler {
-    private static final ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(1);
-    private static final ConcurrentHashMap<Integer, TimedAction> gameTimedAction = new ConcurrentHashMap<>();
+    private final ScheduledExecutorService scheduledExecutorService;
+    static final ConcurrentHashMap<Integer, TimedAction> gameTimedAction = new ConcurrentHashMap<>();
+
+    @Autowired
+    public TimedActionScheduler(final TimedActionExecutorProvider timedActionExecutorProvider) {
+        this.scheduledExecutorService = timedActionExecutorProvider.getScheduledExecutorService();
+    }
 
     public void schedule(final TimedAction timedAction) {
         gameTimedAction.put(timedAction.getGame().getId(), timedAction);
 
         log.debug("Scheduling timed action for game {}", timedAction.getGame().getId());
-        scheduledExecutorService.schedule(
+        this.scheduledExecutorService.schedule(
                 () -> {
                     log.debug("Running timed action for game {}", timedAction.getGame().getId());
                     gameTimedAction.remove(timedAction.getGame().getId());
