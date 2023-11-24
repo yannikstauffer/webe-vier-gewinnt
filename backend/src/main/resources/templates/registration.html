@@ -2,41 +2,124 @@
 <html th:lang="${#locale.language}">
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
 <meta charset="utf-8">
+<head>
+    <title th:text="#{label.register.title}">form</title>
+</head>
+<style>
+    body {
+        margin: 0;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+        'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+        sans-serif;
+        webkit-font-smoothing: antialiased;
+        moz-osx-font-smoothing: grayscale;
+        height: 100vh;
+    }
 
+    main {
+        max-width: 400px;
+        min-width: 300px;
+        margin: 20px auto;
+    }
+
+    input, select, textarea {
+        font-family: inherit;
+        font-size: inherit;
+        background-color: transparent;
+        padding: 0 1em 0 0.5em;
+        moz-padding-start: calc(10px - 3px);
+        margin: 4px 0;
+        height: 40px;
+        box-shadow: 2px 2px 5px 1px rgb(0 0 0 / 30%);
+        border: none;
+        border-radius: 3px;
+        line-height: 1.1;
+        width: 100%;
+    }
+
+    button, .button, input[type=submit], input[type=reset], input[type=button] {
+        font-family: inherit;
+        font-size: inherit;
+        text-decoration: none;
+        padding: 0 1em;
+        moz-padding-start: calc(10px - 3px);
+        margin: 4px 0;
+        height: 40px;
+        box-shadow: 1px 1px 2px 0.1px rgb(0 0 0 / 30%);
+        border: none;
+        border-radius: 3px;
+        cursor: pointer;
+        line-height: 1.1;
+        text-align: center;
+        display: flex;
+        flex-grow: 0;
+        align-items: center;
+        justify-content: center;
+        color: rgb(30 30 30);
+        background-color: rgb(240 240 240);
+
+        &:hover {
+            background-color: rgb(200 200 200);
+            color: rgb(10 10 10);
+            cursor: pointer
+        }
+    }
+
+    .button-row {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+        gap: 5px;
+        grid-column: 1 / span 2;
+    }
+
+    form {
+        display: grid;
+        grid-template-columns: min-content 1fr;
+        align-items: center;
+        gap: 10px 20px;
+    }
+
+    h1 {
+        text-align: center;
+    }
+</style>
 <body>
-<h1 th:text="#{label.register.title}">form</h1>
-<form th:action="@{/processRegistration}" th:object="${user}" method="POST">
-    <div>
+<main>
+    <h1 th:text="#{label.register.title}">form</h1>
+    <form th:action="@{/processRegistration}" th:object="${user}" method="POST">
         <label th:text="#{label.user.firstName}" for="firstname">first</label>
-        <input th:field="*{firstName}" id="firstname"/>
-        <p th:each="error: ${#fields.errors('firstName')}"
-           th:text="${error}">Validation error</p>
-    </div>
-    <div>
+        <div>
+            <input th:field="*{firstName}" id="firstname"/>
+            <p th:each="error: ${#fields.errors('firstName')}"
+               th:text="${error}">Validation error</p>
+        </div>
         <label th:text="#{label.user.lastName}" for="lastname">last</label>
-        <input th:field="*{lastName}" id="lastname"/>
-        <p th:each="error : ${#fields.errors('lastName')}"
-           th:text="${error}">Validation error</p>
-    </div>
-    <div>
+        <div>
+            <input th:field="*{lastName}" id="lastname"/>
+            <p th:each="error : ${#fields.errors('lastName')}"
+               th:text="${error}">Validation error</p>
+        </div>
         <label th:text="#{label.user.email}" for="email">email</label>
-        <input type="email" th:field="*{email}" id="email"/>
-        <p th:each="error : ${#fields.errors('email')}"
-           th:text="${error}">Validation error</p>
-    </div>
-    <div>
+        <div>
+            <input type="email" th:field="*{email}" id="email"/>
+            <p th:each="error : ${#fields.errors('email')}"
+               th:text="${error}">Validation error</p>
+        </div>
         <label th:text="#{label.user.password}" for="password">password</label>
-        <input type="password" th:field="*{password}" id="password"/>
-        <p th:each="error : ${#fields.errors('password')}"
-           th:text="${error}">Validation error</p>
-    </div>
-    <div>
+        <div>
+            <input type="password" th:field="*{password}" id="password"/>
+            <p th:each="error : ${#fields.errors('password')}"
+               th:text="${error}">Validation error</p>
+        </div>
         <label th:text="#{label.user.passwordConfirmation}" for="password_confirmation">confirm</label>
         <input type="password" th:field="*{matchingPassword}" id="password_confirmation"/>
-    </div>
-    <button type="submit" th:text="#{label.register.action}">submit</button>
-</form>
-
-<a th:href="@{/login}" th:text="#{label.login.backToLogin}">login</a>
+        <div class="button-row">
+            <button type="submit" th:text="#{label.register.action}">submit</button>
+            <a class="button" th:href="@{/login}" th:text="#{label.login.backToLogin}">login</a>
+        </div>
+    </form>
+</main>
 </body>
 </html>

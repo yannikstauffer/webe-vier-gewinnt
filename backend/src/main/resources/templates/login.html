@@ -2,30 +2,111 @@
 <html th:lang="${#locale.language}">
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
 <meta charset="utf-8">
+<head>
+    <title th:text="#{label.login.title}">form</title>
+</head>
+<style>
+    body {
+        margin: 0;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+        'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+        sans-serif;
+        webkit-font-smoothing: antialiased;
+        moz-osx-font-smoothing: grayscale;
+        height: 100vh;
+    }
 
+    main {
+        max-width: 400px;
+        min-width: 300px;
+        margin: 20px auto;
+    }
+
+    input, select, textarea {
+        font-family: inherit;
+        font-size: inherit;
+        background-color: transparent;
+        padding: 0 1em 0 0.5em;
+        moz-padding-start: calc(10px - 3px);
+        margin: 4px 0;
+        height: 40px;
+        box-shadow: 2px 2px 5px 1px rgb(0 0 0 / 30%);
+        border: none;
+        border-radius: 3px;
+        line-height: 1.1;
+        width: 100%;
+    }
+
+    button, .button, input[type=submit], input[type=reset], input[type=button] {
+        font-family: inherit;
+        font-size: inherit;
+        text-decoration: none;
+        padding: 0 1em;
+        moz-padding-start: calc(10px - 3px);
+        margin: 4px 0;
+        height: 40px;
+        box-shadow: 1px 1px 2px 0.1px rgb(0 0 0 / 30%);
+        border: none;
+        border-radius: 3px;
+        cursor: pointer;
+        line-height: 1.1;
+        text-align: center;
+        display: flex;
+        flex-grow: 0;
+        align-items: center;
+        justify-content: center;
+        color: rgb(30 30 30);
+        background-color: rgb(240 240 240);
+
+        &:hover {
+            background-color: rgb(200 200 200);
+            color: rgb(10 10 10);
+            cursor: pointer
+        }
+    }
+
+    .button-row {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+        gap: 5px;
+        grid-column: 1 / span 2;
+    }
+
+    form {
+        display: grid;
+        grid-template-columns: min-content 1fr;
+        align-items: center;
+        gap: 10px 20px;
+    }
+
+    h1 {
+        text-align: center;
+    }
+</style>
 <body>
-<h1 th:text="#{label.login.title}">form</h1>
-<div th:if="${param.invalid}" th:text="#{error.user.invalidCredentials}">
-    invalid credentials
-</div>
-<div th:if="${param.logout}" th:text="#{info.logout.done}">
-    logout
-</div>
-<div th:if="${param.registered}" th:text="#{info.register.success}">
-    logout
-</div>
-<form th:action="@{/login}" method="POST">
-    <div>
+<main>
+    <h1 th:text="#{label.login.title}">form</h1>
+    <div th:if="${param.invalid}" th:text="#{error.user.invalidCredentials}">
+        invalid credentials
+    </div>
+    <div th:if="${param.logout}" th:text="#{info.logout.done}">
+        logout
+    </div>
+    <div th:if="${param.registered}" th:text="#{info.register.success}">
+        logout
+    </div>
+    <form th:action="@{/login}" method="POST">
         <label th:text="#{label.user.email}" for="username">email</label>
         <input type="text" name="username" id="username"/>
-    </div>
-    <div>
         <label th:text="#{label.user.password}" for="password">password</label>
         <input type="password" name="password" id="password"/>
-    </div>
-    <button type="submit" th:text="#{label.login.action}">submit</button>
-</form>
-
-<a th:href="@{/registration}" th:text="#{label.register.action}">register</a>
+        <div class="button-row">
+            <button type="submit" th:text="#{label.login.action}">submit</button>
+            <a class="button" th:href="@{/registration}" th:text="#{label.register.action}">register</a>
+        </div>
+    </form>
+</main>
 </body>
 </html>
