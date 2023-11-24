@@ -34,16 +34,18 @@
       "draw": "The game is a draw.",
       "yourTurn": "It's your turn.",
       "notYourTurn": "It's not your turn.",
-      "wait": "The game has not started yet",
       "quit": "A player has quit the game.",
       "disconnected": "A player has lost the connection",
       "paused": "The game has been paused.",
-      "continue": "The game can be continued."
+      "continue": "The game can be continued.",
+      "inProgress": "The game is in progress.",
+      "finished": "The game has ended."
     },
     "button": {
       "newGame": "Start New Game",
       "quitGame": "Leave Game",
-      "continue": "Continue game"
+      "continue": "Continue game",
+      "join": "Join game"
     },
     "confirm": {
       "quit": "Do you really want to leave the game?",
