@@ -18,9 +18,9 @@ public interface GameService {
 
     Game dropRandomDisc(int gameId, User currentUser);
 
-    Game updateGameBoard(final int gameId, final int column, final User currentUser, final String message);
+    Game dropRandomAnonymousDisc(int gameId);
 
-    void deleteAllGames();
+    Game dropDisc(final int gameId, final int column, final User currentUser);
 
     Game controlGame(GameRequestDto request, final User currentUser);
 

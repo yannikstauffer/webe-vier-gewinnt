@@ -15,6 +15,7 @@ public class GameBoard {
     private static final int EMPTY_CELL = 0;
     private static final int ROW_COUNT = 6;
     private static final int COLUMN_COUNT = 7;
+    public static final int ANONYMOUS_DISC_NUMBER = -5;
 
     @Getter(AccessLevel.PRIVATE)
     @Setter(AccessLevel.NONE)
@@ -57,6 +58,18 @@ public class GameBoard {
                 return;
             }
         }
+    }
+
+    public int getPlayerDiscCount() {
+        int count = 0;
+        for (final List<Integer> column : this.board) {
+            for (final Integer cell : column) {
+                if (cell != EMPTY_CELL && cell != ANONYMOUS_DISC_NUMBER) {
+                    count++;
+                }
+            }
+        }
+        return count;
     }
 
     public boolean contains(final int id) {

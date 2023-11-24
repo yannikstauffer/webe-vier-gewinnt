@@ -12,6 +12,7 @@ import ch.ffhs.webe.hs2023.viergewinnt.user.UserService;
 import ch.ffhs.webe.hs2023.viergewinnt.user.model.User;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -120,169 +121,6 @@ public class GameServiceImpl implements GameService {
         return this.gameRepository.save(updatedGame);
     }
 
-    private Game initializeGame(final Game game, final boolean isNewGame) {
-        if (isNewGame) {
-            game.setBoard(new GameBoard());
-        }
-
-        game.setGameState(GameState.IN_PROGRESS);
-        game.setGameBoardState(GameBoardState.MOVE_EXPECTED);
-        game.setNextMove(RANDOM.nextBoolean() ? game.getUserOne().getId() : game.getUserTwo().getId());
-
-        return this.gameRepository.save(game);
-    }
-
-    private Game startGame(final Game game) {
-        this.validateTwoPlayers(game);
-        return this.initializeGame(game, true);
-    }
-
-    private Game restartGame(final Game game) {
-        this.validateTwoPlayers(game);
-
-        final Game newGame = new Game();
-        newGame.setGameLevel(game.getGameLevel());
-        newGame.setUserOne(game.getUserOne());
-        newGame.setUserTwo(game.getUserTwo());
-
-        return this.initializeGame(newGame, true);
-    }
-
-    private Game continueGame(final Game game) {
-        this.validateTwoPlayers(game);
-
-        game.setGameState(GameState.IN_PROGRESS);
-        game.setGameBoardState(GameBoardState.MOVE_EXPECTED);
-
-        return game;
-    }
-
-    private Game removePlayerFromGame(final Game game, final User currentUser) {
-        this.validatePlayer(game, currentUser);
-
-        if (isUserOne(game, currentUser)) {
-            game.setUserOne(null);
-        }
-        if (isUserTwo(game, currentUser)) {
-            game.setUserTwo(null);
-
-        }
-
-        return this.gameRepository.save(game);
-    }
-
-    @Override
-    public void deleteAllGames() {
-        this.gameRepository.deleteAll();
-    }
-
-    @Override
-    public Game dropRandomDisc(final int gameId, final User currentUser) {
-        final Game game = this.findGameOrThrow(gameId);
-
-        if (game.getGameState() == GameState.IN_PROGRESS && game.getGameBoardState() == GameBoardState.MOVE_EXPECTED) {
-            final var availableRandomColumn = this.randomAvailableColumn(game);
-            if (availableRandomColumn.isPresent()) {
-                log.trace("Drop random disc {} for user {} in game {}", availableRandomColumn.get(), currentUser.getId(), game.getId());
-                return this.dropDisc(game, availableRandomColumn.get(), currentUser);
-            } else {
-                log.warn("GameState indicates that game {} is still active but no free columns are available.", game.getId());
-            }
-        }
-
-        return game;
-    }
-
-    private Optional<Integer> randomAvailableColumn(final Game game) {
-        final var gameBoard = game.getBoard();
-
-        if (gameBoard.isFull()) {
-            return Optional.empty();
-        }
-
-        int randomColumn = RANDOM.nextInt(7);
-
-        int i = 0;
-        while (gameBoard.isColumnFull(randomColumn)) {
-            if (i++ > 6) {
-                log.warn("All columns in game {} are full but expected not to be.", game.getId());
-                return Optional.empty();
-            }
-            randomColumn = randomColumn + 1 % 7;
-        }
-
-        return Optional.of(randomColumn);
-    }
-
-    @Override
-    public Game updateGameBoard(final int gameId, final int column, final User currentUser, final String message) {
-        final Game game = this.findGameOrThrow(gameId);
-        return this.dropDisc(game, column, currentUser);
-//        this.validateGameInProgress(game, currentUser);
-//
-//        final GameBoard gameBoard = new GameBoard();
-//        gameBoard.setBoard(game.getBoard());
-//        final boolean isUpdated = true;
-//
-        //todo: level3
-//        if (game.getGameLevel() == GameLevel.LEVEL3 && message.equals("specialDisc")) {
-//            gameBoard.updateBoardColumn(column, -5);
-//        } else {
-//            gameBoard.updateBoardColumn(column, currentUser.getId());
-//        }
-//
-//        if (!isUpdated) {
-//            throw VierGewinntException.of(ErrorCode.INVALID_MOVE, "Ungültiger Zug, Spalte ist voll!");
-//        }
-//
-//        final boolean hasWon = gameBoard.checkWinner(currentUser.getId());
-//
-//        if (hasWon) {
-//            game.setGameBoardState(GameBoardState.PLAYER_HAS_WON);
-//            game.setGameState(GameState.FINISHED);
-//        } else if (gameBoard.isFull()) {
-//            game.setGameBoardState(GameBoardState.DRAW);
-//            game.setGameState(GameState.FINISHED);
-//        } else {
-//            game.setNextMove(game.getNextMove().equals(game.getUserOne().getId()) ?
-//                    game.getUserTwo().getId() : game.getUserOne().getId());
-//        }
-//
-//        game.setBoard(gameBoard.getBoard());
-//        return this.gameRepository.save(game);
-    }
-
-
-    private Game dropDisc(final Game game, final int columnId, final User currentUser) {
-        this.validateGameInProgress(game, currentUser);
-
-        final GameBoard gameBoard = game.getBoard();
-
-        if (gameBoard.isColumnFull(columnId)) {
-            throw VierGewinntException.of(ErrorCode.INVALID_MOVE, "Ungültiger Zug, Spalte ist voll!");
-        } else if (currentUser.getId() != game.getNextMove()) {
-            throw VierGewinntException.of(ErrorCode.INVALID_PLAYER, "The current user is not allowed to drop a disc.");
-        }
-
-        gameBoard.addDisc(columnId, currentUser.getId());
-
-        final boolean hasWon = gameBoard.checkWinner(currentUser.getId());
-
-        if (hasWon) {
-            game.setGameBoardState(GameBoardState.PLAYER_HAS_WON);
-            game.setGameState(GameState.FINISHED);
-        } else if (gameBoard.isFull()) {
-            game.setGameBoardState(GameBoardState.DRAW);
-            game.setGameState(GameState.FINISHED);
-        } else {
-            game.setNextMove(game.getNextMove().equals(game.getUserOne().getId()) ?
-                    game.getUserTwo().getId() : game.getUserOne().getId());
-        }
-
-        game.setBoard(gameBoard);
-        return this.gameRepository.save(game);
-    }
-
     @Override
     public Game getGameById(final int gameId) {
         final Game game = this.findGameOrThrow(gameId);
@@ -309,6 +147,175 @@ public class GameServiceImpl implements GameService {
         return this.gameRepository.findGamesByUserId(userId);
     }
 
+    @Override
+    public Game dropRandomDisc(final int gameId, final User currentUser) {
+        final Game game = this.findGameOrThrow(gameId);
+
+        if (game.isMoveExpected()) {
+            final var availableRandomColumn = this.randomAvailableColumn(game);
+            if (availableRandomColumn.isPresent()) {
+                log.trace("Drop random disc {} for user {} in game {}", availableRandomColumn.get(), currentUser.getId(), game.getId());
+                return this.dropPlayerDisc(game, availableRandomColumn.get(), currentUser);
+            } else {
+                log.warn("GameState indicates that game {} is still active but no free columns are available.", game.getId());
+            }
+        }
+
+        return game;
+    }
+
+    @Override
+    public Game dropRandomAnonymousDisc(final int gameId) {
+        final Game game = this.findGameOrThrow(gameId);
+
+        if (game.isMoveExpected()) {
+            final var availableRandomColumn = this.randomAvailableColumn(game);
+            if (availableRandomColumn.isPresent()) {
+                log.trace("Drop anonymous random disc {} in game {}", availableRandomColumn.get(), game.getId());
+                return this.dropAnonymousDisc(game, availableRandomColumn.get());
+            } else {
+                log.warn("GameState indicates that game {} is still active but no free columns are available.", game.getId());
+            }
+        }
+
+        return game;
+    }
+
+    @Override
+    public Game dropDisc(final int gameId, final int column, final User currentUser) {
+        final Game game = this.findGameOrThrow(gameId);
+        return this.dropPlayerDisc(game, column, currentUser);
+    }
+
+    private Game initializeNewGame(final Game game) {
+        game.setBoard(new GameBoard());
+        game.setGameState(GameState.IN_PROGRESS);
+        game.setGameBoardState(GameBoardState.MOVE_EXPECTED);
+        game.setNextMove(RANDOM.nextBoolean() ? game.getUserOne().getId() : game.getUserTwo().getId());
+
+        return this.gameRepository.save(game);
+    }
+
+    private Game startGame(final Game game) {
+        this.validateTwoPlayers(game);
+        return this.initializeNewGame(game);
+    }
+
+    private Game restartGame(final Game game) {
+        this.validateTwoPlayers(game);
+
+        final Game newGame = new Game();
+        newGame.setGameLevel(game.getGameLevel());
+        newGame.setUserOne(game.getUserOne());
+        newGame.setUserTwo(game.getUserTwo());
+
+        return this.initializeNewGame(newGame);
+    }
+
+    private Game continueGame(final Game game) {
+        this.validateTwoPlayers(game);
+
+        game.setGameState(GameState.IN_PROGRESS);
+        game.setGameBoardState(GameBoardState.MOVE_EXPECTED);
+
+        return game;
+    }
+
+    private Game removePlayerFromGame(final Game game, final User currentUser) {
+        this.validatePlayer(game, currentUser);
+
+        if (isUserOne(game, currentUser)) {
+            game.setUserOne(null);
+        }
+        if (isUserTwo(game, currentUser)) {
+            game.setUserTwo(null);
+
+        }
+
+        return this.gameRepository.save(game);
+    }
+
+    private Optional<Integer> randomAvailableColumn(final Game game) {
+        final var gameBoard = game.getBoard();
+
+        if (gameBoard.isFull()) {
+            return Optional.empty();
+        }
+
+        int randomColumn = RANDOM.nextInt(7);
+
+        int i = 0;
+        while (gameBoard.isColumnFull(randomColumn)) {
+            if (i++ > 6) {
+                log.warn("All columns in game {} are full but expected not to be.", game.getId());
+                return Optional.empty();
+            }
+            randomColumn = randomColumn + 1 % 7;
+        }
+
+        return Optional.of(randomColumn);
+    }
+
+
+    private Game dropPlayerDisc(final Game game, final int columnId, final User currentUser) {
+        this.validateGameInProgress(game);
+        this.validatePlayer(game, currentUser);
+        this.validateNextMove(game, currentUser);
+
+        final var gameBoard = this.gameBoardWithDisc(game, columnId, currentUser.getId());
+
+        this.updateGame(game, gameBoard, currentUser);
+        return this.gameRepository.save(game);
+    }
+
+
+    private Game dropAnonymousDisc(final Game game, final int columnId) {
+        this.validateGameInProgress(game);
+
+        final var gameBoard = this.gameBoardWithDisc(game, columnId, GameBoard.ANONYMOUS_DISC_NUMBER);
+
+        this.updateGame(game, gameBoard, null);
+        return this.gameRepository.save(game);
+    }
+
+    private void updateGame(final Game game, final GameBoard gameBoard, @Nullable final User optionalUser) {
+        final boolean hasWon = Optional.ofNullable(optionalUser)
+                .map(User::getId)
+                .map(gameBoard::checkWinner)
+                .orElse(false);
+
+        if (hasWon) {
+            game.setGameBoardState(GameBoardState.PLAYER_HAS_WON);
+            game.setGameState(GameState.FINISHED);
+        } else if (gameBoard.isFull()) {
+            game.setGameBoardState(GameBoardState.DRAW);
+            game.setGameState(GameState.FINISHED);
+        } else if (optionalUser != null) {
+            game.setNextMove(game.getNextMove().equals(game.getUserOne().getId()) ?
+                    game.getUserTwo().getId() : game.getUserOne().getId());
+        }
+
+        game.setBoard(gameBoard);
+    }
+
+    private void validateNextMove(final Game game, final User currentUser) {
+        if (currentUser.getId() != game.getNextMove()) {
+            throw VierGewinntException.of(ErrorCode.INVALID_PLAYER, "The current user is not allowed to drop a disc.");
+        }
+    }
+
+    private GameBoard gameBoardWithDisc(final Game game, final int columnId, final int discNumber) {
+        final GameBoard gameBoard = game.getBoard();
+
+        if (gameBoard.isColumnFull(columnId)) {
+            throw VierGewinntException.of(ErrorCode.INVALID_MOVE, "Ungültiger Zug, Spalte ist voll!");
+        }
+
+        gameBoard.addDisc(columnId, discNumber);
+        return gameBoard;
+    }
+
+
     private void validatePlayer(final Game game, final User currentUser) {
         if (currentUser == null) {
             throw VierGewinntException.of(ErrorCode.NULL_PLAYER, "Player was not set.");
@@ -320,8 +327,7 @@ public class GameServiceImpl implements GameService {
         }
     }
 
-    private void validateGameInProgress(final Game game, final User currentUser) {
-        this.validatePlayer(game, currentUser);
+    private void validateGameInProgress(final Game game) {
         if (game.getGameState() != GameState.IN_PROGRESS) {
             throw VierGewinntException.of(ErrorCode.INVALID_GAME_STATE, "The game state should be IN_PROGRESS");
         }
