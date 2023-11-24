@@ -11,10 +11,10 @@ import java.util.List;
 @Getter
 @Setter
 public class GameBoard {
-    private static final int CONNECT = 4;
-    private static final int EMPTY_CELL = 0;
-    private static final int ROW_COUNT = 6;
-    private static final int COLUMN_COUNT = 7;
+    static final int CONNECT = 4;
+    static final int EMPTY_CELL = 0;
+    static final int ROW_COUNT = 6;
+    static final int COLUMN_COUNT = 7;
     public static final int ANONYMOUS_DISC_NUMBER = -5;
 
     @Getter(AccessLevel.PRIVATE)
@@ -132,11 +132,11 @@ public class GameBoard {
 
     private static void validateBoardData(final List<List<Integer>> boardData) {
         if (boardData.size() != ROW_COUNT) {
-            throw new IllegalArgumentException("Board data must have " + ROW_COUNT + " rows");
+            throw new IllegalArgumentException("boardData must have " + ROW_COUNT + " rows");
         }
         for (final List<Integer> boardDataRow : boardData) {
             if (boardDataRow.size() != COLUMN_COUNT) {
-                throw new IllegalArgumentException("Board data must have " + COLUMN_COUNT + " columns");
+                throw new IllegalArgumentException("boardData must have " + COLUMN_COUNT + " columns");
             }
         }
     }
