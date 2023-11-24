@@ -56,7 +56,6 @@ const GameBoard = ({initialGameId, userId}) => {
                 setCountdown(prevCountdown => {
                     if (prevCountdown === 1) {
                         clearInterval(timer);
-                        dropDisc(calculateNextMoveColumn());
                     }
                     return Math.max(prevCountdown - 1, 0);
                 });

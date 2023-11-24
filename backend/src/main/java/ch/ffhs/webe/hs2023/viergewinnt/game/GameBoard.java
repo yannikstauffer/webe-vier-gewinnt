@@ -1,56 +1,82 @@
 package ch.ffhs.webe.hs2023.viergewinnt.game;
 
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 @Getter
 @Setter
 public class GameBoard {
     private static final int CONNECT = 4;
-    private ArrayList<ArrayList<Integer>> board = initializeBoard();
+    private static final int EMPTY_CELL = 0;
+    private static final int ROW_COUNT = 6;
+    private static final int COLUMN_COUNT = 7;
 
-    private ArrayList<ArrayList<Integer>> initializeBoard() {
-        ArrayList<ArrayList<Integer>> board = new ArrayList<>();
-        for (int row = 0; row < 6; row++) {
-            ArrayList<Integer> newRow = new ArrayList<>();
-            for (int col = 0; col < 7; col++) {
-                newRow.add(0);
-            }
-            board.add(newRow);
-        }
-        return board;
+    @Getter(AccessLevel.PRIVATE)
+    @Setter(AccessLevel.NONE)
+    private final List<List<Integer>> board = new ArrayList<>();
+
+    public GameBoard() {
+        this.initializeBoard();
     }
 
-    public boolean updateBoardColumn(int column, int playerId) {
+    public GameBoard(final List<List<Integer>> boardData) {
+        validateBoardData(boardData);
+        for (final List<Integer> boardDataRow : boardData) {
+            this.board.add(new ArrayList<>(boardDataRow));
+        }
+    }
+
+    public List<List<Integer>> asListObject() {
+        final List<List<Integer>> list = new ArrayList<>();
+        for (final List<Integer> boardDataRow : this.board) {
+            list.add(new ArrayList<>(boardDataRow));
+        }
+        return list;
+    }
+
+    public boolean isColumnFull(final int column) {
+        this.validateColumnId(column);
         for (int row = this.board.size() - 1; row >= 0; row--) {
             if (this.board.get(row).get(column) == 0) {
-                this.board.get(row).set(column, playerId);
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public boolean isFull() {
-        for (ArrayList<Integer> column : this.board) {
-            for (int cell : column) {
-                if (cell == 0) {
-                    return false;
-                }
+                return false;
             }
         }
         return true;
     }
 
-    public boolean checkWinner(int playerId) {
-        for (int row = 0; row < board.size(); row++) {
-            for (int col = 0; col < board.get(row).size(); col++) {
-                if (checkLine(playerId, row, col, 1, 0) ||          // Horizontal
-                        checkLine(playerId, row, col, 0, 1) ||      // Vertikal
-                        checkLine(playerId, row, col, 1, 1) ||      // Diagonal unten
-                        checkLine(playerId, row, col, 1, -1)) {     // Diagonal oben
+    public void addDisc(final int column, final int playerId) {
+        this.validateColumnId(column);
+        for (int row = this.board.size() - 1; row >= 0; row--) {
+            if (this.board.get(row).get(column) == 0) {
+                this.board.get(row).set(column, playerId);
+                return;
+            }
+        }
+    }
+
+    public boolean contains(final int id) {
+        for (final List<Integer> column : this.board) {
+            if (column.contains(id)) return true;
+        }
+        return false;
+    }
+
+    public boolean isFull() {
+        return !this.contains(EMPTY_CELL);
+    }
+
+    public boolean checkWinner(final int playerId) {
+        for (int row = 0; row < this.board.size(); row++) {
+            for (int col = 0; col < this.board.get(row).size(); col++) {
+                if (this.checkLine(playerId, row, col, 1, 0) ||          // Horizontal
+                        this.checkLine(playerId, row, col, 0, 1) ||      // Vertikal
+                        this.checkLine(playerId, row, col, 1, 1) ||      // Diagonal unten
+                        this.checkLine(playerId, row, col, 1, -1)) {     // Diagonal oben
                     return true;
                 }
             }
@@ -58,24 +84,47 @@ public class GameBoard {
         return false;
     }
 
-    private boolean checkLine(int playerId, int startRow, int startCol, int deltaRow, int deltaCol) {
-        int endRow = startRow + (CONNECT - 1) * deltaRow;
-        int endCol = startCol + (CONNECT - 1) * deltaCol;
+    private void initializeBoard() {
+        this.board.clear();
+
+        for (int row = 0; row < ROW_COUNT; row++) {
+            final Integer[] column = new Integer[COLUMN_COUNT];
+            Arrays.fill(column, EMPTY_CELL);
+            this.board.add(new ArrayList<>(Arrays.asList(column)));
+        }
+    }
+
+    private boolean checkLine(final int playerId, final int startRow, final int startCol, final int deltaRow, final int deltaCol) {
+        final int endRow = startRow + (CONNECT - 1) * deltaRow;
+        final int endCol = startCol + (CONNECT - 1) * deltaCol;
 
         // Ausserhalb Spielbrett?
-        if (endRow < 0 || endRow >= board.size() || endCol < 0 || endCol >= board.get(0).size()) {
+        if (endRow < 0 || endRow >= this.board.size() || endCol < 0 || endCol >= this.board.get(0).size()) {
             return false;
         }
 
         for (int i = 0; i < CONNECT; i++) {
-            if (board.get(startRow + deltaRow * i).get(startCol + deltaCol * i) != playerId) {
+            if (this.board.get(startRow + deltaRow * i).get(startCol + deltaCol * i) != playerId) {
                 return false;
             }
         }
         return true;
     }
 
-    public void resetBoard() {
-        this.board = initializeBoard();
+    private void validateColumnId(final int columnId) {
+        if (columnId < 0 || columnId >= COLUMN_COUNT) {
+            throw new IllegalArgumentException("ColumnId must be between 0 and " + COLUMN_COUNT);
+        }
+    }
+
+    private static void validateBoardData(final List<List<Integer>> boardData) {
+        if (boardData.size() != ROW_COUNT) {
+            throw new IllegalArgumentException("Board data must have " + ROW_COUNT + " rows");
+        }
+        for (final List<Integer> boardDataRow : boardData) {
+            if (boardDataRow.size() != COLUMN_COUNT) {
+                throw new IllegalArgumentException("Board data must have " + COLUMN_COUNT + " columns");
+            }
+        }
     }
 }
