@@ -12,7 +12,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import java.util.Collections;
 import java.util.List;
 
-import static ch.ffhs.webe.hs2023.viergewinnt.user.UserTestUtils.user;
+import static ch.ffhs.webe.hs2023.viergewinnt.user.model.UserTest.user;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;

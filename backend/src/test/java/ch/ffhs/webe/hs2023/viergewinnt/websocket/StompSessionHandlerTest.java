@@ -1,5 +1,8 @@
 package ch.ffhs.webe.hs2023.viergewinnt.websocket;
 
+import ch.ffhs.webe.hs2023.viergewinnt.game.GameService;
+import ch.ffhs.webe.hs2023.viergewinnt.game.model.Game;
+import ch.ffhs.webe.hs2023.viergewinnt.game.values.GameBoardState;
 import ch.ffhs.webe.hs2023.viergewinnt.user.SessionService;
 import ch.ffhs.webe.hs2023.viergewinnt.user.UserService;
 import ch.ffhs.webe.hs2023.viergewinnt.user.model.Session;
@@ -19,9 +22,10 @@ import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 import org.springframework.web.socket.messaging.SessionSubscribeEvent;
 
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.Collections;
 
-import static ch.ffhs.webe.hs2023.viergewinnt.user.UserTestUtils.user;
+import static ch.ffhs.webe.hs2023.viergewinnt.user.model.UserTest.user;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -40,6 +44,9 @@ class StompSessionHandlerTest {
 
     @Mock
     SessionService sessionService;
+
+    @Mock
+    GameService gameService;
 
     @InjectMocks
     StompSessionHandler stompSessionHandler;
@@ -73,7 +80,7 @@ class StompSessionHandlerTest {
 
         // assert
         verify(this.sessionService).removeSession(sender, sessionId);
-        verifyNoInteractions(this.stompSessionMessagesProxy);
+        verifyNoInteractions(this.stompSessionMessagesProxy, this.gameService);
     }
 
     @Test
@@ -83,6 +90,8 @@ class StompSessionHandlerTest {
         final var sessionId = "3";
         final var message = this.message(sender, sessionId);
         final var event = new SessionDisconnectEvent("test-disconnected", message, sessionId, CloseStatus.NORMAL);
+        final var gamesUserWasIn = new ArrayList<Game>();
+        when(this.gameService.getGamesForUser(sender.getId())).thenReturn(gamesUserWasIn);
 
         // act
         this.stompSessionHandler.onSocketDisconnected(event);
@@ -90,6 +99,8 @@ class StompSessionHandlerTest {
         // assert
         verify(this.sessionService).removeSession(sender, sessionId);
         verify(this.stompSessionMessagesProxy).publishUserUpdate(sender, UserUpdateType.OFFLINE);
+        verify(this.gameService).setGameBoardStatesForUser(sender, GameBoardState.PLAYER_DISCONNECTED);
+        verify(this.stompSessionMessagesProxy).publishUserLeftGames(gamesUserWasIn);
     }
 
     @Test

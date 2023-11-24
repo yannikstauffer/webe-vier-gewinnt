@@ -20,7 +20,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 
-import static ch.ffhs.webe.hs2023.viergewinnt.user.UserTestUtils.user;
+import static ch.ffhs.webe.hs2023.viergewinnt.user.model.UserTest.user;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
