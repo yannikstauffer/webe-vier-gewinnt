@@ -1,11 +1,8 @@
-package ch.ffhs.webe.hs2023.viergewinnt.user;
-
-import ch.ffhs.webe.hs2023.viergewinnt.user.model.Session;
-import ch.ffhs.webe.hs2023.viergewinnt.user.model.User;
+package ch.ffhs.webe.hs2023.viergewinnt.user.model;
 
 import java.util.List;
 
-public class UserTestUtils {
+public class UserTest {
     public static User user(final int id) {
         return user(id, null);
     }

@@ -16,8 +16,8 @@ import static ch.ffhs.webe.hs2023.viergewinnt.game.values.GameLevel.LEVEL3;
 @Slf4j
 @Component
 public class LevelService {
-    private static final long LEVEL_TWO_DURATION_IN_SEC = 5;
-    private static final int LEVEL_THREE_ROUND_COUNT = 5;
+    static final long LEVEL_TWO_DURATION_IN_SEC = 5;
+    static final int LEVEL_THREE_ROUND_COUNT = 5;
 
     private final TimedActionScheduler timedActionScheduler;
     private final GameMessagesProxy gameMessagesProxy;
@@ -32,11 +32,10 @@ public class LevelService {
     }
 
     public Optional<Game> applyLevelModifications(final Game game) {
-        this.cancelScheduledLevel2Action(game);
-
-        if (game.getGameLevel() == LEVEL2 && game.isMoveExpected()) {
+        if (game.isMoveExpected() && game.getGameLevel() == LEVEL2) {
+            this.cancelScheduledLevel2Action(game);
             this.addLevel2TimedDiscDrop(game);
-        } else if (game.getGameLevel() == LEVEL3 && game.isMoveExpected()) {
+        } else if (game.isMoveExpected() && game.getGameLevel() == LEVEL3) {
             return this.addLevel3AnyonymousDiscDrop(game);
         }
         return Optional.empty();
