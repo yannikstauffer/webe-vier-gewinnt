@@ -125,7 +125,7 @@ const Lobby = ({userId}) => {
             <button onClick={createGame}>Neues Spiel erstellen</button>
             <ul className="lobby-list">
                 {games.map((game) => (
-                    <li className="lobby-game" key={game.id} onClick={() => onGameClick(game.id)}>
+                    <li className="lobby-game" key={game.id}>
                         <label>{t("game.title")} {game.id}</label><div>{getStateLabel(game)}</div>
                         <label>{t("game.label.playerOne")}</label><div>{game.userOne?.firstName}</div>
                         <label>{t("game.label.playerTwo")}</label><div>{game.userTwo?.firstName}</div>
