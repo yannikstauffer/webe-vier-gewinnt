@@ -2,7 +2,6 @@ package ch.ffhs.webe.hs2023.viergewinnt.websocket;
 
 import ch.ffhs.webe.hs2023.viergewinnt.game.GameService;
 import ch.ffhs.webe.hs2023.viergewinnt.game.model.Game;
-import ch.ffhs.webe.hs2023.viergewinnt.game.values.GameBoardState;
 import ch.ffhs.webe.hs2023.viergewinnt.user.SessionService;
 import ch.ffhs.webe.hs2023.viergewinnt.user.UserService;
 import ch.ffhs.webe.hs2023.viergewinnt.user.model.User;
@@ -15,7 +14,11 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.EventListener;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Component;
-import org.springframework.web.socket.messaging.*;
+import org.springframework.web.socket.messaging.AbstractSubProtocolEvent;
+import org.springframework.web.socket.messaging.SessionConnectEvent;
+import org.springframework.web.socket.messaging.SessionConnectedEvent;
+import org.springframework.web.socket.messaging.SessionDisconnectEvent;
+import org.springframework.web.socket.messaging.SessionSubscribeEvent;
 
 import java.util.List;
 import java.util.Objects;
@@ -70,9 +73,9 @@ public class StompSessionHandler implements ApplicationListener<SessionConnectEv
             log.debug("User {} no longer online. Sending update to all subscribers.", currentUser.getEmail());
             this.stompSessionMessagesProxy.publishUserUpdate(currentUser, UserUpdateType.OFFLINE);
 
-            this.gameService.setGameBoardStatesForUser(currentUser, GameBoardState.PLAYER_DISCONNECTED);
-            List<Game> gamesUserWasIn = this.gameService.getGamesForUser(currentUser.getId());
-            this.stompSessionMessagesProxy.publishUserLeftGames(gamesUserWasIn);
+            this.gameService.setUserAsDisconnected(currentUser);
+            final List<Game> gamesUserWasIn = this.gameService.getGamesForUser(currentUser.getId());
+            this.stompSessionMessagesProxy.publishGameUpdates(gamesUserWasIn);
         }
     }
 

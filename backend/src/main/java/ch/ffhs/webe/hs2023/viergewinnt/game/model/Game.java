@@ -3,9 +3,9 @@ package ch.ffhs.webe.hs2023.viergewinnt.game.model;
 import ch.ffhs.webe.hs2023.viergewinnt.base.ErrorCode;
 import ch.ffhs.webe.hs2023.viergewinnt.base.VierGewinntException;
 import ch.ffhs.webe.hs2023.viergewinnt.game.GameBoard;
-import ch.ffhs.webe.hs2023.viergewinnt.game.values.GameBoardState;
 import ch.ffhs.webe.hs2023.viergewinnt.game.values.GameLevel;
 import ch.ffhs.webe.hs2023.viergewinnt.game.values.GameState;
+import ch.ffhs.webe.hs2023.viergewinnt.game.values.UserState;
 import ch.ffhs.webe.hs2023.viergewinnt.user.model.User;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -27,6 +27,7 @@ import lombok.Setter;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -48,24 +49,23 @@ public class Game {
     @JoinColumn(name = COL_USER_ONE_ID)
     private User userOne;
 
+    @Enumerated(EnumType.STRING)
+    private UserState userOneState;
+
     @ManyToOne
     @JoinColumn(name = COL_USER_TWO_ID)
     private User userTwo;
 
-    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private GameState gameState;
+    private UserState userTwoState;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private GameBoardState gameBoardState;
+    private GameState gameState = GameState.WAITING_FOR_PLAYERS;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private GameLevel gameLevel;
-
-    @Column(name = "status_message")
-    private String statusMessage;
+    private GameLevel gameLevel = GameLevel.LEVEL1;
 
     @Column(name = "next_move")
     private Integer nextMove;
@@ -77,6 +77,16 @@ public class Game {
     @Setter(AccessLevel.PRIVATE)
     @Column(columnDefinition = "TEXT")
     private String boardJson;
+
+    public Game copyAsNew() {
+        final var game = new Game();
+        game.setUserOne(this.userOne);
+        game.setUserOneState(this.userOneState);
+        game.setUserTwo(this.userTwo);
+        game.setUserTwoState(this.userTwoState);
+        game.setGameLevel(this.gameLevel);
+        return game;
+    }
 
     public GameBoard getBoard() {
         if (this.boardJson == null || this.boardJson.isEmpty()) {
@@ -101,11 +111,113 @@ public class Game {
         }
     }
 
+    public List<User> getUsers() {
+        final var users = new ArrayList<User>(2);
+        if (this.userOne != null) {
+            users.add(this.userOne);
+        }
+        if (this.userTwo != null) {
+            users.add(this.userTwo);
+        }
+        return users;
+    }
+
     public boolean hasTwoUsers() {
         return this.userOne != null && this.userTwo != null;
     }
 
-    public boolean isMoveExpected() {
-        return this.getGameState() == GameState.IN_PROGRESS && this.getGameBoardState() == GameBoardState.MOVE_EXPECTED;
+    public boolean isWaitingForPlayers() {
+        return this.getGameState() == GameState.WAITING_FOR_PLAYERS;
     }
+
+    public boolean isReadyToStart() {
+        return this.getGameState() == GameState.WAITING_FOR_PLAYERS
+                && this.bothUsersAreConnected();
+    }
+
+    public boolean isMoveExpected() {
+        return this.getGameState() == GameState.IN_PROGRESS
+                && this.bothUsersAreConnected();
+    }
+
+    public boolean isPaused() {
+        return this.getGameState() == GameState.PAUSED
+                && !this.bothUsersAreConnected();
+    }
+
+    public boolean isReadyToContinue() {
+        return this.getGameState() == GameState.PAUSED
+                && this.bothUsersAreConnected();
+    }
+
+    public boolean bothUsersAreConnected() {
+        return this.userOne != null
+                && this.userTwo != null
+                && this.userOneState == UserState.CONNECTED
+                && this.userTwoState == UserState.CONNECTED;
+    }
+
+    public boolean isNotDone() {
+        return this.getGameState() == GameState.IN_PROGRESS
+                || this.getGameState() == GameState.PAUSED;
+    }
+
+    public void setUserState(final int userId, final UserState userState) {
+        if (this.userOne != null && this.userOne.getId() == userId) {
+            this.userOneState = userState;
+        } else if (this.userTwo != null && this.userTwo.getId() == userId) {
+            this.userTwoState = userState;
+        } else {
+            throw VierGewinntException.of(ErrorCode.INVALID_PLAYER, "User " + userId + " not found in game");
+        }
+    }
+
+    public void clearUser(final int userId) {
+        if (this.userOne != null && this.userOne.getId() == userId) {
+            this.userOne = null;
+            this.userOneState = null;
+        } else if (this.userTwo != null && this.userTwo.getId() == userId) {
+            this.userTwo = null;
+            this.userTwoState = null;
+        } else {
+            throw VierGewinntException.of(ErrorCode.INVALID_PLAYER, "User " + userId + " not found in game");
+        }
+    }
+
+    public boolean containsUser(final int userId) {
+        return this.userOne != null && this.userOne.getId() == userId
+                || this.userTwo != null && this.userTwo.getId() == userId;
+    }
+
+    public void addUser(final User user) {
+        if (this.containsUser(user.getId())) {
+            return;
+        }
+
+        if (this.userOne == null) {
+            this.userOne = user;
+            this.userOneState = UserState.CONNECTED;
+        } else if (this.userTwo == null) {
+            this.userTwo = user;
+            this.userTwoState = UserState.CONNECTED;
+        } else {
+            throw VierGewinntException.of(ErrorCode.GAME_FULL, "Game is full");
+        }
+    }
+
+    public void start() {
+        if (!this.isReadyToStart()) {
+            throw VierGewinntException.of(ErrorCode.GAME_NOT_READY, "Game is not ready to start");
+        }
+        this.gameState = GameState.IN_PROGRESS;
+        this.nextMove = System.currentTimeMillis() % 2 == 0 ? this.userOne.getId() : this.userTwo.getId();
+    }
+
+    public void resume() {
+        if (!this.isReadyToContinue()) {
+            throw VierGewinntException.of(ErrorCode.GAME_NOT_READY, "Game is not ready to continue");
+        }
+        this.gameState = GameState.IN_PROGRESS;
+    }
+
 }

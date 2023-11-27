@@ -5,7 +5,10 @@ public enum GameState {
     WAITING_FOR_PLAYERS,  // Zeigt an, dass Spiel betreten werden kann
     IN_PROGRESS,          // Zeigt an, dass ein Spiel am laufen ist
     PAUSED,               // Spiel ist pausiert und kann weitergespielt werden (z.B disconnect von einem Benutzer)
+    PLAYER_HAS_WON,          // Ein Spieler hat gewonnen
+    DRAW,                    // Das Spiel endet unentschieden
     NEVER_STARTED,        // Spiel wurde nie gestartet und die Spiler haben das Spiel verlassen
     NOT_FINISHED,         // Spiel wurde nicht beendet, aber alle Spieler haben das Spiel verlassen
-    FINISHED              // Spiel wurde fertig gespielt.
+    FINISHED,              // Spiel wurde fertig gespielt.
+    PLAYER_LEFT           // Ein Spieler hat das Spiel verlassen
 }
