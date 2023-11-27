@@ -1,0 +1,8 @@
+.game-layout {
+    display: grid;
+    grid-template-rows: auto;
+    gap: 5px;
+    margin: 0 auto;
+    height: 100%;
+    overflow-y: scroll
+}

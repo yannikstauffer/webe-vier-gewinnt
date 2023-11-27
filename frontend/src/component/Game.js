@@ -1,6 +1,7 @@
 import React, {useEffect} from 'react';
 import {useLocation, useNavigate, useParams} from 'react-router-dom';
 import GameBoard from './GameBoard';
+import './Game.css';
 
 const Game = ({userId}) => {
     const {gameId} = useParams();
@@ -22,7 +23,7 @@ const Game = ({userId}) => {
     }, [navigate, location.pathname]);
 
     return (
-        <div>
+        <div className="game-layout">
             <GameBoard initialGameId={gameId} userId={userId}/>
         </div>
     );

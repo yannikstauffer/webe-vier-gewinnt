@@ -1,8 +1,61 @@
-import React, {useState, useRef} from 'react';
+import React, {useRef, useState} from 'react';
 import {useStompClient, useSubscription} from "react-stomp-hooks";
 import {useLocation, useNavigate} from 'react-router-dom';
 import {useTranslation} from "react-i18next";
 import './Lobby.css';
+import {GameState} from "../model/GameModel";
+
+class GameDto {
+    constructor({id, gameState, userOne, userTwo, userOneState, userTwoState}) {
+        this.id = id;
+        this.gameState = gameState;
+        this.userOne = userOne;
+        this.userTwo = userTwo;
+        this.userOneState = userOneState;
+        this.userTwoState = userTwoState;
+    }
+
+    containsUser(userId) {
+        return this.userOne?.id === userId || this.userTwo?.id === userId;
+    }
+
+    isReadyToStart() {
+        return this.userOne && this.userTwo && this.gameState === GameState.WAITING_FOR_PLAYERS;
+    }
+
+    isVisible(userId) {
+        return this.gameState === GameState.IN_PROGRESS ||
+            this.gameState === GameState.PAUSED ||
+            this.gameState === GameState.WAITING_FOR_PLAYERS ||
+            this.hasQuitButStillRejoinable(userId);
+    }
+
+    hasQuitButStillRejoinable(userId) {
+        return this.gameState === GameState.PLAYER_LEFT && this.isConnected(this.otherUserId(userId));
+    }
+
+    isConnected(userId) {
+        return (this.userOne?.id === userId && this.userOneState === 'CONNECTED') ||
+            (this.userTwo?.id === userId && this.userTwoState === 'CONNECTED');
+    }
+
+    otherUserId(userId) {
+        return this.userOne?.id === userId ? this.userTwo?.id : this.userOne?.id;
+    }
+
+    hasQuit(userId) {
+        return (this.userOne?.id === userId && this.userOneState === 'QUIT') ||
+            (this.userTwo?.id === userId && this.userTwoState === 'QUIT');
+    }
+
+    static ofGames(games) {
+        return games.map(game => new GameDto(game));
+    }
+
+    static ofGame(game) {
+        return new GameDto(game);
+    }
+}
 
 const Lobby = ({userId}) => {
     const {t} = useTranslation();
@@ -15,13 +68,8 @@ const Lobby = ({userId}) => {
     let attemptingToJoinGameId = null;
     let isCreatingGame = false;
 
-
     const filterGamesByState = (games) => {
-        return games.filter(game =>
-            game.gameState === 'IN_PROGRESS' ||
-            game.gameState === 'PAUSED' ||
-            game.gameState === 'WAITING_FOR_PLAYERS'
-        );
+        return games.filter(game => game.isVisible(userId));
     };
 
     const onGameClick = (gameId) => {
@@ -30,7 +78,8 @@ const Lobby = ({userId}) => {
     };
 
     const onGamesReceived = (message) => {
-        const updatedGames = filterGamesByState(JSON.parse(message.body));
+        const updatedGameDtos = GameDto.ofGames(JSON.parse(message.body));
+        const updatedGames = filterGamesByState(updatedGameDtos);
         console.log("update /user/queue/games:", updatedGames);
         setGames(updatedGames);
     };
@@ -38,7 +87,7 @@ const Lobby = ({userId}) => {
     const onLobbyGameReceived = (message) => {
         if (!lobbyGameTimeoutRef.current) {
             lobbyGameTimeoutRef.current = setTimeout(() => {
-                const updatedGame = JSON.parse(message.body);
+                const updatedGame = GameDto.ofGame(JSON.parse(message.body));
                 console.log("update /topic/lobby/games:", updatedGame);
 
                 if (isCreatingGame && !attemptingToJoinGameId) {
@@ -103,32 +152,40 @@ const Lobby = ({userId}) => {
     };
 
     const getStateLabel = (game) => {
-        if (game.gameState === 'IN_PROGRESS') {
+        if (game.isReadyToStart()) {
+            return t("game.state.ready");
+        } else if (game.gameState === GameState.IN_PROGRESS) {
             return t("game.state.inProgress");
-        } else if (game.gameState === 'PAUSED') {
+        } else if (game.gameState === GameState.PAUSED || game.hasQuitButStillRejoinable(userId)) {
             return t("game.state.paused");
-        } else if (game.gameState === 'WAITING_FOR_PLAYERS') {
+        } else if (game.gameState === GameState.WAITING_FOR_PLAYERS) {
             return t("game.state.wait");
-        } else if (game.gameState === 'FINISHED') {
+        } else if (game.gameState === GameState.PLAYER_HAS_WON || game.gameState === GameState.DRAW) {
+            return t("game.state.finished");
+        } else if (game.gameState === GameState.PLAYER_LEFT) {
             return t("game.state.finished");
         }
     }
 
     const isJoinDisabled = (game) => {
-        return game.gameState !== 'WAITING_FOR_PLAYERS'
-        && !(game.gameState === 'PAUSED' && isCurrentUserPartOf(game))
+        return game.gameState !== GameState.WAITING_FOR_PLAYERS
+            && !(game.gameState === GameState.PAUSED && isCurrentUserPartOf(game))
+            && !(game.hasQuitButStillRejoinable(userId));
     }
 
     return (
-        <div>
+        <div className="lobby-layout">
             <h2>Lobby</h2>
             <button onClick={createGame}>Neues Spiel erstellen</button>
             <ul className="lobby-list">
                 {games.map((game) => (
                     <li className="lobby-game" key={game.id}>
-                        <label>{t("game.title")} {game.id}</label><div>{getStateLabel(game)}</div>
-                        <label>{t("game.label.playerOne")}</label><div>{game.userOne?.firstName}</div>
-                        <label>{t("game.label.playerTwo")}</label><div>{game.userTwo?.firstName}</div>
+                        <label>{t("game.title")} {game.id}</label>
+                        <div>{getStateLabel(game)}</div>
+                        <label>{t("game.label.playerOne")}</label>
+                        <div>{game.userOne?.firstName}</div>
+                        <label>{t("game.label.playerTwo")}</label>
+                        <div>{game.userTwo?.firstName}</div>
                         <button className="button join-button"
                                 onClick={() => onGameClick(game.id)}
                                 disabled={isJoinDisabled(game)}>
