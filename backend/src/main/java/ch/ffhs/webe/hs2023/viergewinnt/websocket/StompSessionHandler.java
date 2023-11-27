@@ -73,8 +73,8 @@ public class StompSessionHandler implements ApplicationListener<SessionConnectEv
             log.debug("User {} no longer online. Sending update to all subscribers.", currentUser.getEmail());
             this.stompSessionMessagesProxy.publishUserUpdate(currentUser, UserUpdateType.OFFLINE);
 
-            this.gameService.setUserAsDisconnected(currentUser);
             final List<Game> gamesUserWasIn = this.gameService.getGamesForUser(currentUser.getId());
+            this.gameService.setUserAsDisconnected(currentUser, gamesUserWasIn);
             this.stompSessionMessagesProxy.publishGameUpdates(gamesUserWasIn);
         }
     }

@@ -49,6 +49,7 @@ public class Game {
     @JoinColumn(name = COL_USER_ONE_ID)
     private User userOne;
 
+    @Setter(AccessLevel.PRIVATE)
     @Enumerated(EnumType.STRING)
     private UserState userOneState;
 
@@ -56,6 +57,7 @@ public class Game {
     @JoinColumn(name = COL_USER_TWO_ID)
     private User userTwo;
 
+    @Setter(AccessLevel.PRIVATE)
     @Enumerated(EnumType.STRING)
     private UserState userTwoState;
 
@@ -122,6 +124,11 @@ public class Game {
         return users;
     }
 
+    public void setGameState(final GameState gameState) {
+        this.validateNextState(gameState);
+        this.gameState = gameState;
+    }
+
     public boolean hasTwoUsers() {
         return this.userOne != null && this.userTwo != null;
     }
@@ -146,8 +153,13 @@ public class Game {
     }
 
     public boolean isReadyToContinue() {
-        return this.getGameState() == GameState.PAUSED
+        return (this.getGameState() == GameState.PAUSED || this.getGameState() == GameState.PLAYER_LEFT)
                 && this.bothUsersAreConnected();
+    }
+
+    public boolean isFinished() {
+        return this.getGameState() == GameState.PLAYER_HAS_WON
+                || this.getGameState() == GameState.DRAW;
     }
 
     public boolean bothUsersAreConnected() {
@@ -155,6 +167,12 @@ public class Game {
                 && this.userTwo != null
                 && this.userOneState == UserState.CONNECTED
                 && this.userTwoState == UserState.CONNECTED;
+    }
+
+    public boolean bothUsersLeftAfterAbort() {
+        return !this.isFinished()
+                && this.userOneState == UserState.QUIT
+                && this.userTwoState == UserState.QUIT;
     }
 
     public boolean isNotDone() {
@@ -191,6 +209,7 @@ public class Game {
 
     public void addUser(final User user) {
         if (this.containsUser(user.getId())) {
+            this.setUserState(user.getId(), UserState.CONNECTED);
             return;
         }
 
@@ -218,6 +237,38 @@ public class Game {
             throw VierGewinntException.of(ErrorCode.GAME_NOT_READY, "Game is not ready to continue");
         }
         this.gameState = GameState.IN_PROGRESS;
+    }
+
+    private void validateNextState(final GameState state) {
+        if (state == null) {
+            throw new IllegalArgumentException("State must not be null");
+        }
+        if (state == GameState.DELETED || state == this.gameState) {
+            return;
+        }
+        if (this.gameState == GameState.WAITING_FOR_PLAYERS && state == GameState.IN_PROGRESS) {
+            return;
+        }
+        if (this.gameState == GameState.IN_PROGRESS && state == GameState.PAUSED) {
+            return;
+        }
+        if (this.gameState == GameState.PAUSED && state == GameState.IN_PROGRESS) {
+            return;
+        }
+        if (this.gameState == GameState.IN_PROGRESS && state == GameState.PLAYER_HAS_WON) {
+            return;
+        }
+        if (this.gameState == GameState.IN_PROGRESS && state == GameState.DRAW) {
+            return;
+        }
+        if (this.gameState == GameState.IN_PROGRESS && state == GameState.PLAYER_LEFT) {
+            return;
+        }
+        if (this.gameState == GameState.PAUSED && state == GameState.PLAYER_LEFT) {
+            return;
+        }
+
+        throw new IllegalArgumentException("Invalid state transition from " + this.gameState + " to " + state);
     }
 
 }

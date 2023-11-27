@@ -2,6 +2,7 @@ package ch.ffhs.webe.hs2023.viergewinnt.game.dto;
 
 import ch.ffhs.webe.hs2023.viergewinnt.game.model.Game;
 import ch.ffhs.webe.hs2023.viergewinnt.game.values.GameState;
+import ch.ffhs.webe.hs2023.viergewinnt.game.values.UserState;
 import ch.ffhs.webe.hs2023.viergewinnt.user.dto.UserDto;
 import lombok.Builder;
 import lombok.Data;
@@ -9,7 +10,6 @@ import lombok.Data;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Data
 @Builder
@@ -17,6 +17,8 @@ public class GameDto {
     private int id;
     private UserDto userOne;
     private UserDto userTwo;
+    private UserState userOneState;
+    private UserState userTwoState;
     private GameState gameState;
 
     public static GameDto of(final Game game) {
@@ -25,11 +27,13 @@ public class GameDto {
                 .gameState(game.getGameState());
 
         if (game.getUserOne() != null) {
-            builder.userOne(UserDto.of(game.getUserOne()));
+            builder.userOne(UserDto.of(game.getUserOne()))
+                    .userOneState(game.getUserOneState());
         }
 
         if (game.getUserTwo() != null) {
-            builder.userTwo(UserDto.of(game.getUserTwo()));
+            builder.userTwo(UserDto.of(game.getUserTwo()))
+                    .userTwoState(game.getUserTwoState());
         }
 
         return builder.build();
@@ -42,6 +46,6 @@ public class GameDto {
 
         return games.stream()
                 .map(GameDto::of)
-                .collect(Collectors.toList());
+                .toList();
     }
 }

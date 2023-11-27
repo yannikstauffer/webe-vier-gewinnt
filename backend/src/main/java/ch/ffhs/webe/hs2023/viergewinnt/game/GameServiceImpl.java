@@ -94,29 +94,24 @@ public class GameServiceImpl implements GameService {
             default -> throw VierGewinntException.of(ErrorCode.UNKNOWN, "Invalid game message.");
         }
 
+        if (game.getUsers().isEmpty() || game.bothUsersLeftAfterAbort()) {
+            this.gameRepository.delete(game);
+            game.setGameState(GameState.DELETED);
+            return game;
+        }
+
         return this.gameRepository.save(updatedGame);
     }
 
     private void leaveGame(final Game game, final User currentUser) {
-
-        if (game.isWaitingForPlayers()) {
+        if (game.isFinished()) {
+            game.setUserState(currentUser.getId(), UserState.QUIT);
+        } else if (game.isWaitingForPlayers()) {
             game.clearUser(currentUser.getId());
         } else {
             game.setUserState(currentUser.getId(), UserState.QUIT);
             game.setGameState(GameState.PLAYER_LEFT);
         }
-
-//        if (this.bothUsersLeft(updatedGame)) {
-//            if (updatedGame.getGameState() == GameState.IN_PROGRESS) {
-//                updatedGame.setGameState(GameState.NOT_FINISHED);
-//            } else if (updatedGame.getGameState() == GameState.WAITING_FOR_PLAYERS) {
-//                updatedGame.setGameState(GameState.NEVER_STARTED);
-//            }
-//        } else {
-//            updatedGame.setGameState(GameState.WAITING_FOR_PLAYERS);
-//            updatedGame.setGameBoardState(GameBoardState.PLAYER_QUIT);
-//        }
-
     }
 
     @Override
@@ -125,11 +120,11 @@ public class GameServiceImpl implements GameService {
     }
 
     @Override
-    public void setUserAsDisconnected(final User user) {
-        final List<Game> gamesForUser = this.gameRepository.findGamesByUserId(user.getId());
-
-        for (final Game game : gamesForUser) {
-            if (game.isNotDone()) {
+    public void setUserAsDisconnected(final User user, final List<Game> games) {
+        for (final Game game : games) {
+            if (game.isReadyToStart()) {
+                game.clearUser(user.getId());
+            } else if (game.isNotDone()) {
                 game.setUserState(user.getId(), UserState.DISCONNECTED);
                 if (game.getGameState() == GameState.IN_PROGRESS) {
                     game.setGameState(GameState.PAUSED);
@@ -137,12 +132,12 @@ public class GameServiceImpl implements GameService {
             }
         }
 
-        this.gameRepository.saveAll(gamesForUser);
+        this.gameRepository.saveAll(games);
     }
 
     @Override
     public List<Game> getGamesForUser(final int userId) {
-        return this.gameRepository.findGamesByUserId(userId);
+        return this.gameRepository.findCurrentlyActiveForUserId(userId);
     }
 
     @Override

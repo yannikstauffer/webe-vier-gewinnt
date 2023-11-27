@@ -23,7 +23,7 @@ public interface GameService {
 
     Game controlGame(GameRequestDto request, final User currentUser);
 
-    void setUserAsDisconnected(final User user);
+    void setUserAsDisconnected(final User user, List<Game> games);
 
     List<Game> getGamesForUser(final int userId);
 

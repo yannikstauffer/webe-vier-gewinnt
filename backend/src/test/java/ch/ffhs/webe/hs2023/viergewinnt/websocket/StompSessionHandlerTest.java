@@ -98,7 +98,7 @@ class StompSessionHandlerTest {
         // assert
         verify(this.sessionService).removeSession(sender, sessionId);
         verify(this.stompSessionMessagesProxy).publishUserUpdate(sender, UserUpdateType.OFFLINE);
-        verify(this.gameService).setUserAsDisconnected(sender);
+        verify(this.gameService).setUserAsDisconnected(sender, );
         verify(this.stompSessionMessagesProxy).publishGameUpdates(gamesUserWasIn);
     }
 

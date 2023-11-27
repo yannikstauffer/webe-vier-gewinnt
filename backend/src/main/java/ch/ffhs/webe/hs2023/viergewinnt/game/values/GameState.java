@@ -7,8 +7,6 @@ public enum GameState {
     PAUSED,               // Spiel ist pausiert und kann weitergespielt werden (z.B disconnect von einem Benutzer)
     PLAYER_HAS_WON,          // Ein Spieler hat gewonnen
     DRAW,                    // Das Spiel endet unentschieden
-    NEVER_STARTED,        // Spiel wurde nie gestartet und die Spiler haben das Spiel verlassen
-    NOT_FINISHED,         // Spiel wurde nicht beendet, aber alle Spieler haben das Spiel verlassen
-    FINISHED,              // Spiel wurde fertig gespielt.
-    PLAYER_LEFT           // Ein Spieler hat das Spiel verlassen
+    PLAYER_LEFT,           // Ein Spieler hat das Spiel verlassen
+    DELETED               // Das Spiel wurde gelöscht
 }
