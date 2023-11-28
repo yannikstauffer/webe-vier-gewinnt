@@ -194,7 +194,7 @@ public class Game {
         if (!this.isWaitingForPlayers()) {
             throw new IllegalStateException("Cannot remove user " + userId
                     + " from game " + this.id
-                    + " because it is no longer in the state WAITING_FOR_PLAYERS but"
+                    + " because it is no longer in the state WAITING_FOR_PLAYERS but "
                     + this.gameState);
         }
 

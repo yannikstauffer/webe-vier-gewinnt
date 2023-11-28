@@ -12,6 +12,7 @@ import static ch.ffhs.webe.hs2023.viergewinnt.game.values.UserState.QUIT;
 import static ch.ffhs.webe.hs2023.viergewinnt.user.model.UserTest.user;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.spy;
 
 public class GameTest {
 
@@ -86,24 +87,41 @@ public class GameTest {
                 .hasMessageContaining("Game is full");
     }
 
-    static Game gameWithoutUsers(final int id) {
+    public static Game gameWithoutUsers(final int id) {
         final var game = new Game();
         game.setId(id);
         game.setGameState(GameState.WAITING_FOR_PLAYERS);
         return game;
-
     }
 
     public static Game game(final int id) {
+        final var game = spy(new Game());
+        game.setId(id);
+        game.setUserOne(user(101));
+        game.setUserTwo(user(102));
+        game.setUserState(101, CONNECTED);
+        game.setUserState(102, CONNECTED);
+        game.setGameState(GameState.WAITING_FOR_PLAYERS);
+        game.setNextMove(101);
+        return game;
+    }
+
+    public static Game game(final int id, final GameState state) {
         final var game = new Game();
         game.setId(id);
         game.setUserOne(user(101));
         game.setUserTwo(user(102));
         game.setUserState(101, CONNECTED);
         game.setUserState(102, CONNECTED);
-        game.setGameState(GameState.IN_PROGRESS);
         game.setNextMove(101);
-        game.setGameLevel(GameLevel.LEVEL1);
-        return game;
+
+        if (state != null) {
+            game.setGameState(state);
+        }
+        if (state == GameState.IN_PROGRESS) {
+            game.setNextMove(101);
+        }
+
+        return spy(game);
     }
 }

@@ -126,7 +126,8 @@ public class GameBoard {
 
     private void validateColumnId(final int columnId) {
         if (columnId < 0 || columnId >= COLUMN_COUNT) {
-            throw new IllegalArgumentException("ColumnId must be between 0 and " + COLUMN_COUNT);
+            throw new IllegalArgumentException("ColumnId must be between 0 and " + (COLUMN_COUNT - 1)
+                    + " but was " + columnId);
         }
     }
 

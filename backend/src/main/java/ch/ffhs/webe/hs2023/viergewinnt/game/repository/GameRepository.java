@@ -19,4 +19,11 @@ public interface GameRepository extends CrudRepository<Game, Integer> {
             AND (g.gameState = 'IN_PROGRESS' OR g.gameState = 'PAUSED' OR g.gameState = 'PLAYER_LEFT' OR g.gameState = 'WAITING_FOR_PLAYERS')
             """)
     List<Game> findCurrentlyActiveForUserId(@Param("userId") int userId);
+
+    @Query("""
+            SELECT g
+            FROM games g
+            WHERE (g.gameState = 'IN_PROGRESS' OR g.gameState = 'PAUSED' OR g.gameState = 'PLAYER_LEFT' OR g.gameState = 'WAITING_FOR_PLAYERS')
+            """)
+    List<Game> findCurrentlyActive();
 }
