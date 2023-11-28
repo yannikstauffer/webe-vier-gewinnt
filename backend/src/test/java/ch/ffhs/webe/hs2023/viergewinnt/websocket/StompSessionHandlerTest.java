@@ -25,6 +25,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 import static ch.ffhs.webe.hs2023.viergewinnt.user.model.UserTest.user;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -98,7 +100,7 @@ class StompSessionHandlerTest {
         // assert
         verify(this.sessionService).removeSession(sender, sessionId);
         verify(this.stompSessionMessagesProxy).publishUserUpdate(sender, UserUpdateType.OFFLINE);
-        verify(this.gameService).setUserAsDisconnected(sender, );
+        verify(this.gameService).setUserAsDisconnected(eq(sender), any());
         verify(this.stompSessionMessagesProxy).publishGameUpdates(gamesUserWasIn);
     }
 

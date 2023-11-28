@@ -13,8 +13,8 @@ public class GameTest {
         game.setId(id);
         game.setUserOne(user(101));
         game.setUserTwo(user(102));
-        game.setUserOneState(UserState.CONNECTED);
-        game.setUserTwoState(UserState.CONNECTED);
+        game.setUserState(101, UserState.CONNECTED);
+        game.setUserState(102, UserState.CONNECTED);
         game.setGameState(GameState.IN_PROGRESS);
         game.setNextMove(101);
         game.setGameLevel(GameLevel.LEVEL1);
