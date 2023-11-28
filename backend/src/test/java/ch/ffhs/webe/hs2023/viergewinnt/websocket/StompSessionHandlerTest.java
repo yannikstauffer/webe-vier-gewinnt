@@ -2,7 +2,6 @@ package ch.ffhs.webe.hs2023.viergewinnt.websocket;
 
 import ch.ffhs.webe.hs2023.viergewinnt.game.GameService;
 import ch.ffhs.webe.hs2023.viergewinnt.game.model.Game;
-import ch.ffhs.webe.hs2023.viergewinnt.game.values.GameBoardState;
 import ch.ffhs.webe.hs2023.viergewinnt.user.SessionService;
 import ch.ffhs.webe.hs2023.viergewinnt.user.UserService;
 import ch.ffhs.webe.hs2023.viergewinnt.user.model.Session;
@@ -99,8 +98,8 @@ class StompSessionHandlerTest {
         // assert
         verify(this.sessionService).removeSession(sender, sessionId);
         verify(this.stompSessionMessagesProxy).publishUserUpdate(sender, UserUpdateType.OFFLINE);
-        verify(this.gameService).setGameBoardStatesForUser(sender, GameBoardState.PLAYER_DISCONNECTED);
-        verify(this.stompSessionMessagesProxy).publishUserLeftGames(gamesUserWasIn);
+        verify(this.gameService).setUserAsDisconnected(sender, );
+        verify(this.stompSessionMessagesProxy).publishGameUpdates(gamesUserWasIn);
     }
 
     @Test

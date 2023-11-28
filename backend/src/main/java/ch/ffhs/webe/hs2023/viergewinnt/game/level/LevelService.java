@@ -47,9 +47,9 @@ public class LevelService {
     }
 
     private Optional<Game> addLevel3AnyonymousDiscDrop(final Game game) {
-
         final var discCount = game.getBoard().getPlayerDiscCount();
-        if (discCount % LEVEL_THREE_ROUND_COUNT == 0) {
+
+        if (discCount > 0 && discCount % LEVEL_THREE_ROUND_COUNT == 0) {
             log.debug("LEVEL3: Adding random disc drop");
             return Optional.of(this.gameService.dropRandomAnonymousDisc(game.getId()));
         } else {
