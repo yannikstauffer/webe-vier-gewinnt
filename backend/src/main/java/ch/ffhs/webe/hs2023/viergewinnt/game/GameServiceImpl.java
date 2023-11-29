@@ -101,17 +101,6 @@ public class GameServiceImpl implements GameService {
         return this.gameRepository.save(updatedGame);
     }
 
-    private void leaveGame(final Game game, final User currentUser) {
-        if (game.isFinished()) {
-            game.setUserState(currentUser.getId(), UserState.QUIT);
-        } else if (game.isWaitingForPlayers()) {
-            game.clearUser(currentUser.getId());
-        } else {
-            game.setUserState(currentUser.getId(), UserState.QUIT);
-            game.setGameState(GameState.PLAYER_LEFT);
-        }
-    }
-
     @Override
     public Game getGameById(final int gameId) {
         return this.findGameOrThrow(gameId);
@@ -186,6 +175,36 @@ public class GameServiceImpl implements GameService {
         final Game game = this.findGameOrThrow(gameId);
         this.dropPlayerDisc(game, column, currentUser);
         return this.gameRepository.save(game);
+    }
+
+    @Override
+    public void setAllConnectedUsersAsDisconnected() {
+        final List<Game> games = this.gameRepository.findByUserState(UserState.CONNECTED);
+
+        for (final Game game : games) {
+            if (game.getGameState() == GameState.IN_PROGRESS) {
+                game.setGameState(GameState.PAUSED);
+            }
+            if (game.getUserOneState() == UserState.CONNECTED) {
+                game.setUserState(game.getUserOne().getId(), UserState.DISCONNECTED);
+            }
+            if (game.getUserTwoState() == UserState.CONNECTED) {
+                game.setUserState(game.getUserTwo().getId(), UserState.DISCONNECTED);
+            }
+        }
+
+        this.gameRepository.saveAll(games);
+    }
+
+    private void leaveGame(final Game game, final User currentUser) {
+        if (game.isFinished()) {
+            game.setUserState(currentUser.getId(), UserState.QUIT);
+        } else if (game.isWaitingForPlayers()) {
+            game.clearUser(currentUser.getId());
+        } else {
+            game.setUserState(currentUser.getId(), UserState.QUIT);
+            game.setGameState(GameState.PLAYER_LEFT);
+        }
     }
 
     private Game restartGame(final Game game) {

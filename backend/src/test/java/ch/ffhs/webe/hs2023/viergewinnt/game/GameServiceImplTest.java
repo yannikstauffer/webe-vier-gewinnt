@@ -579,6 +579,36 @@ class GameServiceImplTest {
         assertBoardContains(updated.getBoard(), 0, 3, user1.getId());
     }
 
+    @Test
+    void setAllConnectedUsersAsDisconnected() {
+        // arrange
+        final var game1 = game(1, GameState.IN_PROGRESS);
+        final var game2 = game(2, GameState.PAUSED);
+        final var game3 = game(3, GameState.WAITING_FOR_PLAYERS);
+        final var game4 = game(4, GameState.DRAW);
+        final var game5 = game(5, GameState.PLAYER_LEFT);
+        game5.setUserState(game4.getUserOne().getId(), QUIT);
+        final var games = List.of(game1, game2, game3, game4, game5);
+        when(this.gameRepository.findByUserState(CONNECTED)).thenReturn(games);
+
+        // act
+        this.gameService.setAllConnectedUsersAsDisconnected();
+
+        // assert
+        assertThat(game1.getUserOneState()).isEqualTo(DISCONNECTED);
+        assertThat(game1.getUserTwoState()).isEqualTo(DISCONNECTED);
+        assertThat(game2.getUserOneState()).isEqualTo(DISCONNECTED);
+        assertThat(game2.getUserTwoState()).isEqualTo(DISCONNECTED);
+        assertThat(game3.getUserOneState()).isEqualTo(DISCONNECTED);
+        assertThat(game3.getUserTwoState()).isEqualTo(DISCONNECTED);
+        assertThat(game4.getUserOneState()).isEqualTo(DISCONNECTED);
+        assertThat(game4.getUserTwoState()).isEqualTo(DISCONNECTED);
+        assertThat(game5.getUserOneState()).isEqualTo(QUIT);
+        assertThat(game5.getUserTwoState()).isEqualTo(DISCONNECTED);
+        verify(this.gameRepository).saveAll(games);
+
+    }
+
 
     static void assertBoardContains(final GameBoard gameBoard, final int rowId, final int columnId, final int discNumber) {
         final var listBoard = gameBoard.asListObject();

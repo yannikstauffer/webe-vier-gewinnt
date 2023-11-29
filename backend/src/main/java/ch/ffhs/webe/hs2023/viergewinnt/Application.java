@@ -1,6 +1,7 @@
 package ch.ffhs.webe.hs2023.viergewinnt;
 
 import ch.ffhs.webe.hs2023.viergewinnt.config.ShutdownConfig;
+import ch.ffhs.webe.hs2023.viergewinnt.game.GameService;
 import ch.ffhs.webe.hs2023.viergewinnt.user.repository.SessionRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -17,6 +18,11 @@ public class Application {
     @Bean
     public CommandLineRunner clearLeftOverStompSessions(final SessionRepository repository) {
         return args -> repository.deleteAll();
+    }
+
+    @Bean
+    public CommandLineRunner setPlayerStateAsDisconnected(final GameService gameService) {
+        return args -> gameService.setAllConnectedUsersAsDisconnected();
     }
 
     @Bean

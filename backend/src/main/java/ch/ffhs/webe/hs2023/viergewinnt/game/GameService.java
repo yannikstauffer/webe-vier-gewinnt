@@ -27,4 +27,5 @@ public interface GameService {
 
     List<Game> getGamesForUser(final int userId);
 
+    void setAllConnectedUsersAsDisconnected();
 }
