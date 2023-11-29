@@ -57,9 +57,9 @@ class GameModel {
     }
 
     bothUsersAreConnected() {
-        // todo cover: disconnected vs quit vs connected
         return this._userOne != null && this._userTwo != null
-            && this._userOneState === UserState.CONNECTED && this._userTwoState === UserState.CONNECTED;
+            && this._userOneState === UserState.CONNECTED
+            && this._userTwoState === UserState.CONNECTED;
     }
 
     isWaitingForPlayers() {
