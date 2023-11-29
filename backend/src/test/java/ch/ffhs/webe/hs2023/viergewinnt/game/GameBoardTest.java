@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.IntStream;
 
+import static ch.ffhs.webe.hs2023.viergewinnt.game.GameBoard.COLUMN_COUNT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -68,10 +69,19 @@ public class GameBoardTest {
 
 
     public static GameBoard gameBoard(final int playerDiscCount) {
+        return gameBoard(playerDiscCount, -1);
+    }
+
+    public static GameBoard gameBoard(final int playerDiscCount, final int discNumber) {
         final var gameBoard = new GameBoard();
         IntStream.range(0, playerDiscCount)
-                .forEach(count -> gameBoard.addDisc(count % 7, count + 1));
+                .forEach(count -> gameBoard.addDisc(count % 7, discNumber));
         return gameBoard;
+    }
+
+
+    public static GameBoard fullGameBoard() {
+        return gameBoard(GameBoard.ROW_COUNT * COLUMN_COUNT);
     }
 
 }

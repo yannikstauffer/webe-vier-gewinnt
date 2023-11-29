@@ -61,7 +61,7 @@ public class StompSessionMessagesProxy {
     void publishGameUpdates(final List<Game> games) {
         games.forEach(game -> {
             game.getUsers().forEach(user ->
-                    this.stompMessageService.sendToUser(Queues.GAME, user, GameStateDto.of(game))
+                    this.publishGameUpdate(user, game)
             );
 
             this.stompMessageService.send(Topics.LOBBY_GAMES, GameDto.of(game));

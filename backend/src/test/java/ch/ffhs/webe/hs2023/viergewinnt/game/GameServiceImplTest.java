@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 
 import static ch.ffhs.webe.hs2023.viergewinnt.game.GameBoard.COLUMN_COUNT;
 import static ch.ffhs.webe.hs2023.viergewinnt.game.GameBoard.ROW_COUNT;
+import static ch.ffhs.webe.hs2023.viergewinnt.game.GameBoardTest.fullGameBoard;
 import static ch.ffhs.webe.hs2023.viergewinnt.game.model.GameTest.game;
 import static ch.ffhs.webe.hs2023.viergewinnt.game.model.GameTest.gameWithoutUsers;
 import static ch.ffhs.webe.hs2023.viergewinnt.game.values.ControlMessage.CONTINUE;
@@ -397,7 +398,17 @@ class GameServiceImplTest {
     @Test
     void dropPlayerDisc_setGameStateDraw_ifBoardGetsFull() {
         final var game = game(1, GameState.IN_PROGRESS);
-        final var board = fillGameBoard(COLUMN_COUNT * ROW_COUNT - 1, -1);
+        //        final var board = new GameBoard();
+//
+//        var dropCount = 0;
+//        for (int i = 0; i < GameBoard.ROW_COUNT; i++) {
+//            for (int j = 0; j < COLUMN_COUNT && dropCount < amount; j++) {
+//                board.addDisc(j, discNumber);
+//                dropCount++;
+//            }
+//        }
+//        return board;
+        final var board = GameBoardTest.gameBoard(COLUMN_COUNT * ROW_COUNT - 1, -1);
         game.setBoard(board);
 
         this.gameService.dropPlayerDisc(game, COLUMN_COUNT - 1, game.getUserOne());
@@ -592,23 +603,6 @@ class GameServiceImplTest {
                         .map(Object::toString)
                         .collect(Collectors.joining("\n")))
                 .isEqualTo(discNumber);
-    }
-
-    static GameBoard fullGameBoard() {
-        return fillGameBoard(GameBoard.ROW_COUNT * COLUMN_COUNT, -1);
-    }
-
-    static GameBoard fillGameBoard(final int amount, final int discNumber) {
-        final var board = new GameBoard();
-
-        var dropCount = 0;
-        for (int i = 0; i < GameBoard.ROW_COUNT; i++) {
-            for (int j = 0; j < COLUMN_COUNT && dropCount < amount; j++) {
-                board.addDisc(j, discNumber);
-                dropCount++;
-            }
-        }
-        return board;
     }
 
     private void stubRepository(final Game findGame) {
