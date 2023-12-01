@@ -3,6 +3,7 @@ package ch.ffhs.webe.hs2023.viergewinnt.game.level;
 import ch.ffhs.webe.hs2023.viergewinnt.game.GameMessagesProxy;
 import ch.ffhs.webe.hs2023.viergewinnt.game.GameService;
 import ch.ffhs.webe.hs2023.viergewinnt.game.model.Game;
+import ch.ffhs.webe.hs2023.viergewinnt.user.model.User;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -42,14 +43,10 @@ public class LevelService {
 
     }
 
-    private void cancelScheduledLevel2Action(final Game game) {
-        this.timedActionScheduler.cancel(game);
-    }
-
-    private Optional<Game> addLevel3AnyonymousDiscDrop(final Game game) {
-
+    Optional<Game> addLevel3AnyonymousDiscDrop(final Game game) {
         final var discCount = game.getBoard().getPlayerDiscCount();
-        if (discCount % LEVEL_THREE_ROUND_COUNT == 0) {
+
+        if (discCount > 0 && discCount % LEVEL_THREE_ROUND_COUNT == 0) {
             log.debug("LEVEL3: Adding random disc drop");
             return Optional.of(this.gameService.dropRandomAnonymousDisc(game.getId()));
         } else {
@@ -58,11 +55,16 @@ public class LevelService {
         return Optional.empty();
     }
 
-    private void addLevel2TimedDiscDrop(final Game game) {
-
+    void addLevel2TimedDiscDrop(final Game game) {
         final var user = game.getNextMove() == game.getUserOne().getId() ? game.getUserOne() : game.getUserTwo();
 
-        final var timedAction = new TimedAction(game, LevelService.LEVEL_TWO_DURATION_IN_SEC, TimeUnit.SECONDS) {
+        final var timedAction = this.level2TimedAction(game, user);
+
+        this.timedActionScheduler.schedule(timedAction);
+    }
+
+    TimedAction level2TimedAction(final Game game, final User user) {
+        return new TimedAction(game, LevelService.LEVEL_TWO_DURATION_IN_SEC, TimeUnit.SECONDS) {
             @Override
             public void action() {
                 final var game = LevelService.this.gameService.dropRandomDisc(this.game.getId(), user);
@@ -71,7 +73,9 @@ public class LevelService {
                 LevelService.this.applyLevelModifications(game);
             }
         };
+    }
 
-        this.timedActionScheduler.schedule(timedAction);
+    void cancelScheduledLevel2Action(final Game game) {
+        this.timedActionScheduler.cancel(game);
     }
 }

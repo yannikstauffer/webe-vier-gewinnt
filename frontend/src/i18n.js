@@ -8,7 +8,9 @@ i18n
     .use(LanguageDetector) // detect user language
     .use(initReactI18next) // i18n object to be initialized
     .init({
+        detection: { order: ["path", "navigator"] },
         fallbackLng: "de",
+        whitelist: ['de', 'en'],
         debug: true,
         interpolation: {
             escapeValue: false // react already handles this by default

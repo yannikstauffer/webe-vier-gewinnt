@@ -29,7 +29,7 @@ public class StompSessionMessagesProxy {
     private final GameService gameService;
 
     @Autowired
-    public StompSessionMessagesProxy(final StompMessageService messageService, final UserService userService, final ChatService chatService, GameService gameService) {
+    public StompSessionMessagesProxy(final StompMessageService messageService, final UserService userService, final ChatService chatService, final GameService gameService) {
         this.stompMessageService = messageService;
         this.userService = userService;
         this.chatService = chatService;
@@ -58,20 +58,17 @@ public class StompSessionMessagesProxy {
         this.stompMessageService.send(Topics.USERS, UserUpdateDto.of(user, userUpdateType));
     }
 
-    void publishUserLeftGames(List<Game> games) {
+    void publishGameUpdates(final List<Game> games) {
         games.forEach(game -> {
-            if (game.getUserOne() != null) {
-                this.stompMessageService.sendToUser(Queues.GAME, game.getUserOne(), GameStateDto.of(game));
-            }
-            if (game.getUserTwo() != null) {
-                this.stompMessageService.sendToUser(Queues.GAME, game.getUserTwo(), GameStateDto.of(game));
-            }
+            game.getUsers().forEach(user ->
+                    this.publishGameUpdate(user, game)
+            );
 
             this.stompMessageService.send(Topics.LOBBY_GAMES, GameDto.of(game));
         });
     }
 
-    void publishGameUpdate(final User recipient, Game game) {
+    void publishGameUpdate(final User recipient, final Game game) {
         this.stompMessageService.sendToUser(Queues.GAME, recipient, GameStateDto.of(game));
     }
 

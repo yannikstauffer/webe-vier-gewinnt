@@ -8,7 +8,7 @@
   },
   "chat": {
     "title": "Chat",
-    "placeholder" : "Hier könnte ihre Nachricht stehen...",
+    "placeholder": "Hier könnte ihre Nachricht stehen...",
     "send": "Senden",
     "user": {
       "lobbyName": "Lobby"
@@ -45,10 +45,12 @@
       "newGame": "Neues Spiel starten",
       "quitGame": "Spiel verlassen",
       "continue": "Spiel weiter spielen",
-      "joinGame": "Spiel beitreten"
+      "joinGame": "Spiel beitreten",
+      "rules": "Spielregeln"
     },
     "confirm": {
-      "quit": "Möchten Sie das Spiel wirklich verlassen?",
+      "quit": "Möchtest du das Spiel wirklich verlassen?",
+      "playerLeft": "Dein Gegner hat das Spiel verlassen. Möchtest du das Spiel beenden?",
       "yes": "Ja",
       "no": "Nein"
     },
@@ -56,6 +58,28 @@
       "countdown": "Zeit bis zum nächsten Spielzug:",
       "activated": "Aktiviertes Level:",
       "rounds": "Runden bis zum automatischen Drop:"
+    },
+    "rules": {
+        "title": "Spielregeln",
+      "description": {
+        "lineOne": "Ziel des Spiels ist es, als erster 4 Steine horizontal, vertikal oder diagonal in einer Reihe zu platzieren.",
+        "lineTwo": "Der Spieler, der an der Reihe ist, kann einen Stein durch Klicken in einer beliebigen Spalte fallen lassen.",
+        "lineThree": "Es wird abwechselnd gespielt.",
+        "lineFour": "Das Spiel endet, sobald ein Spieler 4 Steine in einer Reihe hat.",
+        "lineFive": "Das Spiel endet unentschieden, wenn alle Felder belegt sind und kein Spieler 4 Steine in einer Reihe hat."
+      },
+      "levelOne": {
+        "title": "Level 1",
+        "text": "Spiel gemäss den normalen Spielregeln."
+      },
+      "levelTwo": {
+        "title": "Level 2",
+        "text": "Für einen Spielzug stehen 5 Sekunden zur Verfügung. Falls in diesem Zeitraum kein Stein abgesetzt wird, wird dieser an einer zufälligen Position eingefügt."
+      },
+      "levelThree": {
+        "title": "Level 3",
+        "text": "Nach 5 Spielzügen wird ein neutraler Stein an zufälliger Stelle eingefügt."
+      }
     }
   },
   "error": {
@@ -67,8 +91,8 @@
       "messageTextEmpty": "Nachrichtentext ist leer",
       "receiverShouldNotBeSetOnPublicMessage": "Empfänger sollte auf einer öffentlichen Nachricht nicht gesetzt sein"
     },
-    "user":{
-      "notFound":"Benutzer nicht gefunden",
+    "user": {
+      "notFound": "Benutzer nicht gefunden",
       "unknown": "Unbekannter Fehler"
     },
     "game": {

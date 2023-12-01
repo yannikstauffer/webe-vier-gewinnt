@@ -1,41 +1,44 @@
-import React, {useEffect, useState} from 'react';
+import React, {useState} from 'react';
 import {useStompClient, useSubscription} from "react-stomp-hooks";
 import {useTranslation} from 'react-i18next';
 import {useNavigate} from 'react-router-dom';
 import './GameBoard.css';
 import ConfirmDialog from './ConfirmDialog';
+import {GameModel, GameLevel} from "../model/GameModel";
 
 const ROWS = 6;
 const COLUMNS = 7;
-const EMPTY = 'E';
+const EMPTY = 0;
+const ANONYMOUS_DISC = -5;
 
 const createEmptyBoard = () => {
     return Array(ROWS).fill(null).map(() => Array(COLUMNS).fill(EMPTY));
 };
 
-const GameLevel = {
-    LEVEL1: "LEVEL1",
-    LEVEL2: "LEVEL2",
-    LEVEL3: "LEVEL3"
-};
-
 const roundsUntilSpecialDisc = 5;
 
 const GameBoard = ({initialGameId, userId}) => {
-    const [gameId, setGameId] = useState(initialGameId);
-    const [board, setBoard] = useState(createEmptyBoard());
-    const [nextMove, setNextMove] = useState(null);
-    const [gameBoardState, setGameBoardState] = useState('NOT_STARTED');
-    const [statusMessage, setStatusMessage] = useState('');
-    const [buttonState, setButtonState] = useState('start');
-    const [playerOneId, setPlayerOneId] = useState(null);
-    const [playerTwoId, setPlayerTwoId] = useState(null);
     const {t} = useTranslation();
     const stompClient = useStompClient();
     const navigate = useNavigate();
-    const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-    const [gameLevel, setGameLevel] = useState(GameLevel.LEVEL1);
+    const [showDialog, setShowDialog] = useState({
+        show: false,
+        text: null,
+        onConfirm: null,
+        showButtons: true
+    });
     const [countdown, setCountdown] = useState(null);
+    const [game, setGame] = useState(new GameModel({
+        gameId: initialGameId,
+        board: createEmptyBoard(),
+        nextMove: null,
+        gameLevel: GameLevel.LEVEL1,
+        gameState: 'WAITING_FOR_PLAYERS',
+        userOne: null,
+        userOneState: null,
+        userTwo: null,
+        userTwoState: null
+    }));
 
     const onGameUpdateReceived = (message) => {
         const updatedGame = JSON.parse(message.body);
@@ -45,8 +48,18 @@ const GameBoard = ({initialGameId, userId}) => {
 
     useSubscription("/user/queue/game", onGameUpdateReceived);
 
-    useEffect(() => {
-        if (gameLevel === GameLevel.LEVEL2 && nextMove === userId && gameBoardState === 'MOVE_EXPECTED') {
+
+    const updateGame = (updatedGame) => {
+        const gameModel = new GameModel(updatedGame);
+        setGame(gameModel);
+        handleLevel2(gameModel);
+        if (gameModel.playerHasLeft() && !gameModel.bothUsersAreConnected()) {
+            popupDialog(t('game.confirm.playerLeft'), confirmLeave);
+        }
+    };
+
+    const handleLevel2 = (updatedGame) => {
+        if (updatedGame.gameLevel === GameLevel.LEVEL2 && updatedGame.hasNextMove(userId)) {
             setCountdown(5);
             const timer = setInterval(() => {
                 setCountdown(prevCountdown => {
@@ -60,53 +73,27 @@ const GameBoard = ({initialGameId, userId}) => {
 
             return () => clearInterval(timer);
         }
-    }, [gameLevel, nextMove, userId, board, gameBoardState]);
+    }
 
-
-    const updateGame = (updatedGame) => {
-        setGameId(updatedGame.gameId);
-        setBoard(updatedGame.board);
-        setNextMove(updatedGame.nextMove);
-        setGameBoardState(updatedGame.gameBoardState);
-        setStatusMessage(getGameStatusMessage(updatedGame.gameBoardState, updatedGame.nextMove));
-        setGameLevel(updatedGame.gameLevel)
-
-        if (updatedGame.userOne != null) {
-            setPlayerOneId(updatedGame.userOne?.id);
-        }
-
-        if (updatedGame.userTwo != null) {
-            setPlayerTwoId(updatedGame.userTwo?.id);
-        }
-
-        if (updatedGame.gameBoardState === 'READY_TO_START' || updatedGame.gameBoardState === 'NOT_STARTED') {
-            setButtonState('start');
-        } else if (updatedGame.gameBoardState === 'PLAYER_HAS_WON' || updatedGame.gameBoardState === 'DRAW') {
-            setButtonState('restart');
-        } else if (updatedGame.gameBoardState === 'READY_TO_CONTINUE') {
-            setButtonState('continue')
-        }
-    };
-
-    const getGameStatusMessage = (gameBoardState, nextMove) => {
-        switch (gameBoardState) {
-            case 'WAITING_FOR_PLAYERS':
-                return t('game.state.wait');
-            case 'PLAYER_HAS_WON':
-                return nextMove === userId ? t('game.state.win') : t('game.state.lose');
-            case 'DRAW':
-                return t('game.state.draw');
-            case 'MOVE_EXPECTED':
-                return nextMove === userId ? t('game.state.yourTurn') : t('game.state.notYourTurn');
-            case 'READY_TO_START':
-                return t('game.state.ready');
-            case 'PLAYER_QUIT':
-                return t('game.state.quit');
-            case 'PLAYER_DISCONNECTED':
-                return t('game.state.disconnected');
-            case 'READY_TO_CONTINUE':
-                return t('game.state.continue');
-
+    const getGameStatusMessage = () => {
+        if (game.isWaitingForPlayers()) {
+            return t('game.state.wait');
+        } else if (game.isReadyToStart()) {
+            return t('game.state.ready');
+        } else if (game.isMoveExpected()) {
+            return game.hasNextMove(userId) ? t('game.state.yourTurn') : t('game.state.notYourTurn')
+        } else if (game.isPaused()) {
+            return t('game.state.disconnected');
+        } else if (game.isReadyToContinue()) {
+            return t('game.state.continue');
+        } else if (game.playerHasLeft()) {
+            return t('game.state.quit');
+        } else if (game.playerHasWon()) {
+            return game.isWinner(userId) ? t('game.state.win') : t('game.state.lose');
+        } else if (game.isDraw()) {
+            return t('game.state.draw');
+        } else {
+            return '';
         }
     };
 
@@ -115,28 +102,28 @@ const GameBoard = ({initialGameId, userId}) => {
             stompClient.publish({
                 destination: `/4gewinnt/games/control`,
                 body: JSON.stringify({
-                    gameId: gameId,
+                    gameId: game.gameId,
                     message: level
                 }),
             });
         }
     };
 
-
     const handleButtonClick = () => {
-        if (stompClient && stompClient.connected) {
-            let message;
-            if (gameBoardState === 'READY_TO_START' || gameBoardState === 'NOT_STARTED') {
-                message = 'start';
-            } else if (gameBoardState === 'READY_TO_CONTINUE') {
-                message = 'continue';
-            } else {
-                message = 'restart'
-            }
+        let message;
+        if (game.isReadyToStart()) {
+            message = 'start';
+        } else if (game.isReadyToContinue()) {
+            message = 'continue';
+        } else if (game.isFinished()) {
+            message = 'restart'
+        }
+
+        if (message && stompClient && stompClient.connected) {
             stompClient.publish({
                 destination: `/4gewinnt/games/control`,
                 body: JSON.stringify({
-                    gameId: gameId,
+                    gameId: game.gameId,
                     message: message
                 }),
             });
@@ -144,30 +131,30 @@ const GameBoard = ({initialGameId, userId}) => {
     };
 
     const getHandleButtonText = () => {
-        switch (buttonState) {
-            case 'start':
-                return t('game.button.newGame');
-            case 'restart':
-                return t('game.button.newGame');
-            case 'continue':
-                return t('game.button.continue');
-            default:
-                return t('game.button.newGame');
+        if (game.isReadyToStart()) {
+            return t('game.button.newGame');
+        } else if (game.isFinished()) {
+            return t('game.button.newGame');
+        } else if (game.isReadyToContinue()) {
+            return t('game.button.continue');
         }
+
+        return t('game.button.newGame');
     };
 
-    const leaveButtonClick = () => {
-        setShowConfirmDialog(true);
+    const popupDialog = (text, onConfirm) => {
+        setShowDialog({...showDialog, text: text, show: true, onConfirm: onConfirm});
     };
 
     const confirmLeave = () => {
-        setShowConfirmDialog(false);
-        setBoard(createEmptyBoard());
+        closeDialog();
+        game.board = createEmptyBoard();
+        setGame(game);
         if (stompClient && stompClient.connected) {
             stompClient.publish({
                 destination: `/4gewinnt/games/control`,
                 body: JSON.stringify({
-                    gameId: gameId,
+                    gameId: game.gameId,
                     message: 'leave'
                 }),
             });
@@ -177,78 +164,137 @@ const GameBoard = ({initialGameId, userId}) => {
     };
 
     const dropDisc = (column) => {
-        if (nextMove === userId) {
+        if (game.hasNextMove(userId) && stompClient && stompClient.connected) {
 
             stompClient.publish({
                 destination: "/4gewinnt/games/action",
                 body: JSON.stringify({
-                    gameId: gameId,
+                    gameId: game.gameId,
                     column: column,
                     playerId: userId
                 }),
             });
-        }
-    };
 
-    const isGameActive = () => {
-        return gameBoardState === 'MOVE_EXPECTED' || gameBoardState === 'PLAYER_DISCONNECTED';
+        }
     };
 
     const getLevel3RoundsCount = () => {
         return roundsUntilSpecialDisc - (getPlayerDiscCount() % roundsUntilSpecialDisc);
     }
     const getPlayerDiscCount = () => {
-        return board.flat().filter(cell => (cell !== -5 && cell !== 0)).length;
+        return game.board.flat().filter(cell => (cell !== ANONYMOUS_DISC && cell !== 0)).length;
+    }
+
+    const getCellClass = (cell) => {
+        const baseClass = 'cell';
+        if (cell === EMPTY) {
+            return baseClass + ' empty'
+        }
+        if (cell === game.userOne?.id && game.userTwo !== null) {
+            return baseClass + ' player-one';
+        }
+        if (cell === game.userTwo?.id && game.userOne !== null) {
+            return baseClass + ' player-two';
+        }
+        if (cell === ANONYMOUS_DISC) {
+            return baseClass + ' special-disc'
+        }
+    }
+
+    const getLevelButtonClass = (gameLevel) => {
+        return game.gameLevel === gameLevel ? 'selected-button' : '';
+    }
+
+    const closeDialog = () => {
+        setShowDialog({...showDialog, show: false});
+    }
+
+    const leaveGame = () => {
+        if(game.isNotYetStarted() && !game.isReadyToStart()) {
+            confirmLeave();
+        } else {
+            popupDialog(t('game.confirm.quit'), confirmLeave)
+        }
+    }
+
+    const rulesDom = () => {
+        return (<div className="flex-column rules">
+            <h3>{t("game.rules.title")}</h3>
+            <ul>
+                <li>{t("game.rules.description.lineOne")}</li>
+                <li>{t("game.rules.description.lineTwo")}</li>
+                <li>{t("game.rules.description.lineThree")}</li>
+                <li>{t("game.rules.description.lineFour")}</li>
+                <li>{t("game.rules.description.lineFive")}</li>
+            </ul>
+            <ul>
+                <li><strong>{t("game.rules.levelOne.title")}: </strong>
+                    {t("game.rules.levelOne.text")}</li>
+                <li><strong>{t("game.rules.levelTwo.title")}: </strong>
+                    {t("game.rules.levelTwo.text")}</li>
+                <li><strong>{t("game.rules.levelThree.title")}: </strong>
+                    {t("game.rules.levelThree.text")}</li>
+            </ul>
+        </div>);
     }
 
     return (
         <div>
-            <p>{t('game.level.activated')} {gameLevel}</p>
-            <table>
-                <tbody>
-                {board.map((row, rowIndex) => (
-                    <tr key={rowIndex}>
-                        {row.map((cell, colIndex) => {
-                            let cellClass = 'empty';
-                            if (cell !== EMPTY) {
-                                if (cell === playerOneId && playerTwoId !== null) {
-                                    cellClass = 'player-one';
-                                } else if (cell === playerTwoId && playerOneId !== null) {
-                                    cellClass = 'player-two';
-                                } else if (cell === -5) {
-                                    cellClass = 'special-disc'
-                                }
-                            }
-                            return (
-                                <td key={colIndex}
-                                    onClick={() => isGameActive() && nextMove === userId && dropDisc(colIndex)}>
-                                    <div className={`cell ${cellClass}`}></div>
-                                </td>
-                            );
-                        })}
-                    </tr>
-                ))}
-                </tbody>
-            </table>
-            <p>{statusMessage}</p>
-            {countdown && <p>{t('game.level.countdown')} {countdown}</p>}
-            {gameLevel === GameLevel.LEVEL3 && <p>{t('game.level.rounds')} {getLevel3RoundsCount()}</p>}
-            <div className="button-container">
-                <div className="button-group">
-                    <button onClick={() => handleLevelClick(GameLevel.LEVEL1)}>Level 1</button>
-                    <button onClick={() => handleLevelClick(GameLevel.LEVEL2)}>Level 2</button>
-                    <button onClick={() => handleLevelClick(GameLevel.LEVEL3)}>Level 3</button>
-                </div>
-                <div className="button-group">
-                    <button onClick={handleButtonClick} disabled={isGameActive()}>{getHandleButtonText()}</button>
-                    <button onClick={leaveButtonClick}>{t('game.button.quitGame')}</button>
+            <div>
+                <ConfirmDialog
+                    open={showDialog.show}
+                    text={showDialog.text}
+                    onClose={() => closeDialog()}
+                    onConfirm={showDialog.onConfirm}
+                />
+                <table hidden={game.isNotYetStarted()}>
+                    <tbody>
+                    {game.board.map((row, rowIndex) => (
+                        <tr key={rowIndex}>
+                            {row.map((cell, colIndex) => {
+                                return (
+                                    <td key={colIndex}
+                                        onClick={() => dropDisc(colIndex)}>
+                                        <div className={getCellClass(cell)}></div>
+                                    </td>
+                                );
+                            })}
+                        </tr>
+                    ))}
+                    </tbody>
+                </table>
+            </div>
+            <p className="heavy">{getGameStatusMessage()}</p>
+            {!game.isNotYetStarted()
+                && <p className="heavy">{t('game.level.activated')} {game.gameLevel}</p> }
+            {!game.isNotYetStarted()
+                && game.gameLevel === GameLevel.LEVEL2
+                && countdown && <p className="heavy">{t('game.level.countdown')} {countdown}</p>}
+            {!game.isNotYetStarted()
+                && game.gameLevel === GameLevel.LEVEL3
+                && <p className="heavy">{t('game.level.rounds')} {getLevel3RoundsCount()}</p>}
+            <div className="flex-column">
+                {game.isNotYetStarted() &&
+                    <div className="flex-row">
+                        <button className={getLevelButtonClass(GameLevel.LEVEL1)}
+                                onClick={() => handleLevelClick(GameLevel.LEVEL1)}>Level 1
+                        </button>
+                        <button className={getLevelButtonClass(GameLevel.LEVEL2)}
+                                onClick={() => handleLevelClick(GameLevel.LEVEL2)}>Level 2
+                        </button>
+                        <button className={getLevelButtonClass(GameLevel.LEVEL3)}
+                                onClick={() => handleLevelClick(GameLevel.LEVEL3)}>Level 3
+                        </button>
+                    </div>
+                }
+                <div className="flex-row">
+                    <button onClick={handleButtonClick}
+                            disabled={!(game.isReadyToContinue() || game.isReadyToStart())}>{getHandleButtonText()}</button>
+                    <button onClick={() => popupDialog(rulesDom(), null)}>{t('game.button.rules')}</button>
+                    <button
+                        onClick={leaveGame}>{t('game.button.quitGame')}</button>
                 </div>
             </div>
-            <ConfirmDialog
-                open={showConfirmDialog}
-                onClose={() => setShowConfirmDialog(false)}
-                onConfirm={confirmLeave}
-            />
         </div>
     );
 };

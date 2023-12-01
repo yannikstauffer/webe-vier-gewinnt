@@ -45,10 +45,12 @@
       "newGame": "Start New Game",
       "quitGame": "Leave Game",
       "continue": "Continue game",
-      "join": "Join game"
+      "join": "Join game",
+      "rules": "Rules"
     },
     "confirm": {
       "quit": "Do you really want to leave the game?",
+      "playerLeft": "Your opponent has left the game. Do you want to quit the game?",
       "yes": "Ja",
       "no": "Nein"
     },
@@ -56,6 +58,28 @@
       "countdown": "Time until the next move:",
       "activated": "Activated level:",
       "rounds": "Rounds until automatic drop: "
+    },
+    "rules": {
+      "title": "Rules",
+      "description": {
+        "lineOne": "The goal of the game is to place 4 stones in a row horizontally, vertically or diagonally.",
+        "lineTwo": "The player who is on the move can drop a stone by clicking in any column.",
+        "lineThree": "The game is played alternately.",
+        "lineFour": "The game ends as soon as a player has 4 stones in a row.",
+        "lineFive": "The game ends in a draw if all fields are occupied and no player has 4 stones in a row."
+      },
+      "levelOne": {
+        "title": "Level 1",
+        "text": "Game according to the normal rules of the game."
+      },
+      "levelTwo": {
+        "title": "Level 2",
+        "text": "5 seconds are available for one move. If no stone is placed within this time, it will be inserted at a random position."
+      },
+      "levelThree": {
+        "title": "Level 3",
+        "text": "After 5 moves a neutral stone is inserted at a random position."
+      }
     }
   },
   "error": {
