@@ -21,7 +21,12 @@ const GameBoard = ({initialGameId, userId}) => {
     const {t} = useTranslation();
     const stompClient = useStompClient();
     const navigate = useNavigate();
-    const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+    const [showDialog, setShowDialog] = useState({
+        show: false,
+        text: null,
+        onConfirm: null,
+        showButtons: true
+    });
     const [countdown, setCountdown] = useState(null);
     const [game, setGame] = useState(new GameModel({
         gameId: initialGameId,
@@ -48,6 +53,9 @@ const GameBoard = ({initialGameId, userId}) => {
         const gameModel = new GameModel(updatedGame);
         setGame(gameModel);
         handleLevel2(gameModel);
+        if (gameModel.playerHasLeft() && !gameModel.bothUsersAreConnected()) {
+            popupDialog(t('game.confirm.playerLeft'), confirmLeave);
+        }
     };
 
     const handleLevel2 = (updatedGame) => {
@@ -134,12 +142,12 @@ const GameBoard = ({initialGameId, userId}) => {
         return t('game.button.newGame');
     };
 
-    const leaveButtonClick = () => {
-        setShowConfirmDialog(true);
+    const popupDialog = (text, onConfirm) => {
+        setShowDialog({...showDialog, text: text, show: true, onConfirm: onConfirm});
     };
 
     const confirmLeave = () => {
-        setShowConfirmDialog(false);
+        closeDialog();
         game.board = createEmptyBoard();
         setGame(game);
         if (stompClient && stompClient.connected) {
@@ -194,50 +202,99 @@ const GameBoard = ({initialGameId, userId}) => {
     }
 
     const getLevelButtonClass = (gameLevel) => {
-        return game.gameLevel === gameLevel ? 'selected' : '';
+        return game.gameLevel === gameLevel ? 'selected-button' : '';
+    }
+
+    const closeDialog = () => {
+        setShowDialog({...showDialog, show: false});
+    }
+
+    const leaveGame = () => {
+        if(game.isNotYetStarted() && !game.isReadyToStart()) {
+            confirmLeave();
+        } else {
+            popupDialog(t('game.confirm.quit'), confirmLeave)
+        }
+    }
+
+    const rulesDom = () => {
+        return (<div className="flex-column rules">
+            <h3>{t("game.rules.title")}</h3>
+            <ul>
+                <li>{t("game.rules.description.lineOne")}</li>
+                <li>{t("game.rules.description.lineTwo")}</li>
+                <li>{t("game.rules.description.lineThree")}</li>
+                <li>{t("game.rules.description.lineFour")}</li>
+                <li>{t("game.rules.description.lineFive")}</li>
+            </ul>
+            <ul>
+                <li><strong>{t("game.rules.levelOne.title")}: </strong>
+                    {t("game.rules.levelOne.text")}</li>
+                <li><strong>{t("game.rules.levelTwo.title")}: </strong>
+                    {t("game.rules.levelTwo.text")}</li>
+                <li><strong>{t("game.rules.levelThree.title")}: </strong>
+                    {t("game.rules.levelThree.text")}</li>
+            </ul>
+        </div>);
     }
 
     return (
         <div>
-            <p>{t('game.level.activated')} {game.gameLevel}</p>
-            <table>
-                <tbody>
-                {game.board.map((row, rowIndex) => (
-                    <tr key={rowIndex}>
-                        {row.map((cell, colIndex) => {
-                            return (
-                                <td key={colIndex}
-                                    onClick={() => dropDisc(colIndex)}>
-                                    <div className={getCellClass(cell)}></div>
-                                </td>
-                            );
-                        })}
-                    </tr>
-                ))}
-                </tbody>
-            </table>
-            <p>{getGameStatusMessage()}</p>
-            {countdown && <p>{t('game.level.countdown')} {countdown}</p>}
-            {game.gameLevel === GameLevel.LEVEL3 && <p>{t('game.level.rounds')} {getLevel3RoundsCount()}</p>}
-            <div className="button-container">
+            <div>
+                <ConfirmDialog
+                    open={showDialog.show}
+                    text={showDialog.text}
+                    onClose={() => closeDialog()}
+                    onConfirm={showDialog.onConfirm}
+                />
+                <table hidden={game.isNotYetStarted()}>
+                    <tbody>
+                    {game.board.map((row, rowIndex) => (
+                        <tr key={rowIndex}>
+                            {row.map((cell, colIndex) => {
+                                return (
+                                    <td key={colIndex}
+                                        onClick={() => dropDisc(colIndex)}>
+                                        <div className={getCellClass(cell)}></div>
+                                    </td>
+                                );
+                            })}
+                        </tr>
+                    ))}
+                    </tbody>
+                </table>
+            </div>
+            <p className="heavy">{getGameStatusMessage()}</p>
+            {!game.isNotYetStarted()
+                && <p className="heavy">{t('game.level.activated')} {game.gameLevel}</p> }
+            {!game.isNotYetStarted()
+                && game.gameLevel === GameLevel.LEVEL2
+                && countdown && <p className="heavy">{t('game.level.countdown')} {countdown}</p>}
+            {!game.isNotYetStarted()
+                && game.gameLevel === GameLevel.LEVEL3
+                && <p className="heavy">{t('game.level.rounds')} {getLevel3RoundsCount()}</p>}
+            <div className="flex-column">
                 {game.isNotYetStarted() &&
-                    <div className="button-group">
-                        <button className={getLevelButtonClass(GameLevel.LEVEL1)} onClick={() => handleLevelClick(GameLevel.LEVEL1)}>Level 1</button>
-                        <button className={getLevelButtonClass(GameLevel.LEVEL2)} onClick={() => handleLevelClick(GameLevel.LEVEL2)}>Level 2</button>
-                        <button className={getLevelButtonClass(GameLevel.LEVEL3)} onClick={() => handleLevelClick(GameLevel.LEVEL3)}>Level 3</button>
+                    <div className="flex-row">
+                        <button className={getLevelButtonClass(GameLevel.LEVEL1)}
+                                onClick={() => handleLevelClick(GameLevel.LEVEL1)}>Level 1
+                        </button>
+                        <button className={getLevelButtonClass(GameLevel.LEVEL2)}
+                                onClick={() => handleLevelClick(GameLevel.LEVEL2)}>Level 2
+                        </button>
+                        <button className={getLevelButtonClass(GameLevel.LEVEL3)}
+                                onClick={() => handleLevelClick(GameLevel.LEVEL3)}>Level 3
+                        </button>
                     </div>
                 }
-                <div className="button-group">
+                <div className="flex-row">
                     <button onClick={handleButtonClick}
                             disabled={!(game.isReadyToContinue() || game.isReadyToStart())}>{getHandleButtonText()}</button>
-                    <button onClick={leaveButtonClick}>{t('game.button.quitGame')}</button>
+                    <button onClick={() => popupDialog(rulesDom(), null)}>{t('game.button.rules')}</button>
+                    <button
+                        onClick={leaveGame}>{t('game.button.quitGame')}</button>
                 </div>
             </div>
-            <ConfirmDialog
-                open={showConfirmDialog}
-                onClose={() => setShowConfirmDialog(false)}
-                onConfirm={confirmLeave}
-            />
         </div>
     );
 };

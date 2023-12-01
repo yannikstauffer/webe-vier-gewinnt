@@ -1,0 +1,53 @@
+.confirm-dialog {
+    position: absolute;
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    padding: 30px 10px 10px 10px;
+    border-radius: 5px;
+    background-color: white;
+    box-shadow: 2px 2px 5px 1px rgb(0 0 0 / 30%);
+    & > .clickable {
+        cursor: pointer
+    }
+}
+
+.confirm-dialog-container {
+    position: relative;
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 10px;
+    max-width: 80%;
+    left: 50%;
+    transform: translate(-50%, 10px);
+    z-index: 10;
+}
+
+.confirm-dialog-text {
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: center;
+    align-items: center;
+    gap: 10px
+}
+
+.confirm-dialog-buttons {
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: center;
+    align-items: center;
+    gap: 10px
+}
+
+.close-button {
+    position: absolute;
+    top: 0;
+    right: 0;
+    cursor: pointer;
+    padding: 5px 8px;
+    border-radius: 50%;
+}

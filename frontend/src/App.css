@@ -84,7 +84,7 @@ button, .button, input[type=submit], input[type=reset], input[type=button] {
     }
 }
 
-button + .selected, .button + .selected {
+.selected-button {
     background-color: var(--accent-highlight-background-color);
     color: var(--accent-highlight-color);
     cursor: pointer
@@ -104,6 +104,14 @@ button:disabled, button[disabled], button:disabled:hover, button[disabled]:hover
     gap: 5px
 }
 
+.flex-column{
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+}
+
 .layout {
     display: grid;
     grid-template-columns: 2fr 1fr;
@@ -111,4 +119,14 @@ button:disabled, button[disabled], button:disabled:hover, button[disabled]:hover
     margin: 0 auto;
     height: 100%;
     gap: 5px
+}
+
+ul {
+    list-style: none;
+    padding: 5px 0;
+    margin: 0;
+}
+li {
+    list-style-type: none;
+    padding: 5px 0;
 }

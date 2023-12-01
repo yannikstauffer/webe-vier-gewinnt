@@ -99,7 +99,8 @@ public class StompSessionHandler implements ApplicationListener<SessionConnectEv
         final var currentUser = this.getUser(event);
 
         if (("/user" + Queues.GAME).equals(subscription)) { // Sicherheit, dass das update auch kommt nach dem join
-            this.stompSessionMessagesProxy.publishGameUpdate(currentUser, this.gameService.getGameById(currentUser.getCurrentGameId()));
+            final var currentGame = this.gameService.getGameById(currentUser.getCurrentGameId());
+            this.stompSessionMessagesProxy.publishGameUpdate(currentUser, currentGame);
         }
     }
 

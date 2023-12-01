@@ -191,6 +191,13 @@ public class Game {
     }
 
     public void clearUser(final int userId) {
+        if (!this.isWaitingForPlayers()) {
+            throw new IllegalStateException("Cannot remove user " + userId
+                    + " from game " + this.id
+                    + " because it is no longer in the state WAITING_FOR_PLAYERS but "
+                    + this.gameState);
+        }
+
         if (this.userOne != null && this.userOne.getId() == userId) {
             this.userOne = null;
             this.userOneState = null;
@@ -239,32 +246,25 @@ public class Game {
         this.gameState = GameState.IN_PROGRESS;
     }
 
-    private void validateNextState(final GameState state) {
+    boolean isValidNextState(final GameState state) {
         if (state == null) {
             throw new IllegalArgumentException("State must not be null");
         }
-        if (state == GameState.DELETED || state == this.gameState) {
-            return;
-        }
-        if (this.gameState == GameState.WAITING_FOR_PLAYERS && state == GameState.IN_PROGRESS) {
-            return;
-        }
-        if (this.gameState == GameState.IN_PROGRESS && state == GameState.PAUSED) {
-            return;
-        }
-        if (this.gameState == GameState.PAUSED && state == GameState.IN_PROGRESS) {
-            return;
-        }
-        if (this.gameState == GameState.IN_PROGRESS && state == GameState.PLAYER_HAS_WON) {
-            return;
-        }
-        if (this.gameState == GameState.IN_PROGRESS && state == GameState.DRAW) {
-            return;
-        }
-        if (this.gameState == GameState.IN_PROGRESS && state == GameState.PLAYER_LEFT) {
-            return;
-        }
-        if (this.gameState == GameState.PAUSED && state == GameState.PLAYER_LEFT) {
+
+        return !this.isFinished()
+                || (state == GameState.DELETED || state == this.gameState)
+                || (this.isReadyToStart() && state == GameState.IN_PROGRESS)
+                || (this.gameState == GameState.IN_PROGRESS && state == GameState.PAUSED)
+                || (this.isReadyToContinue() && state == GameState.IN_PROGRESS)
+                || (this.gameState == GameState.IN_PROGRESS && state == GameState.PLAYER_HAS_WON)
+                || (this.gameState == GameState.IN_PROGRESS && state == GameState.DRAW)
+                || (this.gameState == GameState.IN_PROGRESS && state == GameState.PLAYER_LEFT)
+                || (this.gameState == GameState.PAUSED && state == GameState.PLAYER_LEFT);
+
+    }
+
+    private void validateNextState(final GameState state) {
+        if (this.isValidNextState(state)) {
             return;
         }
 

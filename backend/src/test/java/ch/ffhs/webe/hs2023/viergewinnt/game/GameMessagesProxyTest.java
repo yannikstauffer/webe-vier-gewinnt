@@ -37,17 +37,19 @@ class GameMessagesProxyTest {
         final var game = game(1);
         final var expectedQueue = Queues.GAME;
         final var expectedDto = GameStateDto.of(game);
-        when(this.userService.getUserById(game.getUserOne().getId())).thenReturn(game.getUserOne());
-        when(this.userService.getUserById(game.getUserTwo().getId())).thenReturn(game.getUserTwo());
+        final var user1 = game.getUserOne();
+        final var user2 = game.getUserTwo();
+        when(this.userService.getUserById(user1.getId())).thenReturn(user1);
+        when(this.userService.getUserById(user2.getId())).thenReturn(user2);
 
         // act
         this.gameMessagesProxy.notifyPlayers(game);
 
         // assert
-        verify(this.userService).getUserById(game.getUserOne().getId());
-        verify(this.userService).getUserById(game.getUserTwo().getId());
-        verify(this.messageService).sendToUser(expectedQueue, game.getUserOne(), expectedDto);
-        verify(this.messageService).sendToUser(expectedQueue, game.getUserTwo(), expectedDto);
+        verify(this.userService).getUserById(user1.getId());
+        verify(this.userService).getUserById(user2.getId());
+        verify(this.messageService).sendToUser(expectedQueue, user1, expectedDto);
+        verify(this.messageService).sendToUser(expectedQueue, user2, expectedDto);
     }
 
     @Test

@@ -7,6 +7,7 @@ import ch.ffhs.webe.hs2023.viergewinnt.user.UserService;
 import ch.ffhs.webe.hs2023.viergewinnt.user.model.Session;
 import ch.ffhs.webe.hs2023.viergewinnt.user.model.User;
 import ch.ffhs.webe.hs2023.viergewinnt.user.values.UserUpdateType;
+import ch.ffhs.webe.hs2023.viergewinnt.websocket.values.Queues;
 import ch.ffhs.webe.hs2023.viergewinnt.websocket.values.Topics;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,7 +25,10 @@ import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Collections;
 
+import static ch.ffhs.webe.hs2023.viergewinnt.game.model.GameTest.game;
 import static ch.ffhs.webe.hs2023.viergewinnt.user.model.UserTest.user;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -98,7 +102,7 @@ class StompSessionHandlerTest {
         // assert
         verify(this.sessionService).removeSession(sender, sessionId);
         verify(this.stompSessionMessagesProxy).publishUserUpdate(sender, UserUpdateType.OFFLINE);
-        verify(this.gameService).setUserAsDisconnected(sender, );
+        verify(this.gameService).setUserAsDisconnected(eq(sender), any());
         verify(this.stompSessionMessagesProxy).publishGameUpdates(gamesUserWasIn);
     }
 
@@ -130,6 +134,38 @@ class StompSessionHandlerTest {
 
         // assert
         verify(this.stompSessionMessagesProxy).publishAllUsersTo(sender);
+    }
+
+    @Test
+    void onTopicSubscribe_publishesAllGames_whenSubscribeToLobbyGamesTopic() {
+        // arrange
+        final var sender = user(6);
+        final var sessionId = "6";
+        final var message = this.message(sender, sessionId, Topics.LOBBY_GAMES);
+        final var event = new SessionSubscribeEvent("test-topic-subscribe-games", message);
+
+        // act
+        this.stompSessionHandler.onTopicSubscribe(event);
+
+        // assert
+        verify(this.stompSessionMessagesProxy).publishAllGamesTo(sender);
+    }
+
+    @Test
+    void onQueuesSubscribe_publishesCurrentGame_whenSubscribeToGameQueue() {
+        // arrange
+        final var sender = user(6);
+        final var sessionId = "6";
+        final var message = this.message(sender, sessionId, "/user" + Queues.GAME);
+        final var event = new SessionSubscribeEvent("test-queue-subscribe-game", message);
+        final var game = game(2);
+        when(this.gameService.getGameById(sender.getCurrentGameId())).thenReturn(game);
+
+        // act
+        this.stompSessionHandler.onQueuesSubscribe(event);
+
+        // assert
+        verify(this.stompSessionMessagesProxy).publishGameUpdate(sender, game);
     }
 
     Message<byte[]> message(final User sender, final String sessionId) {

@@ -20,6 +20,14 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 
+import static ch.ffhs.webe.hs2023.viergewinnt.game.values.ControlMessage.CONTINUE;
+import static ch.ffhs.webe.hs2023.viergewinnt.game.values.ControlMessage.LEAVE;
+import static ch.ffhs.webe.hs2023.viergewinnt.game.values.ControlMessage.LEVEL1;
+import static ch.ffhs.webe.hs2023.viergewinnt.game.values.ControlMessage.LEVEL2;
+import static ch.ffhs.webe.hs2023.viergewinnt.game.values.ControlMessage.LEVEL3;
+import static ch.ffhs.webe.hs2023.viergewinnt.game.values.ControlMessage.RESTART;
+import static ch.ffhs.webe.hs2023.viergewinnt.game.values.ControlMessage.START;
+
 @Slf4j
 @Service
 public class GameServiceImpl implements GameService {
@@ -47,12 +55,7 @@ public class GameServiceImpl implements GameService {
 
     @Override
     public List<Game> getAllGames() {
-        final Iterable<Game> gamesIterable = this.gameRepository.findAll();
-
-        final List<Game> games = new ArrayList<>();
-        gamesIterable.forEach(games::add);
-
-        return games;
+        return this.gameRepository.findCurrentlyActive();
     }
 
     @Override
@@ -60,16 +63,11 @@ public class GameServiceImpl implements GameService {
         final Game game = this.findGameOrThrow(gameId);
 
         if (game.hasTwoUsers() && !game.containsUser(currentUser.getId())) {
-            throw VierGewinntException.of(ErrorCode.GAME_FULL, "Das Spiel ist bereits voll!");
+            throw VierGewinntException.of(ErrorCode.GAME_FULL, "Game is full");
         }
 
         game.addUser(currentUser);
 
-//        if (game.bothUsersAreConnected() && game.getGameState() == GameState.PAUSED) {
-//            game.setGameBoardState(GameBoardState.READY_TO_CONTINUE);
-//        } else if (game.bothUsersAreConnected() && game.getGameState() == GameState.WAITING_FOR_PLAYERS) {
-//            game.setGameBoardState(GameBoardState.READY_TO_START);
-//        }
         final var savedGame = this.gameRepository.save(game);
         this.userService.setCurrentGameId(currentUser.getId(), savedGame.getId());
 
@@ -84,14 +82,14 @@ public class GameServiceImpl implements GameService {
 
         Game updatedGame = game;
         switch (request.getMessage()) {
-            case "start" -> updatedGame.start();
-            case "restart" -> updatedGame = this.restartGame(updatedGame);
-            case "continue" -> updatedGame.resume();
-            case "leave" -> this.leaveGame(updatedGame, currentUser);
-            case "LEVEL1" -> updatedGame.setGameLevel(GameLevel.LEVEL1);
-            case "LEVEL2" -> updatedGame.setGameLevel(GameLevel.LEVEL2);
-            case "LEVEL3" -> updatedGame.setGameLevel(GameLevel.LEVEL3);
-            default -> throw VierGewinntException.of(ErrorCode.UNKNOWN, "Invalid game message.");
+            case START -> updatedGame.start();
+            case RESTART -> updatedGame = this.restartGame(updatedGame);
+            case CONTINUE -> updatedGame.resume();
+            case LEAVE -> this.leaveGame(updatedGame, currentUser);
+            case LEVEL1 -> updatedGame.setGameLevel(GameLevel.LEVEL1);
+            case LEVEL2 -> updatedGame.setGameLevel(GameLevel.LEVEL2);
+            case LEVEL3 -> updatedGame.setGameLevel(GameLevel.LEVEL3);
+            default -> throw VierGewinntException.of(ErrorCode.UNKNOWN, "Unknown game message " + request.getMessage());
         }
 
         if (game.getUsers().isEmpty() || game.bothUsersLeftAfterAbort()) {
@@ -103,17 +101,6 @@ public class GameServiceImpl implements GameService {
         return this.gameRepository.save(updatedGame);
     }
 
-    private void leaveGame(final Game game, final User currentUser) {
-        if (game.isFinished()) {
-            game.setUserState(currentUser.getId(), UserState.QUIT);
-        } else if (game.isWaitingForPlayers()) {
-            game.clearUser(currentUser.getId());
-        } else {
-            game.setUserState(currentUser.getId(), UserState.QUIT);
-            game.setGameState(GameState.PLAYER_LEFT);
-        }
-    }
-
     @Override
     public Game getGameById(final int gameId) {
         return this.findGameOrThrow(gameId);
@@ -121,18 +108,21 @@ public class GameServiceImpl implements GameService {
 
     @Override
     public void setUserAsDisconnected(final User user, final List<Game> games) {
+        final List<Game> updated = new ArrayList<>();
         for (final Game game : games) {
             if (game.isReadyToStart()) {
                 game.clearUser(user.getId());
+                updated.add(game);
             } else if (game.isNotDone()) {
                 game.setUserState(user.getId(), UserState.DISCONNECTED);
                 if (game.getGameState() == GameState.IN_PROGRESS) {
                     game.setGameState(GameState.PAUSED);
                 }
+                updated.add(game);
             }
         }
 
-        this.gameRepository.saveAll(games);
+        this.gameRepository.saveAll(updated);
     }
 
     @Override
@@ -151,7 +141,9 @@ public class GameServiceImpl implements GameService {
                 this.dropPlayerDisc(game, availableRandomColumn.get(), currentUser);
                 return this.gameRepository.save(game);
             } else {
-                log.warn("GameState indicates that game {} is still active but no free columns are available.", game.getId());
+                log.error("GameState indicates that game {} is still active but no free columns are available.", game.getId());
+                throw new IllegalStateException("GameState does not match GameBoard." +
+                        " GameBoard is full and GameState should be a final state.");
             }
         }
 
@@ -168,9 +160,10 @@ public class GameServiceImpl implements GameService {
                 log.trace("Drop anonymous random disc {} in game {}", availableRandomColumn.get(), game.getId());
                 this.dropAnonymousDisc(game, availableRandomColumn.get());
                 return this.gameRepository.save(game);
-
             } else {
-                log.warn("GameState indicates that game {} is still active but no free columns are available.", game.getId());
+                log.error("GameState indicates that game {} is still active but no free columns are available.", game.getId());
+                throw new IllegalStateException("GameState does not match GameBoard." +
+                        " GameBoard is full and GameState should be a final state.");
             }
         }
 
@@ -182,6 +175,36 @@ public class GameServiceImpl implements GameService {
         final Game game = this.findGameOrThrow(gameId);
         this.dropPlayerDisc(game, column, currentUser);
         return this.gameRepository.save(game);
+    }
+
+    @Override
+    public void setAllConnectedUsersAsDisconnected() {
+        final List<Game> games = this.gameRepository.findByUserState(UserState.CONNECTED);
+
+        for (final Game game : games) {
+            if (game.getGameState() == GameState.IN_PROGRESS) {
+                game.setGameState(GameState.PAUSED);
+            }
+            if (game.getUserOneState() == UserState.CONNECTED) {
+                game.setUserState(game.getUserOne().getId(), UserState.DISCONNECTED);
+            }
+            if (game.getUserTwoState() == UserState.CONNECTED) {
+                game.setUserState(game.getUserTwo().getId(), UserState.DISCONNECTED);
+            }
+        }
+
+        this.gameRepository.saveAll(games);
+    }
+
+    private void leaveGame(final Game game, final User currentUser) {
+        if (game.isFinished()) {
+            game.setUserState(currentUser.getId(), UserState.QUIT);
+        } else if (game.isWaitingForPlayers()) {
+            game.clearUser(currentUser.getId());
+        } else {
+            game.setUserState(currentUser.getId(), UserState.QUIT);
+            game.setGameState(GameState.PLAYER_LEFT);
+        }
     }
 
     private Game restartGame(final Game game) {
@@ -212,7 +235,7 @@ public class GameServiceImpl implements GameService {
     }
 
 
-    private void dropPlayerDisc(final Game game, final int columnId, final User currentUser) {
+    void dropPlayerDisc(final Game game, final int columnId, final User currentUser) {
         this.validateIsMoveExpected(game);
         this.validatePlayer(game, currentUser);
         this.validateNextMove(game, currentUser);
@@ -255,11 +278,11 @@ public class GameServiceImpl implements GameService {
         }
     }
 
-    private GameBoard gameBoardWithDisc(final Game game, final int columnId, final int discNumber) {
+    GameBoard gameBoardWithDisc(final Game game, final int columnId, final int discNumber) {
         final GameBoard gameBoard = game.getBoard();
 
         if (gameBoard.isColumnFull(columnId)) {
-            throw VierGewinntException.of(ErrorCode.INVALID_MOVE, "Ungültiger Zug, Spalte ist voll!");
+            throw VierGewinntException.of(ErrorCode.INVALID_MOVE, "Invalid move. Column is already full.");
         }
 
         gameBoard.addDisc(columnId, discNumber);
