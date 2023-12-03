@@ -9,7 +9,7 @@ import {useTranslation} from "react-i18next";
 import './i18n';
 import './App.css';
 
-const BASE_URL = "http://localhost:9000";
+const BASE_URL = "https://chalkstick.ch";
 const VIERGEWINNT_URL = BASE_URL + "/4gewinnt";
 const WS_URL = VIERGEWINNT_URL + "/ws";
 
