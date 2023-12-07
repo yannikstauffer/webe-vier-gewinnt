@@ -59,19 +59,23 @@ const GameBoard = ({initialGameId, userId}) => {
     };
 
     const handleLevel2 = (updatedGame) => {
-        if (updatedGame.gameLevel === GameLevel.LEVEL2 && updatedGame.hasNextMove(userId)) {
-            setCountdown(5);
-            const timer = setInterval(() => {
-                setCountdown(prevCountdown => {
-                    if (prevCountdown === 1) {
-                        clearInterval(timer);
-                    }
-                    const nextCountdown = Math.max(prevCountdown - 1, 0);
-                    return nextCountdown === 0 ? null : nextCountdown;
-                });
-            }, 1000);
+        if (updatedGame.gameLevel === GameLevel.LEVEL2) {
+            if (updatedGame.hasNextMove(userId)) {
+                setCountdown(5);
+                const timer = setInterval(() => {
+                    setCountdown(prevCountdown => {
+                        if (prevCountdown <= 1 || prevCountdown === null) {
+                            clearInterval(timer);
+                        }
+                        const nextCountdown = Math.max(prevCountdown - 1, 0);
+                        return nextCountdown === 0 ? null : nextCountdown;
+                    });
+                }, 1000);
 
-            return () => clearInterval(timer);
+                return () => clearInterval(timer);
+            } else {
+                setCountdown(null);
+            }
         }
     }
 
