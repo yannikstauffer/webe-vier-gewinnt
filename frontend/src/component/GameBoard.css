@@ -58,3 +58,27 @@ p.heavy {
 .rules {
     padding: 10px;
 }
+
+/* Animation */
+@keyframes fallAnimation {
+    from {
+        top: -600%;
+    }
+    to {
+        top: 50%;
+    }
+}
+
+.cell.empty {
+    background-color: white;
+}
+
+.cell.falling {
+    position: absolute;
+    animation: fallAnimation 0.2s ease-out;
+}
+
+table {
+    z-index: 2;
+    position: relative;
+}
