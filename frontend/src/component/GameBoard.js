@@ -42,7 +42,7 @@ const GameBoard = ({initialGameId, userId}) => {
 
     const [previousBoard, setPreviousBoard] = useState(createEmptyBoard());
     const [lastDroppedDisc, setLastDroppedDisc] = useState({ row: null, col: null });
-
+    const [initialRender, setInitialRender] = useState(true);
 
     const onGameUpdateReceived = (message) => {
         const updatedGame = JSON.parse(message.body);
@@ -57,13 +57,17 @@ const GameBoard = ({initialGameId, userId}) => {
         const gameModel = new GameModel(updatedGame);
         const newBoard = gameModel.board;
 
-        for (let row = 0; row < ROWS; row++) {
-            for (let col = 0; col < COLUMNS; col++) {
-                if (newBoard[row][col] !== previousBoard[row][col]) {
-                    setLastDroppedDisc({ row, col });
-                    break;
+        if (!initialRender) {
+            for (let row = 0; row < ROWS; row++) {
+                for (let col = 0; col < COLUMNS; col++) {
+                    if (newBoard[row][col] !== previousBoard[row][col]) {
+                        setLastDroppedDisc({ row, col });
+                        break;
+                    }
                 }
             }
+        } else {
+            setInitialRender(false);
         }
 
         setPreviousBoard(newBoard);
