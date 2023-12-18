@@ -176,7 +176,7 @@ const Lobby = ({userId}) => {
     return (
         <div className="lobby-layout">
             <h2>Lobby</h2>
-            <button onClick={createGame}>Neues Spiel erstellen</button>
+            <button onClick={createGame}>{t("lobby.createNewGame")}</button>
             <ul className="lobby-list">
                 {games.map((game) => (
                     <li className="lobby-game" key={game.id}>
