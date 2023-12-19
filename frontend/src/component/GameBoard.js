@@ -46,7 +46,11 @@ const GameBoard = ({initialGameId, userId}) => {
 
     const onGameUpdateReceived = (message) => {
         const updatedGame = JSON.parse(message.body);
-        console.log("update game:", updatedGame);
+        console.log("update game:", updatedGame)
+        if (updatedGame.gameId + '' !== game.gameId + '') {
+            console.log("discarding game update as it does not match the current game id", game.gameId);
+            return;
+        }
         updateGame(updatedGame);
     };
 
