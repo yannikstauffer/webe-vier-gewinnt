@@ -161,7 +161,8 @@ class StompSessionHandlerTest {
         final var message = this.message(sender, sessionId, "/user" + Queues.GAME);
         final var event = new SessionSubscribeEvent("test-queue-subscribe-game", message);
         final var game = game(2);
-        when(this.gameService.getGameById(sender.getCurrentGameId())).thenReturn(game);
+        sender.pushCurrentGameId(game.getId());
+        when(this.gameService.getGameById(game.getId())).thenReturn(game);
 
         // act
         this.stompSessionHandler.onQueuesSubscribe(event);
