@@ -104,6 +104,7 @@
       "invalidMove": "Invalid move",
       "nullPlayer": "Player was not set.",
       "invalidPlayer": "The current user is not part of this game.",
+      "notPlayersTurn": "It is not your turn.",
       "invalidGameState": "The game state should be IN_PROGRESS"
     }
   },
