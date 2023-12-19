@@ -79,9 +79,10 @@ class StompSessionHandlerTest {
         final var event = new SessionDisconnectEvent("test-disconnected", message, sessionId, CloseStatus.NORMAL);
 
         // act
-        this.stompSessionHandler.onSocketDisconnected(event);
+        final var future = this.stompSessionHandler.onSocketDisconnected(event);
 
         // assert
+        future.join();
         verify(this.sessionService).removeSession(sender, sessionId);
         verifyNoInteractions(this.stompSessionMessagesProxy, this.gameService);
     }
@@ -97,9 +98,10 @@ class StompSessionHandlerTest {
         when(this.gameService.getGamesForUser(sender.getId())).thenReturn(gamesUserWasIn);
 
         // act
-        this.stompSessionHandler.onSocketDisconnected(event);
+        final var future = this.stompSessionHandler.onSocketDisconnected(event);
 
         // assert
+        future.join();
         verify(this.sessionService).removeSession(sender, sessionId);
         verify(this.stompSessionMessagesProxy).publishUserUpdate(sender, UserUpdateType.OFFLINE);
         verify(this.gameService).setUserAsDisconnected(eq(sender), any());
