@@ -40,6 +40,10 @@ const GameBoard = ({initialGameId, userId}) => {
         userTwoState: null
     }));
 
+    const [previousBoard, setPreviousBoard] = useState(createEmptyBoard());
+    const [lastDroppedDisc, setLastDroppedDisc] = useState({ row: null, col: null });
+    const [initialRender, setInitialRender] = useState(true);
+
     const onGameUpdateReceived = (message) => {
         const updatedGame = JSON.parse(message.body);
         console.log("update game:", updatedGame);
@@ -51,8 +55,25 @@ const GameBoard = ({initialGameId, userId}) => {
 
     const updateGame = (updatedGame) => {
         const gameModel = new GameModel(updatedGame);
+        const newBoard = gameModel.board;
+
+        if (!initialRender) {
+            for (let row = 0; row < ROWS; row++) {
+                for (let col = 0; col < COLUMNS; col++) {
+                    if (newBoard[row][col] !== previousBoard[row][col]) {
+                        setLastDroppedDisc({ row, col });
+                        break;
+                    }
+                }
+            }
+        } else {
+            setInitialRender(false);
+        }
+
+        setPreviousBoard(newBoard);
         setGame(gameModel);
         handleLevel2(gameModel);
+
         if (gameModel.playerHasLeft() && !gameModel.bothUsersAreConnected()) {
             popupDialog(t('game.confirm.playerLeft'), confirmLeave);
         }
@@ -178,7 +199,6 @@ const GameBoard = ({initialGameId, userId}) => {
                     playerId: userId
                 }),
             });
-
         }
     };
 
@@ -189,20 +209,26 @@ const GameBoard = ({initialGameId, userId}) => {
         return game.board.flat().filter(cell => (cell !== ANONYMOUS_DISC && cell !== 0)).length;
     }
 
-    const getCellClass = (cell) => {
-        const baseClass = 'cell';
+    const getCellClass = (cell, rowIndex, colIndex) => {
+        let classes = 'cell';
+
         if (cell === EMPTY) {
-            return baseClass + ' empty'
+            classes += ' empty';
+        } else {
+            if (cell === game.userOne?.id && game.userTwo !== null) {
+                classes += ' player-one';
+            } else if (cell === game.userTwo?.id && game.userOne !== null) {
+                classes += ' player-two';
+            } else if (cell === ANONYMOUS_DISC) {
+                classes += ' special-disc';
+            }
+
+            if (lastDroppedDisc && lastDroppedDisc.row === rowIndex && lastDroppedDisc.col === colIndex) {
+                classes += ' falling';
+            }
         }
-        if (cell === game.userOne?.id && game.userTwo !== null) {
-            return baseClass + ' player-one';
-        }
-        if (cell === game.userTwo?.id && game.userOne !== null) {
-            return baseClass + ' player-two';
-        }
-        if (cell === ANONYMOUS_DISC) {
-            return baseClass + ' special-disc'
-        }
+
+        return classes;
     }
 
     const getLevelButtonClass = (gameLevel) => {
@@ -259,7 +285,7 @@ const GameBoard = ({initialGameId, userId}) => {
                                 return (
                                     <td key={colIndex}
                                         onClick={() => dropDisc(colIndex)}>
-                                        <div className={getCellClass(cell)}></div>
+                                        <div className={getCellClass(cell, rowIndex, colIndex)}></div>
                                     </td>
                                 );
                             })}
