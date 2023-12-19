@@ -129,6 +129,14 @@ public class Game {
         this.gameState = gameState;
     }
 
+    public boolean isUserOneConnected() {
+        return this.userOne != null && this.userOneState == UserState.CONNECTED;
+    }
+
+    public boolean isUserTwoConnected() {
+        return this.userTwo != null && this.userTwoState == UserState.CONNECTED;
+    }
+
     public boolean hasTwoUsers() {
         return this.userOne != null && this.userTwo != null;
     }
