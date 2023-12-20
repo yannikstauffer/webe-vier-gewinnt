@@ -24,10 +24,10 @@ public class GameMessagesProxy {
     }
 
     public void notifyPlayers(final Game game) {
-        if (game.getUserOne() != null) {
+        if (game.isUserOneConnected()) {
             this.messageService.sendToUser(Queues.GAME, this.userService.getUserById(game.getUserOne().getId()), GameStateDto.of(game));
         }
-        if (game.getUserTwo() != null) {
+        if (game.isUserTwoConnected()) {
             this.messageService.sendToUser(Queues.GAME, this.userService.getUserById(game.getUserTwo().getId()), GameStateDto.of(game));
         }
     }

@@ -68,9 +68,9 @@ class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void setCurrentGameId(final int userId, final int gameId){
-        final var user = getUserById(userId);
-        user.setCurrentGameId(gameId);
+    public void setCurrentGameId(final int userId, final int gameId) {
+        final var user = this.getUserById(userId);
+        user.pushCurrentGameId(gameId);
 
         this.userRepository.save(user);
     }

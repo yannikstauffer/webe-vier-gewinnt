@@ -51,7 +51,19 @@ public class User {
     @Builder.Default
     private List<Session> sessions = new ArrayList<>();
 
-    private int currentGameId;
+    @Getter(AccessLevel.PRIVATE)
+    @Setter(AccessLevel.PRIVATE)
+    private Integer currentGameId;
+
+    public void pushCurrentGameId(final int gameId) {
+        this.currentGameId = gameId;
+    }
+
+    public Integer popCurrentGameId() {
+        final var gameId = this.currentGameId;
+        this.currentGameId = null;
+        return gameId;
+    }
 
     public void removeSession(final String sessionId) {
         this.sessions.removeIf(session -> session.getSessionId().equals(sessionId));

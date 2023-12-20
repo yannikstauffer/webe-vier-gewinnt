@@ -274,7 +274,7 @@ public class GameServiceImpl implements GameService {
 
     private void validateNextMove(final Game game, final User currentUser) {
         if (currentUser.getId() != game.getNextMove()) {
-            throw VierGewinntException.of(ErrorCode.INVALID_PLAYER, "The current user is not allowed to drop a disc.");
+            throw VierGewinntException.of(ErrorCode.NOT_PLAYERS_TURN, "The current user is not allowed to drop a disc.");
         }
     }
 

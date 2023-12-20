@@ -22,6 +22,7 @@ public enum ErrorCode {
     INVALID_MOVE("error.game.invalidMove"),
     NULL_PLAYER("error.game.nullPlayer"),
     INVALID_PLAYER("error.game.invalidPlayer"),
+    NOT_PLAYERS_TURN("error.game.notPlayersTurn"),
     INVALID_GAME_STATE("error.game.invalidGameState"),
     UNKNOWN("error.unknown");
 

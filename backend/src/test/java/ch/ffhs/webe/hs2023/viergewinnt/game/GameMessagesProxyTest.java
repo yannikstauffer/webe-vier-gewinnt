@@ -3,6 +3,7 @@ package ch.ffhs.webe.hs2023.viergewinnt.game;
 import ch.ffhs.webe.hs2023.viergewinnt.game.dto.GameDto;
 import ch.ffhs.webe.hs2023.viergewinnt.game.dto.GameStateDto;
 import ch.ffhs.webe.hs2023.viergewinnt.game.model.Game;
+import ch.ffhs.webe.hs2023.viergewinnt.game.values.UserState;
 import ch.ffhs.webe.hs2023.viergewinnt.user.UserService;
 import ch.ffhs.webe.hs2023.viergewinnt.websocket.StompMessageService;
 import ch.ffhs.webe.hs2023.viergewinnt.websocket.values.Queues;
@@ -52,12 +53,29 @@ class GameMessagesProxyTest {
         verify(this.messageService).sendToUser(expectedQueue, user2, expectedDto);
     }
 
+
+    @Test
+    void notifyPlayers_doesNotNotify_ifPlayerStateIsNotConnected() {
+        // arrange
+        final var game = game(1);
+        final var user1 = game.getUserOne();
+        final var user2 = game.getUserTwo();
+        game.setUserState(user1.getId(), UserState.DISCONNECTED);
+        game.setUserState(user2.getId(), UserState.QUIT);
+
+        // act
+        this.gameMessagesProxy.notifyPlayers(game);
+
+        // assert
+        verifyNoInteractions(this.messageService, this.userService);
+    }
+
     @Test
     void notifyPlayers_withNoPlayersInGame_DoesNotSend() {
         // arrange
         final var game = mock(Game.class);
-        when(game.getUserOne()).thenReturn(null);
-        when(game.getUserTwo()).thenReturn(null);
+        when(game.isUserOneConnected()).thenReturn(false);
+        when(game.isUserTwoConnected()).thenReturn(false);
 
         // act
         this.gameMessagesProxy.notifyPlayers(game);

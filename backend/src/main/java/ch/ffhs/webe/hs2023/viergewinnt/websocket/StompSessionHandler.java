@@ -22,6 +22,7 @@ import org.springframework.web.socket.messaging.SessionSubscribeEvent;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 
 @Slf4j
 @Component
@@ -61,7 +62,7 @@ public class StompSessionHandler implements ApplicationListener<SessionConnectEv
     }
 
     @EventListener
-    public void onSocketDisconnected(final SessionDisconnectEvent event) {
+    public CompletableFuture<Void> onSocketDisconnected(final SessionDisconnectEvent event) {
         final var currentUser = this.getUser(event);
         final var sessionId = this.getSessionId(event);
 
@@ -70,13 +71,30 @@ public class StompSessionHandler implements ApplicationListener<SessionConnectEv
         log.debug("Session {} removed for user {}", sessionId, currentUser.getEmail());
 
         if (currentUser.getSessions().isEmpty()) {
-            log.debug("User {} no longer online. Sending update to all subscribers.", currentUser.getEmail());
-            this.stompSessionMessagesProxy.publishUserUpdate(currentUser, UserUpdateType.OFFLINE);
-
-            final List<Game> gamesUserWasIn = this.gameService.getGamesForUser(currentUser.getId());
-            this.gameService.setUserAsDisconnected(currentUser, gamesUserWasIn);
-            this.stompSessionMessagesProxy.publishGameUpdates(gamesUserWasIn);
+            return this.publishUserOfflineEvents(currentUser.getEmail());
         }
+        return CompletableFuture.completedFuture(null);
+    }
+
+    private CompletableFuture<Void> publishUserOfflineEvents(final String userEmail) {
+        return CompletableFuture.runAsync(() -> {
+            try {
+                Thread.sleep(1000);
+            } catch (final InterruptedException e) {
+                log.error("Error while waiting for user to reconnect", e);
+                Thread.currentThread().interrupt();
+            }
+            final var user = this.userService.getUserByEmail(userEmail);
+            if (!user.getSessions().isEmpty()) {
+                return;
+            }
+            log.debug("User {} no longer online. Sending update to all subscribers.", user.getEmail());
+            this.stompSessionMessagesProxy.publishUserUpdate(user, UserUpdateType.OFFLINE);
+
+            final List<Game> gamesUserWasIn = this.gameService.getGamesForUser(user.getId());
+            this.gameService.setUserAsDisconnected(user, gamesUserWasIn);
+            this.stompSessionMessagesProxy.publishGameUpdates(gamesUserWasIn);
+        });
     }
 
     @EventListener
@@ -99,8 +117,11 @@ public class StompSessionHandler implements ApplicationListener<SessionConnectEv
         final var currentUser = this.getUser(event);
 
         if (("/user" + Queues.GAME).equals(subscription)) { // Sicherheit, dass das update auch kommt nach dem join
-            final var currentGame = this.gameService.getGameById(currentUser.getCurrentGameId());
-            this.stompSessionMessagesProxy.publishGameUpdate(currentUser, currentGame);
+            final var gameId = currentUser.popCurrentGameId();
+            if (gameId != null) {
+                final var currentGame = this.gameService.getGameById(gameId);
+                this.stompSessionMessagesProxy.publishGameUpdate(currentUser, currentGame);
+            }
         }
     }
 
