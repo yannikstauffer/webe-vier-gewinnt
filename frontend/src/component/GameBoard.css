@@ -35,12 +35,12 @@ td:hover .empty {
 
 .player-one {
     background-color: #FF4136;
-    box-shadow: 0 0 10px 2px #FF4136;
+    box-shadow: 0 0 0 5px gray, 0 0 0 2px white inset;
 }
 
 .player-two {
     background-color: #FFDC00;
-    box-shadow: 0 0 10px 2px #FFDC00;
+    box-shadow: 0 0 0 5px gray;
 }
 
 p.heavy {
