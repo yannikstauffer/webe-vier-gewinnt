@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -31,12 +32,21 @@ public class RegistrationController {
     }
 
     @PostMapping("/processRegistration")
-    public ModelAndView registerUserAccount(@ModelAttribute("user") @Valid final LoginDto loginDto, final ModelAndView mav) {
+    public ModelAndView registerUserAccount(@ModelAttribute("user") @Valid final LoginDto loginDto, final BindingResult bindingResult, final ModelAndView mav) {
+        if (bindingResult.hasErrors()) {
+            mav.addObject("user", loginDto);
+            mav.addObject("message", bindingResult.getFieldError().getDefaultMessage());
+            mav.setViewName("registration");
+            return mav;
+        }
+
         try {
             final User registered = this.userService.registerNewUserAccount(loginDto);
             log.debug("Registered new user with email: {}", registered.getEmail());
         } catch (final VierGewinntException exception) {
-            mav.addObject("message", exception.getErrorCode());
+            mav.addObject("globalError", exception.getErrorCode().getInternationalizedMessageKey());
+            mav.addObject("user", loginDto);
+            mav.setViewName("registration");
             return mav;
         }
         return new ModelAndView("redirect:/login?registered");

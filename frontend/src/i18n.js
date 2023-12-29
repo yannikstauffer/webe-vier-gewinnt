@@ -10,7 +10,8 @@ i18n
     .init({
         detection: { order: ["path", "navigator"] },
         fallbackLng: "de",
-        whitelist: ['de', 'en'],
+        supportedLngs: ['de', 'en'],
+        nonExplicitSupportedLngs: true,
         debug: true,
         interpolation: {
             escapeValue: false // react already handles this by default
