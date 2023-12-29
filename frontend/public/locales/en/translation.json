@@ -1,0 +1,119 @@
+{
+  "app": {
+    "title": "4 in a row",
+    "action": {
+      "logout": "Logout"
+    },
+    "loading": "Loading..."
+  },
+  "chat": {
+    "title": "Chat",
+    "placeholder": "This could be your message...",
+    "send": "Send",
+    "user": {
+      "lobbyName": "Lobby"
+    }
+  },
+  "lobby": {
+    "title": "Lobby",
+    "createNewGame": "Create new Game",
+    "deleteList": "Delete list"
+  },
+  "game": {
+    "title": "Game",
+    "label": {
+      "playerOne": "Player 1:",
+      "playerTwo": "Player 2:",
+      "creator": "Creator"
+    },
+    "state": {
+      "wait": "Waiting for more players.",
+      "ready": "A new game can be started.",
+      "win": "You have won!",
+      "lose": "You have lost.",
+      "draw": "The game is a draw.",
+      "yourTurn": "It's your turn.",
+      "notYourTurn": "It's not your turn.",
+      "quit": "A player has quit the game.",
+      "disconnected": "A player has lost the connection",
+      "paused": "The game has been paused.",
+      "continue": "The game can be continued.",
+      "inProgress": "The game is in progress.",
+      "finished": "The game has ended."
+    },
+    "button": {
+      "newGame": "Start New Game",
+      "quitGame": "Leave Game",
+      "continue": "Continue game",
+      "joinGame": "Join game",
+      "rules": "Rules"
+    },
+    "confirm": {
+      "quit": "Do you really want to leave the game?",
+      "playerLeft": "Your opponent has left the game. Do you want to quit the game?",
+      "yes": "Ja",
+      "no": "Nein"
+    },
+    "level": {
+      "countdown": "Time until the next move:",
+      "activated": "Activated level:",
+      "rounds": "Rounds until automatic drop: "
+    },
+    "rules": {
+      "title": "Rules",
+      "description": {
+        "lineOne": "The goal of the game is to place 4 stones in a row horizontally, vertically or diagonally.",
+        "lineTwo": "The player who is on the move can drop a stone by clicking in any column.",
+        "lineThree": "The game is played alternately.",
+        "lineFour": "The game ends as soon as a player has 4 stones in a row.",
+        "lineFive": "The game ends in a draw if all fields are occupied and no player has 4 stones in a row."
+      },
+      "levelOne": {
+        "title": "Level 1",
+        "text": "Game according to the normal rules of the game."
+      },
+      "levelTwo": {
+        "title": "Level 2",
+        "text": "5 seconds are available for one move. If no stone is placed within this time, it will be inserted at a random position."
+      },
+      "levelThree": {
+        "title": "Level 3",
+        "text": "After 5 moves a neutral stone is inserted at a random position."
+      }
+    }
+  },
+  "error": {
+    "label": {
+      "anErrorOccurred": "An error occurred"
+    },
+    "chat": {
+      "receiverNotSet": "Receiver not set",
+      "messageTextEmpty": "Message text is empty",
+      "receiverShouldNotBeSetOnPublicMessage": "Receiver should not be set on public message"
+    },
+    "user": {
+      "notFound": "User not found",
+      "unknown": "Unknown error"
+    },
+    "game": {
+      "notFound": "Game not found",
+      "isFull": "The game is already full",
+      "cannotRead": "Game board could not be found",
+      "cannotWrite": "Game board could not be saved",
+      "notReady": "Waiting for other players",
+      "invalidMove": "Invalid move",
+      "nullPlayer": "Player was not set.",
+      "invalidPlayer": "The current user is not part of this game.",
+      "notPlayersTurn": "It is not your turn.",
+      "invalidGameState": "The game state should be IN_PROGRESS"
+    }
+  },
+  "system": {
+    "label": {
+      "message": "System notification"
+    },
+    "message": {
+      "serverIsShuttingDown": "The server is shutting down."
+    }
+  }
+}

@@ -1,7 +1,7 @@
 table {
     border-collapse: collapse;
     margin: 20px auto;
-    background-color: #007BFF; /* Farbe des Spielbretts */
+    background-color: #007BFF;
 }
 
 td {
@@ -16,10 +16,10 @@ td {
 }
 
 td:hover .empty {
-    background-color: rgba(255, 255, 255, 0.2); /* Hervorhebung beim Überfahren einer leeren Zelle */
+    background-color: rgba(255, 255, 255, 0.2);
 }
 
-.empty, .player-one, .player-two {
+.empty, .player-one, .player-two, .special-disc {
     width: 50px;
     height: 50px;
     border-radius: 50%;
@@ -30,22 +30,55 @@ td:hover .empty {
 }
 
 .empty {
-    background-color: #FFF; /* Farbe einer leeren Zelle */
+    background-color: white;
 }
 
 .player-one {
-    background-color: #FF4136; /* Farbe des ersten Spielers */
-    box-shadow: 0px 0px 10px 2px #FF4136; /* Leichter Schatten für den ersten Spieler */
+    background-color: #FF4136;
+    box-shadow: 0 0 0 5px gray, 0 0 0 2px white inset;
 }
 
 .player-two {
-    background-color: #FFDC00; /* Farbe des zweiten Spielers */
-    box-shadow: 0px 0px 10px 2px #FFDC00; /* Leichter Schatten für den zweiten Spieler */
+    background-color: #FFDC00;
+    box-shadow: 0 0 0 5px gray;
 }
 
-p {
+p.heavy {
     text-align: center;
     font-size: 1.2em;
     margin-top: 20px;
     font-weight: bold;
+}
+
+.special-disc {
+    background-color: grey;
+    box-shadow: 0 0 10px 2px grey;
+}
+
+.rules {
+    padding: 10px;
+}
+
+/* Animation */
+@keyframes fallAnimation {
+    from {
+        top: -600%;
+    }
+    to {
+        top: 50%;
+    }
+}
+
+.cell.empty {
+    background-color: white;
+}
+
+.cell.falling {
+    position: absolute;
+    animation: fallAnimation 0.2s ease-out;
+}
+
+table {
+    z-index: 2;
+    position: relative;
 }

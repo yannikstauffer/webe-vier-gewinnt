@@ -1,0 +1,33 @@
+.banner {
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 2px 2px 5px 1px rgb(0 0 0 / 30%);
+    & > .clickable {
+        cursor: pointer
+    }
+}
+.error-banner {
+    background-color: var(--error-background-color);
+    color: var(--error-text-color);
+}
+.info-banner {
+    background-color: var(--info-background-color);
+    color: var(--info-text-color);
+}
+
+.banner-container {
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 10px;
+    max-width: 80%;
+    position: absolute;
+    left: 50%;
+    transform: translate(-50%, 10px)
+}

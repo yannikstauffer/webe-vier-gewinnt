@@ -1,56 +1,77 @@
 package ch.ffhs.webe.hs2023.viergewinnt.game;
 
+import ch.ffhs.webe.hs2023.viergewinnt.game.dto.GameActionDto;
 import ch.ffhs.webe.hs2023.viergewinnt.game.dto.GameRequestDto;
-import ch.ffhs.webe.hs2023.viergewinnt.game.model.Game;
+import ch.ffhs.webe.hs2023.viergewinnt.game.level.LevelService;
+import ch.ffhs.webe.hs2023.viergewinnt.user.UserService;
+import ch.ffhs.webe.hs2023.viergewinnt.websocket.values.MessageSources;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
-import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.stereotype.Controller;
 
-import java.util.List;
+import java.security.Principal;
 
 @Slf4j
 @Controller
 public class GameController {
 
     private final GameService gameService;
+    private final UserService userService;
+    private final LevelService levelService;
+    private final GameMessagesProxy gameMessagesProxy;
 
     @Autowired
-    public GameController(GameService gameService) {
+    public GameController(final GameService gameService,
+                          final UserService userService,
+                          final LevelService levelService,
+                          final GameMessagesProxy gameMessagesProxy) {
         this.gameService = gameService;
+        this.userService = userService;
+        this.levelService = levelService;
+        this.gameMessagesProxy = gameMessagesProxy;
     }
 
-    @MessageMapping("/games/create")
-    @SendTo("/topic/lobby/games/create")
-    public Game createGame(@Payload GameRequestDto request) {
-        return gameService.createGame(request);
+    @MessageMapping(MessageSources.GAMES + "/create")
+    public void createGame(final Principal user) {
+        final var sender = this.userService.getUserByEmail(user.getName());
+        final var game = this.gameService.createGame(sender);
+
+        this.gameMessagesProxy.notifyAll(game);
     }
 
-    @MessageMapping("/games/all")
-    @SendTo("/topic/lobby/games/all")
-    public List<Game> getAllGames() {
-        return gameService.getAllGames();
+    @MessageMapping(MessageSources.GAMES + "/join")
+    public void joinGame(@Payload final GameRequestDto request, final Principal user) {
+        final var sender = this.userService.getUserByEmail(user.getName());
+        final var game = this.gameService.joinGame(request.getGameId(), sender);
+
+        this.gameMessagesProxy.notifyAll(game);
     }
 
-    @MessageMapping("/games/deleteAll")
-    @SendTo("/topic/lobby/games/all")
-    public List<Game> deleteAllGames() {
-        gameService.deleteAllGames();
-        return gameService.getAllGames();
+    @MessageMapping(MessageSources.GAMES + "/control")
+    public void gameControl(@Payload final GameRequestDto request, final Principal user) {
+        final var sender = this.userService.getUserByEmail(user.getName());
+        final var game = this.gameService.controlGame(request, sender);
+
+
+        final var modifiedGame = this.levelService.applyLevelModifications(game)
+                .orElse(game);
+
+        this.gameMessagesProxy.notifyAll(modifiedGame);
     }
 
-    @MessageMapping("/games/join")
-    @SendTo("/topic/lobby/games/joined")
-    public Game joinGame(@Payload GameRequestDto request) {
-        return gameService.joinGame(request);
+    @MessageMapping(MessageSources.GAMES + "/action")
+    public void gameAction(@Payload final GameActionDto request, final Principal user) {
+        final var sender = this.userService.getUserByEmail(user.getName());
+        final var game = this.gameService.dropDisc(request.getGameId(), request.getColumn(), sender);
+
+        final var modifiedGame = this.levelService.applyLevelModifications(game)
+                .orElse(game);
+
+        this.gameMessagesProxy.notifyPlayers(modifiedGame);
+
     }
 
-    @MessageMapping("/games/left")
-    @SendTo("/topic/lobby/games/all")
-    public List<Game> leftGame(@Payload GameRequestDto request) {
-        gameService.leftGame(request);
-        return gameService.getAllGames();
-    }
+
 }

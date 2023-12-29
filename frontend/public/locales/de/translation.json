@@ -1,0 +1,119 @@
+{
+  "app": {
+    "title": "4 gewinnt",
+    "action": {
+      "logout": "Abmelden"
+    },
+    "loading": "Lädt..."
+  },
+  "chat": {
+    "title": "Chat",
+    "placeholder": "Hier könnte ihre Nachricht stehen...",
+    "send": "Senden",
+    "user": {
+      "lobbyName": "Lobby"
+    }
+  },
+  "lobby": {
+    "title": "Lobby",
+    "createNewGame": "Neues Spiel erstellen",
+    "deleteList": "Liste löschen"
+  },
+  "game": {
+    "title": "Spiel",
+    "label": {
+      "playerOne": "Spieler 1:",
+      "playerTwo": "Spieler 2:",
+      "creator": "Ersteller"
+    },
+    "state": {
+      "wait": "Warte auf weitere Spieler.",
+      "ready": "Ein neues Spiel kann gestartet werden.",
+      "win": "Du hast gewonnen!",
+      "lose": "Du hast verloren.",
+      "draw": "Das Spiel endet unentschieden.",
+      "yourTurn": "Du bist am Zug.",
+      "notYourTurn": "Du bist nicht am Zug.",
+      "quit": "Ein Spieler hat das Spiel verlassen.",
+      "disconnected": "Ein Spieler hat die Verbindung verloren",
+      "continue": "Es kann weitergespielt werden.",
+      "paused": "Das Spiel ist pausiert.",
+      "inProgress": "Das Spiel läuft.",
+      "finished": "Das Spiel ist zu Ende."
+    },
+    "button": {
+      "newGame": "Neues Spiel starten",
+      "quitGame": "Spiel verlassen",
+      "continue": "Spiel weiter spielen",
+      "joinGame": "Spiel beitreten",
+      "rules": "Spielregeln"
+    },
+    "confirm": {
+      "quit": "Möchtest du das Spiel wirklich verlassen?",
+      "playerLeft": "Dein Gegner hat das Spiel verlassen. Möchtest du das Spiel beenden?",
+      "yes": "Ja",
+      "no": "Nein"
+    },
+    "level": {
+      "countdown": "Zeit bis zum nächsten Spielzug:",
+      "activated": "Aktiviertes Level:",
+      "rounds": "Runden bis zum automatischen Drop:"
+    },
+    "rules": {
+        "title": "Spielregeln",
+      "description": {
+        "lineOne": "Ziel des Spiels ist es, als erster 4 Steine horizontal, vertikal oder diagonal in einer Reihe zu platzieren.",
+        "lineTwo": "Der Spieler, der an der Reihe ist, kann einen Stein durch Klicken in einer beliebigen Spalte fallen lassen.",
+        "lineThree": "Es wird abwechselnd gespielt.",
+        "lineFour": "Das Spiel endet, sobald ein Spieler 4 Steine in einer Reihe hat.",
+        "lineFive": "Das Spiel endet unentschieden, wenn alle Felder belegt sind und kein Spieler 4 Steine in einer Reihe hat."
+      },
+      "levelOne": {
+        "title": "Level 1",
+        "text": "Spiel gemäss den normalen Spielregeln."
+      },
+      "levelTwo": {
+        "title": "Level 2",
+        "text": "Für einen Spielzug stehen 5 Sekunden zur Verfügung. Falls in diesem Zeitraum kein Stein abgesetzt wird, wird dieser an einer zufälligen Position eingefügt."
+      },
+      "levelThree": {
+        "title": "Level 3",
+        "text": "Nach 5 Spielzügen wird ein neutraler Stein an zufälliger Stelle eingefügt."
+      }
+    }
+  },
+  "error": {
+    "label": {
+      "anErrorOccurred": "Es ist ein Fehler aufgetreten"
+    },
+    "chat": {
+      "receiverNotSet": "Empfänger fehlt",
+      "messageTextEmpty": "Nachrichtentext ist leer",
+      "receiverShouldNotBeSetOnPublicMessage": "Empfänger sollte auf einer öffentlichen Nachricht nicht gesetzt sein"
+    },
+    "user": {
+      "notFound": "Benutzer nicht gefunden",
+      "unknown": "Unbekannter Fehler"
+    },
+    "game": {
+      "notFound": "Spiel nicht gefunden",
+      "isFull": "Das Spiel ist bereits voll",
+      "cannotRead": "Spielbrett konnte nicht gefunden werden",
+      "cannotWrite": "Spielbrett konnte nicht gespeichert werden",
+      "notReady": "Warten auf andere Spieler",
+      "invalidMove": "Ungültiger Spielzug",
+      "nullPlayer": "Spieler wurde nicht festgelegt.",
+      "invalidPlayer": "Der aktuelle Benutzer ist kein Teil dieses Spiels.",
+      "notPlayersTurn": "Du bist aktuell nicht am Zug.",
+      "invalidGameState": "Der Spielstatus sollte IN_PROGRESS sein."
+    }
+  },
+  "system": {
+    "label": {
+      "message": "Systemmitteilung"
+    },
+    "message": {
+      "serverIsShuttingDown": "Der Server wird heruntergefahren."
+    }
+  }
+}

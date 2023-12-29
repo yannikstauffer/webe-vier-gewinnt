@@ -11,16 +11,16 @@ public class ControllerExceptionHandler {
 
     @MessageExceptionHandler(value = {Exception.class})
     @SendToUser("/queue/error")
-    protected ErrorResponseDto handleRuntimeException(final Exception exception) {
+    protected ErrorResponseDto handleException(final Exception exception) {
         final var vierGewinntException = this.asVierGewinntException(exception);
         log.error(exception.getMessage(), exception);
 
         return ErrorResponseDto.of(vierGewinntException);
     }
 
-    private VierGewinntException asVierGewinntException(final Exception exception) {
-        return exception.getClass().isAssignableFrom(VierGewinntException.class)
-                ? (VierGewinntException) exception
+    protected VierGewinntException asVierGewinntException(final Exception exception) {
+        return exception instanceof final VierGewinntException vierGewinntException
+                ? vierGewinntException
                 : VierGewinntException.of(ErrorCode.UNKNOWN, exception);
     }
 }

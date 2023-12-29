@@ -2,17 +2,30 @@ package ch.ffhs.webe.hs2023.viergewinnt.game;
 
 import ch.ffhs.webe.hs2023.viergewinnt.game.dto.GameRequestDto;
 import ch.ffhs.webe.hs2023.viergewinnt.game.model.Game;
+import ch.ffhs.webe.hs2023.viergewinnt.user.model.User;
 
 import java.util.List;
 
 public interface GameService {
-    Game createGame(GameRequestDto request);
+    Game createGame(User currentUser);
 
     List<Game> getAllGames();
 
-    Game joinGame(GameRequestDto request);
+    Game getGameById(final int gameId);
 
-    void leftGame(GameRequestDto request);
+    Game joinGame(final int gameId, final User currentUser);
 
-    void deleteAllGames();
+    Game dropRandomDisc(int gameId, User currentUser);
+
+    Game dropRandomAnonymousDisc(int gameId);
+
+    Game dropDisc(final int gameId, final int column, final User currentUser);
+
+    Game controlGame(GameRequestDto request, final User currentUser);
+
+    void setUserAsDisconnected(final User user, List<Game> games);
+
+    List<Game> getGamesForUser(final int userId);
+
+    void setAllConnectedUsersAsDisconnected();
 }
