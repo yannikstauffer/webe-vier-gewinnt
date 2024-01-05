@@ -155,6 +155,12 @@ public class Game {
                 && this.bothUsersAreConnected();
     }
 
+    public boolean isMoveExpectedBy(final User user) {
+        return this.getGameState() == GameState.IN_PROGRESS
+                && this.bothUsersAreConnected()
+                && this.getNextMove() == user.getId();
+    }
+
     public boolean isPaused() {
         return this.getGameState() == GameState.PAUSED
                 && !this.bothUsersAreConnected();
