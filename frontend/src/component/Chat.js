@@ -33,6 +33,8 @@ const Chat = ({userId}) => {
     };
 
     const addMessageToLobby = (lobbyMessagePayload) => {
+        if(lobbyMessages.find(message => message.id === lobbyMessagePayload.id)) return;
+
         lobbyMessages.push(lobbyMessagePayload);
         setLobbyMessages([...lobbyMessages]);
     }
@@ -44,6 +46,8 @@ const Chat = ({userId}) => {
         addPrivateChat(chatPartner);
 
         let list = privateChats.get(chatPartner.id);
+        if(list.find(message => message.id === privateMessagePayload.id)) return;
+
         list.push(privateMessagePayload);
         privateChats.set(chatPartner.id, list);
         setPrivateChats(new Map(privateChats));

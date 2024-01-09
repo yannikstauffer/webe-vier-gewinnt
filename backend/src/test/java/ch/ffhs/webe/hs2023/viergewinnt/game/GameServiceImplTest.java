@@ -498,6 +498,22 @@ class GameServiceImplTest {
     }
 
     @Test
+    void dropRandomDisc_withOtherUsersTurn_doesNotDrop() {
+        // arrange
+        final var game = game(1, GameState.IN_PROGRESS);
+        game.setNextMove(game.getUserTwo().getId());
+        this.stubRepository(game);
+        final var user1 = game.getUserOne();
+
+        // act
+        final var updated = this.gameService.dropRandomDisc(game.getId(), user1);
+
+        // assert
+        assertThat(game).isEqualTo(updated);
+        verifyNoMoreInteractions(this.gameRepository);
+    }
+
+    @Test
     void dropRandomDisc_onNoMoveExpected_returnsUneditedObject() {
         // arrange
         final var game = game(1, GameState.WAITING_FOR_PLAYERS);

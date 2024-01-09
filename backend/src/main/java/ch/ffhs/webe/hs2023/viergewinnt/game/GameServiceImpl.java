@@ -134,7 +134,7 @@ public class GameServiceImpl implements GameService {
     public Game dropRandomDisc(final int gameId, final User currentUser) {
         final Game game = this.findGameOrThrow(gameId);
 
-        if (game.isMoveExpected()) {
+        if (game.isMoveExpectedBy(currentUser)) {
             final var availableRandomColumn = this.randomAvailableColumn(game);
             if (availableRandomColumn.isPresent()) {
                 log.trace("Drop random disc {} for user {} in game {}", availableRandomColumn.get(), currentUser.getId(), game.getId());
